@@ -1,6 +1,16 @@
 # Automatic code generation in jCuda 
 > A master degree project which goal is to provide a tool for the automatic generation of the parallel Java code.
 
+### The manipulation of the code will be performed using the BCEL library
+```sh
+https://github.com/apache/commons-bcel
+```
+
+### JCuda
+```sh
+http://www.jcuda.org
+```
+
 ### Main cases to study:
 1. matrix multiplication
 2. nbody
@@ -38,5 +48,8 @@
         ...
 </dependencies>        
 ```
+
+
+
 
 MIT
