@@ -9,12 +9,12 @@ import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
 
 
-public class SampleExpresion {
+public class SimpleExpressionBuilder {
     public static void main(String[] args) {
         System.out.println("Generating Class");
 
         ClassGen cg = new ClassGen(
-                "SyntheticClass",
+                "SimpleExpression",
                 "java.lang.Object",
                 "<generated>",
                 Const.ACC_PUBLIC,
@@ -31,7 +31,7 @@ public class SampleExpresion {
                 new Type[]{new ArrayType(Type.STRING, 1)},
                 new String[]{"argv"},
                 "main",
-                "SyntheticClass",
+                "SampleExpresion",
                 il,
                 cp
         );
@@ -59,11 +59,11 @@ public class SampleExpresion {
         //Invoke the method.
         il.append(
                 factory.createInvoke(
-                    "java.io.PrintStream",
-                    "println",
-                    Type.VOID,
-                    new Type[]{Type.STRING},
-                    Const.INVOKEVIRTUAL
+                        "java.io.PrintStream",
+                        "println",
+                        Type.VOID,
+                        new Type[]{Type.STRING},
+                        Const.INVOKEVIRTUAL
                 )
         );
 
@@ -76,7 +76,7 @@ public class SampleExpresion {
         cg.addMethod(mg.getMethod()); //Add the method to the class
 
         try {
-            cg.getJavaClass().dump("src/main/generated/SampleExpression.class");
+            cg.getJavaClass().dump("src/main/generated/SimpleExpression.class");
         } catch (IOException e) {
             System.err.println(e);
         }
