@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9f3be850-913f-4c8e-86d8-12025bb81968" name="Default Changelist" comment="" />
+    <list default="true" id="9f3be850-913f-4c8e-86d8-12025bb81968" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/Matrix.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../benchmarks/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../benchmarks/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/../readme.md" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,6 +20,9 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
   <component name="MavenImportPreferences">
     <option name="importingSettings">
       <MavenImportingSettings>
@@ -22,6 +31,7 @@
     </option>
   </component>
   <component name="ProjectId" id="1Z39FnTVFeeLXWOqYNyYAXuR0Sm" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -29,18 +39,19 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="reference.projectsettings.compiler.javacompiler" />
+    <property name="settings.editor.selected.configurable" value="preferences.externalTools" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/java" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.JCudaHistogram">
+  <component name="RunManager" selected="Application.JCudaMultiplier">
     <configuration name="JCudaHistogram" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="JCudaHistogram" />
       <module name="jcuda" />
@@ -59,8 +70,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.JCudaHistogram" />
         <item itemvalue="Application.JCudaMultiplier" />
+        <item itemvalue="Application.JCudaHistogram" />
       </list>
     </recent_temporary>
   </component>
@@ -78,10 +89,10 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state x="67" y="212" width="833" height="677" key="#Project_Structure" timestamp="1584083205102">
+    <state x="67" y="212" width="833" height="677" key="#Project_Structure" timestamp="1584476658080">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="67" y="212" width="833" height="677" key="#Project_Structure/67.27.1853.1053@67.27.1853.1053" timestamp="1584083205102" />
+    <state x="67" y="212" width="833" height="677" key="#Project_Structure/67.27.1853.1053@67.27.1853.1053" timestamp="1584476658080" />
     <state x="451" y="210" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1584057032165">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -90,26 +101,38 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="106" y="356" width="718" height="390" key="#com.intellij.fileTypes.FileTypeChooser/67.27.1853.1053@67.27.1853.1053" timestamp="1584084044892" />
-    <state width="871" height="280" key="GridCell.Tab.0.bottom" timestamp="1584096586078">
+    <state x="541" y="314" width="1375" height="584" key="#com.intellij.ide.macro.MacrosDialog" timestamp="1584477231909">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="871" height="280" key="GridCell.Tab.0.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1584096586078" />
-    <state width="871" height="280" key="GridCell.Tab.0.center" timestamp="1584096586078">
+    <state x="541" y="314" width="1375" height="584" key="#com.intellij.ide.macro.MacrosDialog/67.27.1853.1053@67.27.1853.1053" timestamp="1584477231909" />
+    <state x="503" y="437" width="510" height="342" key="#com.intellij.tools.ToolEditorDialog" timestamp="1584477297012">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="871" height="280" key="GridCell.Tab.0.center/67.27.1853.1053@67.27.1853.1053" timestamp="1584096586078" />
-    <state width="871" height="280" key="GridCell.Tab.0.left" timestamp="1584096586077">
+    <state x="503" y="437" width="510" height="342" key="#com.intellij.tools.ToolEditorDialog/67.27.1853.1053@67.27.1853.1053" timestamp="1584477297012" />
+    <state x="541" y="364" width="424" height="484" key="FileChooserDialogImpl" timestamp="1584476958388">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="871" height="280" key="GridCell.Tab.0.left/67.27.1853.1053@67.27.1853.1053" timestamp="1584096586077" />
-    <state width="871" height="280" key="GridCell.Tab.0.right" timestamp="1584096586078">
+    <state x="541" y="364" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053@67.27.1853.1053" timestamp="1584476958388" />
+    <state width="903" height="167" key="GridCell.Tab.0.bottom" timestamp="1584477515255">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="871" height="280" key="GridCell.Tab.0.right/67.27.1853.1053@67.27.1853.1053" timestamp="1584096586078" />
-    <state x="251" y="183" width="1024" height="845" key="SettingsEditor" timestamp="1584057449341">
+    <state width="903" height="167" key="GridCell.Tab.0.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1584477515255" />
+    <state width="903" height="167" key="GridCell.Tab.0.center" timestamp="1584477515253">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="251" y="183" width="1024" height="845" key="SettingsEditor/67.27.1853.1053@67.27.1853.1053" timestamp="1584057449341" />
+    <state width="903" height="167" key="GridCell.Tab.0.center/67.27.1853.1053@67.27.1853.1053" timestamp="1584477515253" />
+    <state width="903" height="167" key="GridCell.Tab.0.left" timestamp="1584477515252">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state width="903" height="167" key="GridCell.Tab.0.left/67.27.1853.1053@67.27.1853.1053" timestamp="1584477515252" />
+    <state width="903" height="167" key="GridCell.Tab.0.right" timestamp="1584477515254">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state width="903" height="167" key="GridCell.Tab.0.right/67.27.1853.1053@67.27.1853.1053" timestamp="1584477515254" />
+    <state x="251" y="189" width="1024" height="839" key="SettingsEditor" timestamp="1584477298793">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state x="251" y="189" width="1024" height="839" key="SettingsEditor/67.27.1853.1053@67.27.1853.1053" timestamp="1584477298793" />
     <state x="649" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1584081192719">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>

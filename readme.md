@@ -1,15 +1,21 @@
 # Automatic code generation in jCuda 
-> A master degree project which goal is to provide a tool for the automatic generation of the parallel Java code.
+> A master degree project which goal is to provide a tool for the automatic generation of the parallel Java code for CPU-GPU.
+
+Continuation of the project:  <https://github.com/Matikul/autoparallel>
 
 ### The manipulation of the code will be performed using the BCEL library
+`commons-bcel`:  <https://github.com/apache/commons-bcel>
+
 ```sh
-https://github.com/apache/commons-bcel
+First attempt with BCEL are with generate static code. 
+The next step will be a dynamic transformation of the existing code, like injecting one piece of code into another.
 ```
 
 ### JCuda
-```sh
-http://www.jcuda.org
-```
+
+`jcuda`:  <http://www.jcuda.org>
+`JCudaSamplesl`:  <https://github.com/jcuda/jcuda-samples/tree/master/JCudaSamples/src/main/java/jcuda>
+
 
 ### Main cases to study:
 1. matrix multiplication
@@ -18,19 +24,21 @@ http://www.jcuda.org
 4. fft
 
 ### The repository contains projects/folders:
-* jcuda
-    * contains examples written in jcuda
+* bcel
+    * examples with use BCEL
+	In the folder with name 'generated' are outputs files with *.class extension. If you want to check if code generated with bcel works then you copy code into new file with *java extension. 
 * benchmarks
     * contains benchmarks, comparison of 3 different ways: sequential program, parallel program, jcuda program
+* jcuda
+    * contains examples written in jcuda
 * results
     * major reports in one place
 
 
 
 ### The project is created in the IntelliJ IDEA, which can be downloaded from the website:
-```sh
- https://www.jetbrains.com/idea/download/
-```
+`IntelliJIDEA`: <https://www.jetbrains.com/idea/download/>
+
 
 ### In the pom.xml file you can specify the version of jCuda you are using
 ```sh
@@ -48,8 +56,5 @@ http://www.jcuda.org
         ...
 </dependencies>        
 ```
-
-
-
 
 MIT

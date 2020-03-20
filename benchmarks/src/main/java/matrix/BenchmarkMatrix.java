@@ -42,8 +42,8 @@ public class BenchmarkMatrix {
 
     @State(value = Scope.Benchmark)
     public static class TestState {
-        int size = 200;
-        int bound = 20;
+        int size = 1000;
+        int bound = 5;
         int[][] A = MatrixUtils.randomIntArrayMatrix(size, size, bound);
         int[][] B = MatrixUtils.randomIntArrayMatrix(size, size, bound);
         SerialMultiplier serialMultiplier = new SerialMultiplier(A, B);

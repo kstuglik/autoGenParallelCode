@@ -1,7 +1,6 @@
 /*
-    UPDATED VERSION OF EXAMPLE FROM:    http://www.geekyarticles.com/2011/08/manipulating-java-class-files-with-bcel_18.html
- */
-
+modified example from: http://www.geekyarticles.com/2011/08/manipulating-java-class-files-with-bcel_18.html
+*/
 
 import java.io.IOException;
 
@@ -57,15 +56,9 @@ public class SimpleExpressionBuilder {
         il.append(new IADD());//Add
 
         //Invoke the method.
-        il.append(
-                factory.createInvoke(
-                        "java.io.PrintStream",
-                        "println",
-                        Type.VOID,
-                        new Type[]{Type.STRING},
-                        Const.INVOKEVIRTUAL
-                )
-        );
+        il.append(factory.createInvoke(
+                "java.io.PrintStream","println",
+                Type.VOID,new Type[]{Type.STRING},Const.INVOKEVIRTUAL));
 
         //Return from the method
         il.append(InstructionConst.RETURN);

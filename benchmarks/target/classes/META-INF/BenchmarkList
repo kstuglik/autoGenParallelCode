@@ -1,11 +1,11 @@
-JMH S 28 histogram.BenchmarkHistogram S 71 histogram.generated.BenchmarkHistogram_SerialHistogramBenchmark_jmhTest S 24 SerialHistogramBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
-JMH S 20 nbody.NbodyBenchmark S 61 nbody.generated.NbodyBenchmark_parallelNbodyBenchmark_jmhTest S 22 parallelNbodyBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
 JMH S 28 histogram.BenchmarkHistogram S 73 histogram.generated.BenchmarkHistogram_ParallelHistogramBenchmark_jmhTest S 26 ParallelHistogramBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
-JMH S 28 histogram.BenchmarkHistogram S 70 histogram.generated.BenchmarkHistogram_JCudaHistogramBenchmark_jmhTest S 23 JCudaHistogramBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
-JMH S 20 nbody.NbodyBenchmark S 59 nbody.generated.NbodyBenchmark_serialNbodyBenchmark_jmhTest S 20 serialNbodyBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
 JMH S 28 histogram.HistogramBenchmark S 71 histogram.generated.HistogramBenchmark_SerialHistogramBenchmark_jmhTest S 24 SerialHistogramBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
+JMH S 20 nbody.NbodyBenchmark S 59 nbody.generated.NbodyBenchmark_serialNbodyBenchmark_jmhTest S 20 serialNbodyBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
 JMH S 22 matrix.BenchmarkMatrix S 71 matrix.generated.BenchmarkMatrix_MultiplySquareMatricesParallel_jmhTest S 30 MultiplySquareMatricesParallel S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
 JMH S 22 matrix.BenchmarkMatrix S 69 matrix.generated.BenchmarkMatrix_MultiplySquareMatricesSerial_jmhTest S 28 MultiplySquareMatricesSerial S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
-JMH S 22 matrix.BenchmarkMatrix S 68 matrix.generated.BenchmarkMatrix_MultiplySquareMatricesJCuda_jmhTest S 27 MultiplySquareMatricesJCuda S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
-JMH S 28 histogram.HistogramBenchmark S 70 histogram.generated.HistogramBenchmark_JCudaHistogramBenchmark_jmhTest S 23 JCudaHistogramBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
 JMH S 28 histogram.HistogramBenchmark S 73 histogram.generated.HistogramBenchmark_ParallelHistogramBenchmark_jmhTest S 26 ParallelHistogramBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
+JMH S 20 nbody.NbodyBenchmark S 61 nbody.generated.NbodyBenchmark_parallelNbodyBenchmark_jmhTest S 22 parallelNbodyBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
+JMH S 28 histogram.BenchmarkHistogram S 70 histogram.generated.BenchmarkHistogram_JCudaHistogramBenchmark_jmhTest S 23 JCudaHistogramBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
+JMH S 28 histogram.HistogramBenchmark S 70 histogram.generated.HistogramBenchmark_JCudaHistogramBenchmark_jmhTest S 23 JCudaHistogramBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
+JMH S 28 histogram.BenchmarkHistogram S 71 histogram.generated.BenchmarkHistogram_SerialHistogramBenchmark_jmhTest S 24 SerialHistogramBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
+JMH S 22 matrix.BenchmarkMatrix S 68 matrix.generated.BenchmarkMatrix_MultiplySquareMatricesJCuda_jmhTest S 27 MultiplySquareMatricesJCuda S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 

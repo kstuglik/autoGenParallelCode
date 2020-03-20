@@ -1,50 +1,12 @@
 /*
-EXAMPLE FROM:   https://github.com/apache/commons-bcel/blob/master/src/examples/HelloWorldBuilder.java
- */
+modified example from: https://github.com/apache/commons-bcel/blob/master/src/examples/HelloWorldBuilder.java
+*/
 
 import java.io.IOException;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.generic.ALOAD;
-import org.apache.bcel.generic.ASTORE;
-import org.apache.bcel.generic.ArrayType;
-import org.apache.bcel.generic.ClassGen;
-import org.apache.bcel.generic.ConstantPoolGen;
-import org.apache.bcel.generic.GOTO;
-import org.apache.bcel.generic.InstructionConst;
-import org.apache.bcel.generic.InstructionFactory;
-import org.apache.bcel.generic.InstructionHandle;
-import org.apache.bcel.generic.InstructionList;
-import org.apache.bcel.generic.LocalVariableGen;
-import org.apache.bcel.generic.MethodGen;
-import org.apache.bcel.generic.ObjectType;
-import org.apache.bcel.generic.PUSH;
-import org.apache.bcel.generic.Type;
+import org.apache.bcel.generic.*;
 
-/**
- * Create HelloWorld class:
- * <PRE>
- * import java.io.*;
- *
- * public class HelloWorld {
- *     public static void main(String[] argv) {
- *         BufferedReader in   = new BufferedReader(new InputStreamReader(System.in));
- *         String name = null;
- *
- *         try {
- *             System.out.print("Please enter your name> ");
- *             name = in.readLine();
- *         } catch(IOException e) {
- *             System.out.println(e);
- *             return;
- *         }
- *
- *         System.out.println("Hello, " + name);
- *     }
- * }
- * </PRE>
- *
- */
 public class HelloWorldBuilder {
     public static void main(final String[] argv) {
         final ClassGen cg = new ClassGen("HelloWorld", "java.lang.Object",
