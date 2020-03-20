@@ -1,15 +1,15 @@
 # Automatic code generation in jCuda 
-> A master degree project which goal is to provide a tool for the automatic generation of the parallel Java code for CPU-GPU.
+> A master degree project with target to provide a tool for the automatic generation of the parallel code cpu-gpu in java.
 
 Continuation of the project:  <https://github.com/Matikul/autoparallel>
 
-### The manipulation of the code will be performed using the BCEL library
+### The manipulation of the code will be performed by using the BCEL library
 `commons-bcel`:  <https://github.com/apache/commons-bcel>
 
-```sh
+
 First attempt with BCEL are with generate static code. 
 The next step will be a dynamic transformation of the existing code, like injecting one piece of code into another.
-```
+
 
 ### JCuda
 
