@@ -1,4 +1,4 @@
-/*
+package geekyarticles;/*
 modified example from: http://www.geekyarticles.com/2011/08/manipulating-java-class-files-with-bcel_25.html
 */
 
@@ -70,7 +70,7 @@ public class SimpleWhileBuilder {
 
         cg.addMethod(mg.getMethod()); //Add the method to the class
 
-        try { cg.getJavaClass().dump("src/main/generated/SimpleWhile.class");}
+        try { cg.getJavaClass().dump("src/main/java/geekyarticles/generated/SimpleWhile.class");}
         catch (IOException e) {System.err.println(e);}
 
         System.out.println("********Constant Pool**********");System.out.println(cp.getFinalConstantPool());

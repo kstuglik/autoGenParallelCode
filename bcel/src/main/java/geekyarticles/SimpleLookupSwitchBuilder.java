@@ -1,4 +1,4 @@
-/*
+package geekyarticles;/*
 modified example from: http://www.geekyarticles.com/2011/08/manipulating-java-class-files-with-bcel_25.html
 */
 
@@ -112,7 +112,7 @@ public class SimpleLookupSwitchBuilder {
 
         cg.addMethod(mg.getMethod());
 
-        try { cg.getJavaClass().dump("src/main/generated/SimpleLookupSwitchBuilder.class");}
+        try { cg.getJavaClass().dump("src/main/java/geekyarticles/generated/SimpleLookupSwitchBuilder.class");}
         catch (IOException e) {System.err.println(e);}
 
         System.out.println("********Constant Pool**********");System.out.println(cp.getFinalConstantPool());

@@ -13,7 +13,7 @@ The next step will be a dynamic transformation of the existing code, like inject
 
 ### JCuda
 
-`jcuda`:  <http://www.jcuda.org>
+`jcuda`:  <http://www.jcuda.org> \
 `JCudaSamplesl`:  <https://github.com/jcuda/jcuda-samples/tree/master/JCudaSamples/src/main/java/jcuda>
 
 

@@ -2,6 +2,8 @@
 modified example from: https://github.com/apache/commons-bcel/blob/master/src/examples/HelloWorldBuilder.java
 */
 
+package apachebcel;
+
 import java.io.IOException;
 
 import org.apache.bcel.Const;
