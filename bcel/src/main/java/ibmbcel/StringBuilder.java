@@ -1,11 +1,13 @@
 /*
 Source: https://www.ibm.com/developerworks/library/j-dyn0414/
+
 set program arguments: int int ...
-java StringBuilder.java 1000 2000
+java ibmbcel.StringBuilder.java 1000 2000
+
+recompile
 */
 
 package ibmbcel;
-
 public class StringBuilder
 {
     String buildString(int length) {

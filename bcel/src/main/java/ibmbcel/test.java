@@ -16,7 +16,7 @@ public class test {
 
     }
 
-    private String buildString$impl(int length) {
+    String buildString$impl(int length) {
         String result = "";
 
         for(int i = 0; i < length; ++i) {
@@ -26,7 +26,7 @@ public class test {
         return result;
     }
 
-    private String buildString(int var1) {
+    String buildString(int var1) {
         long var2 = System.currentTimeMillis();
         String var4 = this.buildString$impl(var1);
         PrintStream var10000 = System.out;
