@@ -23,7 +23,8 @@ The next step will be a dynamic transformation of the existing code, like inject
 3. histogram
 4. fft
 
-### The repository contains projects/folders:
+
+### The repository consists of several projects. The easiest way to solve the configuration problem is to treat each of the folders as a separate project:
 * bcel
     * examples with use BCEL
 	In the folder with name 'generated' are outputs files with *.class extension. If you want to check if code generated with bcel works then you copy code into new file with *java extension. 
@@ -31,8 +32,6 @@ The next step will be a dynamic transformation of the existing code, like inject
     * contains benchmarks, comparison of 3 different ways: sequential program, parallel program, jcuda program
 * jcuda
     * contains examples written in jcuda
-* results
-    * major reports in one place
 
 
 
