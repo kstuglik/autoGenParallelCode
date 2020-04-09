@@ -12,8 +12,10 @@ package ibmbcel;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import org.apache.bcel.*;
-import org.apache.bcel.classfile.*;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ClassParser;
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
 
 public class BCELTiming {
@@ -103,8 +105,9 @@ public class BCELTiming {
 
     public static void main(String[] argv) {
 
-        String path_to_file = "/home/lenovo/Documents/MGR/bcel/target/classes/ibmbcel/";
-        String class_file = "StringBuilder.class";
+        String path_to_file = "target/classes/ibmbcel/";
+//        String class_file = "StringBuilder.class";
+        String class_file = "Hello.class";
         String method_file = "buildString";
 
         try {

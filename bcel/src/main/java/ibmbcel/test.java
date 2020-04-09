@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package ibmbcel;
 
 import java.io.PrintStream;
@@ -6,33 +11,28 @@ public class test {
     public test() {
     }
 
-    public static void main(String[] argv) {
-        test inst = new test();
-
-        for(int i = 0; i < argv.length; ++i) {
-            String result = inst.buildString(Integer.parseInt(argv[i]));
-            System.out.println("Constructed string of length " + result.length());
-        }
-
+    public static void main(String[] args) {
+        String res = buildString(2000);
+        System.out.println(res);
     }
 
-    String buildString$impl(int length) {
+    public static String buildString$impl(int length) {
         String result = "";
 
         for(int i = 0; i < length; ++i) {
-            result = result + (char)(i % 26 + 97);
+            result = result + Integer.toString(i) + "->";
         }
 
         return result;
     }
 
-    String buildString(int var1) {
-        long var2 = System.currentTimeMillis();
-        String var4 = this.buildString$impl(var1);
+    public static String buildString(int var0) {
+        long var1 = System.currentTimeMillis();
+        String var3 = buildString$impl(var0);
         PrintStream var10000 = System.out;
         var10000.print("Call to method buildString$impl took ");
-        var10000.print(System.currentTimeMillis() - var2);
+        var10000.print(System.currentTimeMillis() - var1);
         var10000.println(" ms.");
-        return var4;
+        return var3;
     }
 }

@@ -3,16 +3,17 @@ SOURCE: https://itsallbinary.com/do-your-own-static-code-analysis-programmatical
 */
 package itsallbinary;
 
-import com.sun.org.apache.bcel.internal.Repository;
-import com.sun.org.apache.bcel.internal.classfile.JavaClass;
-import com.sun.org.apache.bcel.internal.classfile.Method;
-import com.sun.org.apache.bcel.internal.util.ByteSequence;
 import org.apache.bcel.Const;
+import org.apache.bcel.Repository;
 import org.apache.bcel.classfile.ClassFormatException;
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.classfile.Method;
+import org.apache.bcel.util.ByteSequence;
+
 import java.io.IOException;
 
 public class BCEX {
-    public static void main(String[] args) throws ClassFormatException {
+    public static void main(String[] args) throws ClassFormatException, ClassNotFoundException {
         Class<?>[] classesToAnalyze = new Class[] { AnalyzeMeGoodCode.class, AnalyzeMeBadCode.class };
 
         for (Class<?> classToAnalyze : classesToAnalyze) {

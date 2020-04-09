@@ -123,7 +123,7 @@ public class HelloWorldBuilder {
 
         // Get JavaClass object and dump it to file.
         try {
-            cg.getJavaClass().dump("src/main/generated/HelloWorld.class");
+            cg.getJavaClass().dump("src/main/java/apachebcel/generated/HelloWorld.class");
         } catch (final IOException e) {
             System.err.println(e);
         }

@@ -37,11 +37,30 @@ public class IntegrationTest {
 //        }
 //    }
 
+//    @Test
+    @SuppressWarnings("Duplicates")
+//    public void test() throws IOException, TargetLostException {
+//        modifier.modifyBytecode(TEST_CLASS_LOCATION, TEST_CLASS_NAME, MODIFIED_METHOD_POSITION);
+//        modifier.modifyBytecode(TEST_CLASS_LOCATION, TEST_CLASS_NAME, 3, (short) 1000);//MOVE BODIES METHOD
+//        Runtime runtime = Runtime.getRuntime();
+//        String cmd = System.getProperty("java.home") + "/bin/java -cp " + TEST_CLASS_LOCATION + TEST_CLASS_NAME + BytecodeModifier.MODIFICATION_SUFFIX;
+//        try {
+//            Process process = runtime.exec(cmd);
+//            process.waitFor();
+//            assertEquals(1, process.exitValue());
+//        } catch (IOException | InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    String path__to_class_test = "/home/zorro/_projects/mgr/autoGenParallelCode/bcel/target/test-classes/";
+    String name_class_test = "Test2";
+
     @Test
     @SuppressWarnings("Duplicates")
-    public void test() throws IOException, TargetLostException {
+    public void test_2() throws IOException, TargetLostException {
 //        modifier.modifyBytecode(TEST_CLASS_LOCATION, TEST_CLASS_NAME, MODIFIED_METHOD_POSITION);
-        modifier.modifyBytecode(TEST_CLASS_LOCATION, TEST_CLASS_NAME, 3, (short) 1000);//MOVE BODIES METHOD
+        modifier.modifyBytecode(path__to_class_test, name_class_test, 1, (short) 1000);//MOVE BODIES METHOD
 //        Runtime runtime = Runtime.getRuntime();
 //        String cmd = System.getProperty("java.home") + "/bin/java -cp " + TEST_CLASS_LOCATION + TEST_CLASS_NAME + BytecodeModifier.MODIFICATION_SUFFIX;
 //        try {
