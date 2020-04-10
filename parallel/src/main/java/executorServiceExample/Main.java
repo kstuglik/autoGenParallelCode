@@ -18,6 +18,7 @@ public class Main {
         final long sp = System.currentTimeMillis();
         parallelMultiplier.multiply();
         final long ep = System.currentTimeMillis();
+
         final Duration p = Duration.ofNanos(ep - sp);
         String str = "ExecutorService;" + A.length + "x" + A[0].length + ";" + p.getNano() + "\n";
 

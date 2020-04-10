@@ -11,24 +11,27 @@ public class Main {
         Random rand = new Random();
 
         double[][] result = new double[size][size];
-        for (int i = 0; i < size; i++) {
 
+        for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 result[i][j] = rand.nextDouble();
             }
         }
+
         return result;
     }
 
     public static void writeIntoFile(String filename, double[][] x) throws IOException {
         BufferedWriter outputWriter = null;
         outputWriter = new BufferedWriter(new FileWriter(filename));
+
         for (int i = 0; i < x.length; i++) {
             for (int j = 0; j < x[0].length; j++) {
                 outputWriter.write(x[i][j] + " ");
             }
             outputWriter.newLine();
         }
+
         outputWriter.flush();
         outputWriter.close();
     }
@@ -45,9 +48,12 @@ public class Main {
 
     public static double[][] readMatrix(String filename) {
         double[][] matrix = null;
+
         try (BufferedReader br = new BufferedReader(new FileReader(new File(filename)))) {
+
             String line;
             List<String[]> list = new ArrayList<>();
+
             while ((line = br.readLine()) != null) {
                 String[] args = line.split(" ");
                 try {
@@ -58,11 +64,13 @@ public class Main {
             }
 
             matrix = new double[list.size()][list.get(0).length];
+
             for (int i = 0; i < list.size(); i++) {
                 for (int j = 0; j < list.get(0).length; j++) {
                     matrix[i][j] = Double.parseDouble(list.get(i)[j]);
                 }
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

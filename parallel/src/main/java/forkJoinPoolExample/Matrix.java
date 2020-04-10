@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class Matrix extends RecursiveAction {
-    private static final int THRESHOLD = 3;
+    private static final int THRESHOLD = 16;
     static volatile double[][] m;
     public double[][] A;
     public double[][] B;
@@ -60,14 +60,12 @@ public class Matrix extends RecursiveAction {
     }
 
     private double[][] matrixLeft(double[][] matrix) {
-//        System.out.println("begin left");
         double[][] m = new double[matrix.length][matrix[0].length / 2];
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length / 2; j++) {
                 m[i][j] = matrix[i][j];
             }
         }
-//        System.out.println("returning left");
         return m;
     }
 
@@ -83,14 +81,14 @@ public class Matrix extends RecursiveAction {
 
     @Override
     protected void compute() {
-        if (A[0].length < THRESHOLD) {
+        if (A[0].length <= THRESHOLD) {
             for (int i = 0; i < A.length; i++) {
                 for (int j = 0; j < B[0].length; j++) {
                     for (int k = 0; k < B.length; k++) {
                         m[i][j] += A[i][k] * B[k][j];
+//                        System.out.println("JESTEM"+A[0].length );
                     }
                 }
-//                System.out.println("");
             }
         } else {
             Matrix left = new Matrix(matrixLeft(A),
@@ -104,39 +102,6 @@ public class Matrix extends RecursiveAction {
 
             left.join();
             right.join();
-//            System.out.println("completed");
-//            toStringMatrix(m);
         }
-    }
-
-    public void resultThreadPool() {
-        ExecutorService executorService = Executors.newCachedThreadPool();
-        List<Future<Integer>> futuresArray = new ArrayList<>();
-        int[][] matrix3 = new int[A.length][B[0].length];
-
-        for (int i = 0; i < A.length; i++) {
-            for (int j = 0; j < B[0].length; j++) {
-                futuresArray.add(
-                        executorService.submit(
-                                new MultiplyThread(A, B, i, j)
-                        )
-                );
-            }
-        }
-        try {
-            int index = 0;
-            for (int i = 0; i < A.length; i++) {
-                for (int j = 0; j < B[0].length; j++) {
-                    matrix3[i][j] = futuresArray.get(index).get();
-                    index++;
-                    System.out.print(matrix3[i][j] + " ");
-                }
-                System.out.println("\n");
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            // thrown if task was interrupted before completion
-            e.printStackTrace();
-        }
-        executorService.shutdown();
     }
 }
