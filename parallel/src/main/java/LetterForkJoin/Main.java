@@ -3,7 +3,7 @@ example from:
 http://shengwangi.blogspot.com/2015/10/how-to-use-java-parallel-forkjoin-framework-example.html
  */
 
-package ForkJoinDemo;
+package LetterForkJoin;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;

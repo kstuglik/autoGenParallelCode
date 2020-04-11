@@ -1,4 +1,4 @@
-package executorServiceExample;
+package MatrixExecutorService;
 
 import java.time.Duration;
 
