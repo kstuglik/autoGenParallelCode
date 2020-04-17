@@ -8,10 +8,10 @@ import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
 
 
-public class SimpleWhileBuilder {
+public class SimpleForBuilder {
     public static void main(String[] args) {
         final ClassGen cg=new ClassGen(
-                "package_name.SimpleWhile", "java.lang.Object","<MatrixBuilder.MatrixBuilder.generated>",
+                "package_name.SimpleFor", "java.lang.Object","<MatrixBuilder.MatrixBuilder.generated>",
                 Const.ACC_PUBLIC, null);
         final ConstantPoolGen cp = cg.getConstantPool();
         final InstructionList il = new InstructionList();
@@ -28,8 +28,8 @@ public class SimpleWhileBuilder {
         il.append(new AALOAD());//Got value of the variable as a String;
 
         il.append(factory.createInvoke(
-                        "java.lang.Integer","parseInt",
-                        Type.INT, new Type[]{Type.STRING}, Const.INVOKESTATIC)
+                "java.lang.Integer","parseInt",
+                Type.INT, new Type[]{Type.STRING}, Const.INVOKESTATIC)
         );//Now we got the value as int
 
         il.append(new ISTORE(2));// The limit to the loop counter.
@@ -70,7 +70,7 @@ public class SimpleWhileBuilder {
 
         cg.addMethod(mg.getMethod()); //Add the method to the class
 
-        try { cg.getJavaClass().dump("src/main/java/geekyarticles/MatrixBuilder.MatrixBuilder.generated/SimpleWhile.class");}
+        try { cg.getJavaClass().dump("src/main/java/geekyarticles/generated/SimpleFor.class");}
         catch (IOException e) {System.err.println(e);}
 
         System.out.println("********Constant Pool**********");System.out.println(cp.getFinalConstantPool());

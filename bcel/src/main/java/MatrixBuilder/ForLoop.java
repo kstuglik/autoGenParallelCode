@@ -5,157 +5,156 @@ import org.apache.bcel.generic.*;
 
 import java.io.IOException;
 
+
 public class ForLoop {
 
+    static String packageName;
+    static String clsName;
+    static String fullClsName;
+    static ClassGen cg;
+    static ConstantPoolGen cp;
+    static InstructionList il;
+    static InstructionFactory factory;
+    static MethodGen mg;
+    static LocalVariableGen lg;
+
+    public ForLoop() {
+        packageName = "MatrixBuilder";
+        clsName = "TestForLoop";
+        fullClsName = packageName + "." + clsName;
+        cg = new ClassGen(fullClsName, "java.lang.Object", "<generated>", Const.ACC_PUBLIC | Const.ACC_SUPER, null);
+        cp = cg.getConstantPool(); // cg creates constant pool
+        il = new InstructionList();
+        factory = new InstructionFactory(cg);
+        mg = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.VOID, new Type[]{new ArrayType(Type.STRING, 1)}, new String[]{"argv"}, "main", clsName, il, cp);
+    }
+
+    public static int create_field_integer(String name){
+        lg = mg.addLocalVariable(name, Type.INT, null, null);
+        int id = lg.getIndex();
+        return id;
+    }
+
+    public static int create_field_ldc_integer(String name, Integer value){
+        lg = ForLoop.mg.addLocalVariable(name, Type.INT, null, null);
+        int id = lg.getIndex();
+        il.append(new LDC(cp.addInteger(value)));
+        lg.setStart(il.append(new ISTORE(id)));
+        return id;
+    }
+
+    public static int create_field_ldc_double(String name, Double value){
+        lg = mg.addLocalVariable(name, Type.DOUBLE, null, null);
+        int id = lg.getIndex();
+        il.append(new LDC(cp.addDouble(value)));
+        lg.setStart(il.append(new DSTORE(id)));
+        return id;
+    }
+
+    public static int create_field_array_double(String name, Integer dim, Integer n){
+        lg = mg.addLocalVariable(name, new ArrayType(Type.DOUBLE, dim), null, null);
+        int id = lg.getIndex();
+        if(n>0){
+            il.append(new PUSH(cp, n));
+            il.append(new NEWARRAY(Type.DOUBLE));
+            il.append(new ASTORE(id));
+        }
+        return id;
+    }
+
+    public static void init_compare_for_loop(InstructionHandle loop_start,Integer id_counter, Integer id_value_bound, Integer value_increment){
+        il.append(new IINC(id_counter, 1));
+        InstructionHandle loop_compare = il.append(new ILOAD(id_counter));
+        il.append(new ILOAD(id_value_bound));
+        il.append(new IF_ICMPLT(loop_start));
+        il.insert(loop_start, new GOTO(loop_compare));
+    }
+
+    public static void confirm_and_save(String output_path){
+        mg.setMaxStack();
+        cg.addMethod(mg.getMethod());
+        il.dispose();
+        cg.addEmptyConstructor(Const.ACC_PUBLIC);
+        try { cg.getJavaClass().dump(output_path);}
+        catch (IOException e) {System.err.println(e);}
+        System.out.println("DONE!");
+    }
+
+
     public static void main(String[] args) {
-        String packageName = "MatrixBuilder";
-        String clsName = "TestForLoop";
-        String fullClsName = packageName+"."+clsName;
-        ClassGen cg = new ClassGen(
-                fullClsName, "java.lang.Object",
-                "<generated>", Const.ACC_PUBLIC | Const.ACC_SUPER, null);
-        ConstantPoolGen cp = cg.getConstantPool(); // cg creates constant pool
-        InstructionList il = new InstructionList();
-        InstructionFactory factory = new InstructionFactory(cg);
-
-        short acc_flags = Const.ACC_PUBLIC;
-        final MethodGen mg = new MethodGen(
-                Const.ACC_PUBLIC|Const.ACC_STATIC,
-                Type.VOID,
-                new Type[]{new ArrayType(Type.STRING, 1)},
-                new String[]{"argv"},
-                "main",
-                clsName,
-                il,
-                cp
-        );
-
-        //double sum = 0;
-        LocalVariableGen lg;
-        lg = mg.addLocalVariable("sum", Type.DOUBLE, null, null);
-        int idxSum = lg.getIndex();
-        il.append(new LDC(cp.addDouble(0.0)));
-        lg.setStart(il.append(new DSTORE(idxSum))); // "sum" valid from here
 
         //////////////////////////////////////////////////////////////
-        //	for(int i=0; i<10; i++) {
-        //		sum += args[i];
-        //	}
+        //        for(int i = 0; i < r1; ++i) {
+        //            for(int j = 0; j < c2; ++j) {
+        //                for(int k = 0; k < r2; ++k) {
+        //                    sum += A[i] * B[j];
+        //                }
+        //            }
+        //        }
         /////////////////////////////////////////////////////////////
-        lg = mg.addLocalVariable("A", new ArrayType(Type.DOUBLE, 1), null, null);
-        int idxA = lg.getIndex();
-        il.append(new PUSH(cp, 6));
-        il.append(new NEWARRAY(Type.DOUBLE));
-        il.append(new ASTORE(idxA));
-        /////////////////////////////////////////////////////////////
-        lg = mg.addLocalVariable("B", new ArrayType(Type.DOUBLE, 1), null, null);
-        int idxB = lg.getIndex();
-        il.append(new PUSH(cp, 6));
-        il.append(new NEWARRAY(Type.DOUBLE));
-        il.append(new ASTORE(idxB));
-        /////////////////////////////////////////////////////////////
-        lg = mg.addLocalVariable("r1", Type.INT, null, null);
-        int idxR1 = lg.getIndex();
-        il.append(new LDC(cp.addInteger(2)));
-        lg.setStart(il.append(new ISTORE(idxR1)));
-        /////////////////////////////////////////////////////////////
-        lg = mg.addLocalVariable("c1", Type.INT, null, null);
-        int idxC1 = lg.getIndex();
-        il.append(new LDC(cp.addInteger(3)));
-        lg.setStart(il.append(new ISTORE(idxC1)));
-        /////////////////////////////////////////////////////////////
-        lg = mg.addLocalVariable("r2", Type.INT, null, null);
-        int idxR2 = lg.getIndex();
-        il.append(new LDC(cp.addInteger(3)));
-        lg.setStart(il.append(new ISTORE(idxR2)));
-        /////////////////////////////////////////////////////////////
-        lg = mg.addLocalVariable("c2", Type.INT, null, null);
-        int idxC2 = lg.getIndex();
-        il.append(new LDC(cp.addInteger(2)));
-        lg.setStart(il.append(new ISTORE(idxC2)));
-        /////////////////////////////////////////////////////////////
-        lg = mg.addLocalVariable("width", Type.INT, null, null);
-        int idxWidth = lg.getIndex();
+        ForLoop fL = new ForLoop();
+
+        int id_Sum = create_field_ldc_double("sum",0.0);
+        int id_A  = create_field_array_double("A", 1,6);
+        int id_B  = create_field_array_double("B", 1,6);
+        int id_R1 = create_field_ldc_integer("r1",2);
+        int id_C1 = create_field_ldc_integer("c1",3);
+        int id_R2 = create_field_ldc_integer("r2",3);
+        int id_C2 = create_field_ldc_integer("c2",3);
+
+
+        //int width = 2 * 3;
+        int id_Width = create_field_integer("width");
         il.append(new LDC(cp.addInteger(2)));//Load the constant
         il.append(new LDC(cp.addInteger(3)));//Load the constant
         il.append(new IMUL());//Add
-        il.append(new ISTORE(idxWidth));
-        /////////////////////////////////////////////////////////////
-        lg = mg.addLocalVariable("C", new ArrayType(Type.DOUBLE, 1), null, null);
-        int idxC = lg.getIndex();
-        il.append(new ILOAD(idxWidth));
+        il.append(new ISTORE(id_Width));
+
+
+        //double[] C = new double[width];
+        int id_C = create_field_array_double("C", 1,0);
+        il.append(new ILOAD(id_Width));
         il.append(new NEWARRAY(Type.DOUBLE));
-        il.append(new ASTORE(idxC));
-        /////////////////////////////////////////////////////////////
-        //  --------------------------FOR LOOOP----------------------
-        lg = mg.addLocalVariable("i", Type.INT, null, null);
-        int idxI = lg.getIndex();
+        il.append(new ASTORE(id_C));
 
-        lg = mg.addLocalVariable("j", Type.INT, null, null);
-        int idxJ = lg.getIndex();
 
-        lg = mg.addLocalVariable("k", Type.INT, null, null);
-        int idxK = lg.getIndex();
-
-        il.append(new LDC(cp.addInteger(0)));
-        lg.setStart(il.append(new ISTORE(idxI))); // "i" valid from here
-
+        //1.loopStart
+        int id_I = create_field_ldc_integer("i",0);
         InstructionHandle loopStart = il.append(new LDC(cp.addInteger(0)));
-        lg.setStart(il.append(new ISTORE(idxJ))); // "j" valid from here
-        //Loop sum = A[i] + B[i];
+
+        //2.loopStart2
+        int id_J = create_field_ldc_integer("j",0);
         InstructionHandle loopStart2 = il.append(new LDC(cp.addInteger(0)));
-        lg.setStart(il.append(new ISTORE(idxK))); // "k" valid from here
 
-        InstructionHandle loopStart3 = il.append(new DLOAD(idxA));
+        //3.loopStart3
+        int id_K = create_field_ldc_integer("k",0);
+        InstructionHandle loopStart3 = il.append(new DLOAD(id_A));
 
-        il.append(new ILOAD(idxI));
+
+        //body: sum += A[i] * B[j];
+        il.append(new ILOAD(id_I));
         il.append(new DALOAD());
-        il.append(new DLOAD(idxB));
-        il.append(new ILOAD(idxJ));
+        il.append(new DLOAD(id_B));
+        il.append(new ILOAD(id_J));
         il.append(new DALOAD());
         il.append(new DMUL());
-        il.append(new DLOAD(idxSum));
+        il.append(new DLOAD(id_Sum));
         il.append(new DADD());
-        il.append(new DSTORE(idxSum));
+        il.append(new DSTORE(id_Sum));
 
 
-        //k++
-        il.append(new IINC(idxK, 1));
-        //Compare: k < r2 - for(int j = 0; j < c2; ++j)
-        InstructionHandle loopCmp3 = il.append(new ILOAD(idxK));
-        il.append(new ILOAD(idxR2));
-        il.append(new IF_ICMPLT(loopStart3));
-        il.insert(loopStart3, new GOTO(loopCmp3));
+        //3.Compare: k < r2 - for(int j = 0; j < c2; ++j)
+        init_compare_for_loop(loopStart3,id_K,id_R2,1);
 
-        //j++
-        il.append(new IINC(idxJ, 1));
-        //Compare: j < c2 - for(int j = 0; j < c2; ++j)
-        InstructionHandle loopCmp2 = il.append(new ILOAD(idxJ));
-        il.append(new ILOAD(idxC2));
-        il.append(new IF_ICMPLT(loopStart2));
-        il.insert(loopStart2, new GOTO(loopCmp2));
+        //2.Compare: j < c2 - for(int j = 0; j < c2; ++j)
+        init_compare_for_loop(loopStart2,id_J,id_C2,1);
 
-        //i++
-        il.append(new IINC(idxI, 1));
-
-        //Compare: i < r1 - for(int i = 0; i < r1; ++i)
-        InstructionHandle loopCmp = il.append(new ILOAD(idxI));
-        il.append(new ILOAD(idxR1));
-        il.append(new IF_ICMPLT(loopStart));
-
-        il.insert(loopStart, new GOTO(loopCmp));
+        //1.Compare: i < r1 - for(int i = 0; i < r1; ++i)
+        init_compare_for_loop(loopStart,id_I,id_R1,1);
 
         il.append(InstructionConst.RETURN);
-        /////////////////////////////////////////////////////////////
 
 
-        mg.setMaxStack();
-        cg.addMethod(mg.getMethod());
-        il.dispose(); // Allow instruction handles to be reused
-
-        cg.addEmptyConstructor(Const.ACC_PUBLIC);
-
-        try { cg.getJavaClass().dump("src/main/java/MatrixBuilder/generated/TestForLoop.class");}
-        catch (IOException e) {System.err.println(e);}
+        confirm_and_save("src/main/java/MatrixBuilder/generated/TestForLoop.class");
     }
 }
