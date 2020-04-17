@@ -11,7 +11,7 @@ import org.apache.bcel.generic.*;
 public class SimpleWhileBuilder {
     public static void main(String[] args) {
         final ClassGen cg=new ClassGen(
-                "package_name.SimpleWhile", "java.lang.Object","<generated>",
+                "package_name.SimpleWhile", "java.lang.Object","<MatrixBuilder.MatrixBuilder.generated>",
                 Const.ACC_PUBLIC, null);
         final ConstantPoolGen cp = cg.getConstantPool();
         final InstructionList il = new InstructionList();
@@ -62,7 +62,7 @@ public class SimpleWhileBuilder {
         MethodGen mg = new MethodGen(
                 Const.ACC_PUBLIC|Const.ACC_STATIC,
                 Type.VOID,new Type[]{new ArrayType(Type.STRING, 1)},
-                new String[]{"args"},"main","<generated>",
+                new String[]{"args"},"main","<MatrixBuilder.MatrixBuilder.generated>",
                 il,cp);
 
         mg.setMaxLocals();//Calculate the maximum number of local variables.
@@ -70,7 +70,7 @@ public class SimpleWhileBuilder {
 
         cg.addMethod(mg.getMethod()); //Add the method to the class
 
-        try { cg.getJavaClass().dump("src/main/java/geekyarticles/generated/SimpleWhile.class");}
+        try { cg.getJavaClass().dump("src/main/java/geekyarticles/MatrixBuilder.MatrixBuilder.generated/SimpleWhile.class");}
         catch (IOException e) {System.err.println(e);}
 
         System.out.println("********Constant Pool**********");System.out.println(cp.getFinalConstantPool());
