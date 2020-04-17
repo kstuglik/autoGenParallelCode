@@ -6,7 +6,7 @@ import org.apache.bcel.generic.*;
 import java.io.IOException;
 
 
-public class ForLoop {
+public class MatrixBuilder {
 
     static String packageName;
     static String className;
@@ -19,9 +19,9 @@ public class ForLoop {
     static MethodGen mg;
     static LocalVariableGen lg;
 
-    public ForLoop() {
+    public MatrixBuilder() {
         packageName = "MatrixBuilder";
-        className   = "TestForLoop";
+        className   = "MatrixMul";
         fullClassName = packageName + "." + className;
         cg = new ClassGen(fullClassName, "java.lang.Object", "<generated>",
                 Const.ACC_PUBLIC | Const.ACC_SUPER, null);
@@ -40,7 +40,7 @@ public class ForLoop {
     }
 
     public static int create_field_ldc_integer(String name, Integer value){
-        lg = ForLoop.mg.addLocalVariable(name, Type.INT, null, null);
+        lg = MatrixBuilder.mg.addLocalVariable(name, Type.INT, null, null);
         int id = lg.getIndex();
         il.append(new LDC(cp.addInteger(value)));
         lg.setStart(il.append(new ISTORE(id)));
@@ -96,21 +96,21 @@ public class ForLoop {
         //            }
         //        }
         /////////////////////////////////////////////////////////////
-        ForLoop fL = new ForLoop();
+        MatrixBuilder fL = new MatrixBuilder();
 
         int id_Sum = create_field_ldc_double("sum",0.0);
         int id_A  = create_field_array_double("A", 1,6);
         int id_B  = create_field_array_double("B", 1,6);
-        int id_R1 = create_field_ldc_integer("r1",2);
-        int id_C1 = create_field_ldc_integer("c1",3);
-        int id_R2 = create_field_ldc_integer("r2",3);
-        int id_C2 = create_field_ldc_integer("c2",3);
+        int id_RowsA = create_field_ldc_integer("rowsA",2);
+        int id_ColA = create_field_ldc_integer("colsA",3);
+        int id_RowsB = create_field_ldc_integer("rowsB",3);
+        int id_ColsB = create_field_ldc_integer("colsB",3);
 
 
         //int width = 2 * 3;
         int id_Width = create_field_integer("width");
-        il.append(new LDC(cp.addInteger(2)));//Load the constant
-        il.append(new LDC(cp.addInteger(3)));//Load the constant
+        il.append(new ILOAD(id_RowsA));//Load the constant
+        il.append(new ILOAD(id_ColsB));//Load the constant
         il.append(new IMUL());//Add
         il.append(new ISTORE(id_Width));
 
@@ -128,14 +128,25 @@ public class ForLoop {
 
         //2.loopStart2
         int id_J = create_field_ldc_integer("j",0);
-        InstructionHandle loopStart2 = il.append(new LDC(cp.addInteger(0)));
+        int id_index = create_field_integer("index");
 
-        //3.loopStart3
+        InstructionHandle loopStart2 = il.append(new ILOAD(id_I));
+        il.append(new ILOAD(id_RowsB));
+        il.append(new IMUL());
+        il.append(new ILOAD(id_J));
+        il.append(new IADD());
+        il.append(new ISTORE(id_index));
+
+
+
+//        il.append(new DLOAD(id_B));
+        il.append(new LDC(cp.addDouble(0.0)));
+        il.append(new DSTORE(id_Sum));
+
+
+        //3.loopStart3: body: sum += A[i] * B[j];
         int id_K = create_field_ldc_integer("k",0);
         InstructionHandle loopStart3 = il.append(new DLOAD(id_A));
-
-
-        //body: sum += A[i] * B[j];
         il.append(new ILOAD(id_I));
         il.append(new DALOAD());
         il.append(new DLOAD(id_B));
@@ -148,17 +159,17 @@ public class ForLoop {
 
 
         //3.Compare: k < r2 - for(int j = 0; j < c2; ++j)
-        init_compare_for_loop(loopStart3,id_K,id_R2,1);
+        init_compare_for_loop(loopStart3,id_K,id_RowsB,1);
 
         //2.Compare: j < c2 - for(int j = 0; j < c2; ++j)
-        init_compare_for_loop(loopStart2,id_J,id_C2,1);
+        init_compare_for_loop(loopStart2,id_J,id_ColsB,1);
 
         //1.Compare: i < r1 - for(int i = 0; i < r1; ++i)
-        init_compare_for_loop(loopStart,id_I,id_R1,1);
+        init_compare_for_loop(loopStart,id_I,id_RowsA,1);
 
         il.append(InstructionConst.RETURN);
 
 
-        confirm_and_save("src/main/java/MatrixBuilder/generated/TestForLoop.class");
+        confirm_and_save("src/main/java/MatrixBuilder/generated/MulMatrix.class");
     }
 }
