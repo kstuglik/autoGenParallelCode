@@ -9,8 +9,9 @@ import java.io.IOException;
 public class ForLoop {
 
     static String packageName;
-    static String clsName;
-    static String fullClsName;
+    static String className;
+    static String fullClassName;
+
     static ClassGen cg;
     static ConstantPoolGen cp;
     static InstructionList il;
@@ -20,13 +21,16 @@ public class ForLoop {
 
     public ForLoop() {
         packageName = "MatrixBuilder";
-        clsName = "TestForLoop";
-        fullClsName = packageName + "." + clsName;
-        cg = new ClassGen(fullClsName, "java.lang.Object", "<generated>", Const.ACC_PUBLIC | Const.ACC_SUPER, null);
+        className   = "TestForLoop";
+        fullClassName = packageName + "." + className;
+        cg = new ClassGen(fullClassName, "java.lang.Object", "<generated>",
+                Const.ACC_PUBLIC | Const.ACC_SUPER, null);
         cp = cg.getConstantPool(); // cg creates constant pool
         il = new InstructionList();
         factory = new InstructionFactory(cg);
-        mg = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.VOID, new Type[]{new ArrayType(Type.STRING, 1)}, new String[]{"argv"}, "main", clsName, il, cp);
+        mg = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
+                Type.VOID, new Type[]{new ArrayType(Type.STRING, 1)},
+                new String[]{"argv"}, "main", className, il, cp);
     }
 
     public static int create_field_integer(String name){
@@ -62,20 +66,20 @@ public class ForLoop {
         return id;
     }
 
-    public static void init_compare_for_loop(InstructionHandle loop_start,Integer id_counter, Integer id_value_bound, Integer value_increment){
-        il.append(new IINC(id_counter, 1));
-        InstructionHandle loop_compare = il.append(new ILOAD(id_counter));
-        il.append(new ILOAD(id_value_bound));
-        il.append(new IF_ICMPLT(loop_start));
-        il.insert(loop_start, new GOTO(loop_compare));
+    public static void init_compare_for_loop(InstructionHandle loopStart,Integer idCounter, Integer idBoundValue, Integer incValue){
+        il.append(new IINC(idCounter, 1));
+        InstructionHandle loop_compare = il.append(new ILOAD(idCounter));
+        il.append(new ILOAD(idBoundValue));
+        il.append(new IF_ICMPLT(loopStart));
+        il.insert(loopStart, new GOTO(loop_compare));
     }
 
-    public static void confirm_and_save(String output_path){
+    public static void confirm_and_save(String pathOutput){
         mg.setMaxStack();
         cg.addMethod(mg.getMethod());
         il.dispose();
         cg.addEmptyConstructor(Const.ACC_PUBLIC);
-        try { cg.getJavaClass().dump(output_path);}
+        try { cg.getJavaClass().dump(pathOutput);}
         catch (IOException e) {System.err.println(e);}
         System.out.println("DONE!");
     }

@@ -2,30 +2,42 @@ package MatrixBuilder;
 
 import java.util.Arrays;
 
-public class MatrixExample {
+
+import java.util.Arrays;
+public class MatrixExample{
 
     public static void main(String[] args) {
-        int[][] A = new int[][]{{1, 2, 3}, {4, 5, 6}};
-        int[][] B = new int[][]{{7, 8}, {9, 10}, {11, 12}};
 
-        int r1 = A.length;
-        int c1 = A[0].length;
-        int r2 = B.length;
-        int c2 = B[0].length;
+        //columnar representation of the matrix
+        int[] A = {1,4,2,5,3,6};
+        int[] B = {7,9,11,8,10,12};
+        int colsA = 3;
+        int rowsA = 2;
+        int colsB = 2;
+        int rowsB = 3;
 
-        int[][] C = new int[r1][c2];
 
-        for(int i = 0; i < r1; ++i) {
-            for(int j = 0; j < c2; ++j) {
-                C[i][j] = 0;
+        if(colsA == rowsB){
 
-                for(int k = 0; k < r2; ++k) {
-                    C[i][j] += A[i][k] * B[k][j];
+            int[] C = new int[4];
+
+            for(int i=0;i<rowsA;i++){
+                for(int j=0;j<colsB;j++){
+                    C[i*rowsA+j] = 0;
+
+                    for(int k=0;k<rowsB;k++){
+                        int a = A[k*rowsA+j];
+                        int b = B[k+colsA*i];
+                        C[i*rowsA+j] += a*b;
+                    }
                 }
             }
+
+            System.out.println(Arrays.toString(C));
+
+        }else{
+            System.out.println("cols_A != rows_B");
         }
 
-        System.out.println(Arrays.deepToString(C));
     }
 }
-
