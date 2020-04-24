@@ -55,15 +55,23 @@ public class MatrixBuilder {
         return id;
     }
 
-    public static int create_field_array_double(String name, Integer dim, Integer n){
-        lg = mg.addLocalVariable(name, new ArrayType(Type.DOUBLE, dim), null, null);
+    public static int create_field_array_type(Type type, String name, Integer dim, Integer n){
+        lg = mg.addLocalVariable(name, new ArrayType(type, dim), null, null);
         int id = lg.getIndex();
         if(n>0){
             il.append(new PUSH(cp, n));
-            il.append(new NEWARRAY(Type.DOUBLE));
+            il.append(new NEWARRAY((BasicType) type));
             il.append(new ASTORE(id));
         }
         return id;
+    }
+
+    public static int create_field_array_type_init(Type type, String name, Integer dim, Integer id_2){
+        int id = create_field_array_type(type,name, dim, 0);
+        il.append(new ILOAD(id_2));
+        il.append(new NEWARRAY((BasicType) type));
+        il.append(new ASTORE(id));
+        return  id;
     }
 
     public static void init_compare_for_loop(InstructionHandle loopStart,Integer idCounter, Integer idBoundValue, Integer incValue){
@@ -84,6 +92,47 @@ public class MatrixBuilder {
         System.out.println("DONE!");
     }
 
+    //simplified version create_expression
+    public static void create_expression(int[] idOperands, String[] operators){
+        //example:  width = rowsA * colsB
+
+        int counterOperands = idOperands.length;
+        int counterOperators = operators.length;
+
+        il.append(new ILOAD(idOperands[0]));
+
+        for (int i = 0; i < counterOperators ; i++) {
+
+            il.append(new ILOAD(idOperands[i+1]));
+            //imul & dmul and others.. fmul/lmul is TO DO?
+            if(operators[i] == "imul"){
+                il.append(new IMUL());
+            }
+            else if(operators[i] == "dmul"){
+                il.append(new DMUL());
+            }
+            else if(operators[i] == "ddiv"){
+                il.append(new DDIV());
+            }
+            else if(operators[i] == "idiv"){
+                il.append(new IDIV());
+            }
+            else if(operators[i] == "iadd"){
+                il.append(new IADD());
+            }
+            else if(operators[i] == "dadd"){
+                il.append(new DADD());
+            }
+            else if(operators[i] == "isub"){
+                il.append(new ISUB());
+            }
+            //(operators[i]s[0] == "dsub")
+            else{
+                il.append(new DSUB());
+            }
+        }
+        il.append(new ISTORE(idOperands[counterOperands-1]));
+    }
 
     public static void main(String[] args) {
 
@@ -98,29 +147,29 @@ public class MatrixBuilder {
         /////////////////////////////////////////////////////////////
         MatrixBuilder fL = new MatrixBuilder();
 
+        int[] idOperands;
+        String[] operators;
+
         int id_Sum = create_field_ldc_double("sum",0.0);
-        int id_A  = create_field_array_double("A", 1,6);
-        int id_B  = create_field_array_double("B", 1,6);
+
+        int id_A  = create_field_array_type(Type.INT,"A", 1,6);
         int id_RowsA = create_field_ldc_integer("rowsA",2);
-        int id_ColA = create_field_ldc_integer("colsA",3);
+        int id_ColsA = create_field_ldc_integer("colsA",3);
+
+        int id_B  = create_field_array_type(Type.INT,"B", 1,6);
         int id_RowsB = create_field_ldc_integer("rowsB",3);
         int id_ColsB = create_field_ldc_integer("colsB",3);
 
 
-        //int width = 2 * 3;
+        //int width = rowsA * colsB => order of operands: rowsA, colsB, width
         int id_Width = create_field_integer("width");
-        il.append(new ILOAD(id_RowsA));//Load the constant
-        il.append(new ILOAD(id_ColsB));//Load the constant
-        il.append(new IMUL());//Add
-        il.append(new ISTORE(id_Width));
+        idOperands = new int[]{id_RowsA, id_ColsB, id_Width};
+        operators  = new String[]{"imul"};
+        create_expression(idOperands,operators);
 
 
         //double[] C = new double[width];
-        int id_C = create_field_array_double("C", 1,0);
-        il.append(new ILOAD(id_Width));
-        il.append(new NEWARRAY(Type.DOUBLE));
-        il.append(new ASTORE(id_C));
-
+        int id_C = create_field_array_type_init(Type.INT,"C", 1, id_Width);
 
         //1.loopStart
         int id_I = create_field_ldc_integer("i",0);
@@ -131,12 +180,10 @@ public class MatrixBuilder {
         int id_index = create_field_integer("index");
 
         InstructionHandle loopStart2 = il.append(new ILOAD(id_I));
-        il.append(new ILOAD(id_RowsB));
-        il.append(new IMUL());
-        il.append(new ILOAD(id_J));
-        il.append(new IADD());
-        il.append(new ISTORE(id_index));
 
+        idOperands = new int[]{id_I,id_RowsB,id_J,id_index};
+        operators = new String[]{"imul", "iadd"};
+        create_expression(idOperands,operators);
 
 
 //        il.append(new DLOAD(id_B));
