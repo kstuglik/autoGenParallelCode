@@ -18,6 +18,7 @@ import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
 
+
 public class BCELTiming {
     private static void addWrapper(ClassGen cgen, Method method) {
 
@@ -111,11 +112,10 @@ public class BCELTiming {
         String method_file = "buildString";
 
         try {
-            JavaClass jclass;
-            jclass = new ClassParser(path_to_file+class_file).parse();
+            JavaClass jclass = new ClassParser(path_to_file+class_file).parse();
             ClassGen cg = new ClassGen(jclass);
-
             Method[] methods = jclass.getMethods();
+
             int index;
             for (index = 0; index < methods.length; index++) {
                 if (methods[index].getName().equals(method_file)) {break;}

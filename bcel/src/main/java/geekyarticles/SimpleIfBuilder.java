@@ -13,7 +13,7 @@ public class SimpleIfBuilder {
     public static void main(String[] args) {
         ClassGen cg = new ClassGen(
                 "SimpleIf","java.lang.Object",
-                "<generated>",Const.ACC_PUBLIC,null
+                "<MatrixBuilder.MatrixBuilder.generated>",Const.ACC_PUBLIC,null
         );
 
         final ConstantPoolGen cp = cg.getConstantPool();
@@ -65,7 +65,7 @@ public class SimpleIfBuilder {
 
         cg.addMethod(mg.getMethod()); //Add the method to the class
 
-        try { cg.getJavaClass().dump("src/main/java/geekyarticles/generated/SimpleIf.class");}
+        try { cg.getJavaClass().dump("src/main/java/geekyarticles/MatrixBuilder.MatrixBuilder.generated/SimpleIf.class");}
         catch (IOException e) {System.err.println(e);}
 
         System.out.println("********Constant Pool**********");System.out.println(cp.getFinalConstantPool());

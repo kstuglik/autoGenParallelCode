@@ -11,7 +11,7 @@ public class SimpleLookupSwitchBuilder {
 
     public static void main(String[] args) {
         final ClassGen cg=new ClassGen(
-                "package_name.SimpleLookupSwitch", "java.lang.Object","<generated>",
+                "package_name.SimpleLookupSwitch", "java.lang.Object","<MatrixBuilder.MatrixBuilder.generated>",
                 Const.ACC_PUBLIC, null);
         
         final ConstantPoolGen cp = cg.getConstantPool();
@@ -105,7 +105,7 @@ public class SimpleLookupSwitchBuilder {
         MethodGen mg = new MethodGen(
                 Const.ACC_PUBLIC|Const.ACC_STATIC,
                 Type.VOID,new Type[]{new ArrayType(Type.STRING, 1)},
-                new String[]{"args"},"main","<generated>",il,cp);
+                new String[]{"args"},"main","<MatrixBuilder.MatrixBuilder.generated>",il,cp);
 
         mg.setMaxLocals();
         mg.setMaxStack();

@@ -14,17 +14,20 @@ public class MatrixExample{
         int colsB = 2;
         int rowsB = 3;
 
+        int[] C = new int[rowsA*colsB];
+
         if(colsA != rowsB){System.out.println("cols_A != rows_B"); }
         else{
-            int[] C = new int[rowsA*colsB];
             for(int i=0; i<rowsA; i++){
                 for(int j=0; j<colsB; j++){
-                    C[i*rowsA+j] = 0;
+                    int index = i*rowsA+j;
+                    C[index] = 0;
                     for(int k=0; k<rowsB; k++){
-                        int a = A[k*rowsA+j];
-                        int b = B[k+colsA*i];
-                        C[i*rowsA+j] += a*b;
+                        int id_a = k*rowsA+j;
+                        int id_b = k+colsA*i;
+                        C[index] += A[id_a]*B[id_b];
                     }
+                    System.out.println(C[index]);
                 }
             }
             System.out.println(Arrays.toString(C));

@@ -19,6 +19,8 @@ public class MatrixBuilder {
     static MethodGen mg;
     static LocalVariableGen lg;
 
+    static ObjectType p_stream;
+
     public MatrixBuilder() {
         packageName = "MatrixBuilder";
         className   = "MatrixMul";
@@ -31,6 +33,7 @@ public class MatrixBuilder {
         mg = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
                 Type.VOID, new Type[]{new ArrayType(Type.STRING, 1)},
                 new String[]{"argv"}, "main", className, il, cp);
+        p_stream  = new ObjectType("java.io.PrintStream");
     }
 
     public static int create_field_integer(String name){
@@ -92,8 +95,8 @@ public class MatrixBuilder {
         System.out.println("DONE!");
     }
 
-    //simplified version create_expression
-    public static void create_expression(int[] idOperands, String[] operators){
+    //simplified version create_simple_expression
+    public static void create_simple_expression(int[] idOperands, String[] operators){
         //example:  width = rowsA * colsB
 
         int counterOperands = idOperands.length;
@@ -134,6 +137,32 @@ public class MatrixBuilder {
         il.append(new ISTORE(idOperands[counterOperands-1]));
     }
 
+   public static void load_array_index_field(int idArray, int idIndex){
+       il.append(new DLOAD(idArray));
+       il.append(new ILOAD(idIndex));
+       il.append(new DALOAD());
+   }
+
+   public static void println_integer(Integer result){
+       final GOTO g = new GOTO(null);
+       final InstructionHandle ih = il.append(
+               factory.createFieldAccess(
+                       "java.lang.System",
+                       "out",
+                       p_stream,
+                       Const.GETSTATIC
+               )
+       );
+
+       g.setTarget(ih);
+
+       il.append(new ILOAD(result));
+
+       il.append(factory.createInvoke(
+               "java.io.PrintStream","println",
+               Type.VOID,new Type[]{Type.INT},Const.INVOKEVIRTUAL));
+   }
+
     public static void main(String[] args) {
 
         //////////////////////////////////////////////////////////////
@@ -150,8 +179,6 @@ public class MatrixBuilder {
         int[] idOperands;
         String[] operators;
 
-        int id_Sum = create_field_ldc_double("sum",0.0);
-
         int id_A  = create_field_array_type(Type.INT,"A", 1,6);
         int id_RowsA = create_field_ldc_integer("rowsA",2);
         int id_ColsA = create_field_ldc_integer("colsA",3);
@@ -165,7 +192,7 @@ public class MatrixBuilder {
         int id_Width = create_field_integer("width");
         idOperands = new int[]{id_RowsA, id_ColsB, id_Width};
         operators  = new String[]{"imul"};
-        create_expression(idOperands,operators);
+        create_simple_expression(idOperands,operators);
 
 
         //double[] C = new double[width];
@@ -177,36 +204,43 @@ public class MatrixBuilder {
 
         //2.loopStart2
         int id_J = create_field_ldc_integer("j",0);
-        int id_index = create_field_integer("index");
+        int id_index = create_field_integer("id_c");
 
         InstructionHandle loopStart2 = il.append(new ILOAD(id_I));
 
         idOperands = new int[]{id_I,id_RowsB,id_J,id_index};
         operators = new String[]{"imul", "iadd"};
-        create_expression(idOperands,operators);
+        create_simple_expression(idOperands,operators);
 
-
-//        il.append(new DLOAD(id_B));
-        il.append(new LDC(cp.addDouble(0.0)));
-        il.append(new DSTORE(id_Sum));
-
+        int id_Sum = create_field_ldc_integer("sum",0);
 
         //3.loopStart3: body: sum += A[i] * B[j];
         int id_K = create_field_ldc_integer("k",0);
         InstructionHandle loopStart3 = il.append(new DLOAD(id_A));
-        il.append(new ILOAD(id_I));
-        il.append(new DALOAD());
-        il.append(new DLOAD(id_B));
-        il.append(new ILOAD(id_J));
-        il.append(new DALOAD());
-        il.append(new DMUL());
-        il.append(new DLOAD(id_Sum));
-        il.append(new DADD());
-        il.append(new DSTORE(id_Sum));
+
+        int id_a = create_field_integer("id_a");
+        idOperands = new int[]{id_K,id_RowsA,id_J,id_a};
+        operators = new String[]{"imul", "iadd"};
+        create_simple_expression(idOperands,operators);
+
+        int id_b = create_field_integer("id_b");
+        idOperands = new int[]{id_I,id_ColsA,id_K,id_b};
+        operators = new String[]{"imul", "iadd"};
+        create_simple_expression(idOperands,operators);
+
+        load_array_index_field(id_A,id_a);
+        load_array_index_field(id_B,id_b);
+
+        il.append(new IMUL());
+        il.append(new ILOAD(id_Sum));
+        il.append(new IADD());
+        il.append(new ISTORE(id_Sum));
 
 
         //3.Compare: k < r2 - for(int j = 0; j < c2; ++j)
         init_compare_for_loop(loopStart3,id_K,id_RowsB,1);
+
+        println_integer(id_Sum);
 
         //2.Compare: j < c2 - for(int j = 0; j < c2; ++j)
         init_compare_for_loop(loopStart2,id_J,id_ColsB,1);

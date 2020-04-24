@@ -16,7 +16,7 @@ public class SimpleExpressionBuilder {
         ClassGen cg = new ClassGen(
                 "SimpleExpression",
                 "java.lang.Object",
-                "<generated>",
+                "<MatrixBuilder.MatrixBuilder.generated>",
                 Const.ACC_PUBLIC,
                 null
         );

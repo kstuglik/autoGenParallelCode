@@ -12,7 +12,7 @@ import org.apache.bcel.generic.*;
 public class HelloWorldBuilder {
     public static void main(final String[] argv) {
         final ClassGen cg = new ClassGen("HelloWorld", "java.lang.Object",
-                "<generated>", Const.ACC_PUBLIC |
+                "<MatrixBuilder.MatrixBuilder.generated>", Const.ACC_PUBLIC |
                 Const.ACC_SUPER,
                 null);
         final ConstantPoolGen cp = cg.getConstantPool(); // cg creates constant pool
@@ -123,7 +123,7 @@ public class HelloWorldBuilder {
 
         // Get JavaClass object and dump it to file.
         try {
-            cg.getJavaClass().dump("src/main/java/apachebcel/generated/HelloWorld.class");
+            cg.getJavaClass().dump("src/main/java/apachebcel/MatrixBuilder.MatrixBuilder.generated/HelloWorld.class");
         } catch (final IOException e) {
             System.err.println(e);
         }

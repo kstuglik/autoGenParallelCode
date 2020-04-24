@@ -7,9 +7,9 @@ import java.io.IOException;
 public class ScanClassFile {
     public static void main(String[] argv) {
 
-        String path_to_file = "/home/lenovo/Documents/MGR/bcel/target/classes/ibmbcel/";
-        String class_file = "StringBuilder.class";
-        String method_file = "buildString";
+        String path_to_file = "target/classes/MatrixBuilder/";
+        String class_file = "Part1.class";
+        String method_file = "Part1";
         int index;
         try {
             JavaClass jclass;
