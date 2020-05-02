@@ -1,7 +1,7 @@
 package MatrixBuilder;
 
 
-
+import java.util.Arrays;
 
 public class test {
     public static void main(String[] argv) {
@@ -18,18 +18,19 @@ public class test {
 
         for(int i = 0; i < rowsA; ++i) {
             for(int j = 0; j < colsB; ++j) {
-                int id_c = i * rowsB + j;
-                int sum = 0;
+                int id_c = i * colsB + j;
 
                 for(int k = 0; k < rowsB; ++k) {
-                    int id_a = k * rowsA + j;
-                    int id_b = i * colsA + k;
-                    sum += A[id_a] * B[id_b];
+                    int id_a = k * rowsA + i;
+                    int id_b = j * rowsB + k;
+                    C[id_c] += A[id_a] * B[id_b];
                 }
-
-                System.out.println(sum);
             }
         }
 
+        System.out.println(Arrays.toString(C));
+    }
+
+    public test() {
     }
 }

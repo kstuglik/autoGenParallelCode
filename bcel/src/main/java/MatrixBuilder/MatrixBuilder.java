@@ -87,6 +87,8 @@ public class MatrixBuilder {
 
     public static void confirm_and_save(String pathOutput) {
         mg.setMaxStack();
+        mg.setMaxLocals();
+//        mg.stripAttributes(true);
         cg.addMethod(mg.getMethod());
         il.dispose();
         cg.addEmptyConstructor(Const.ACC_PUBLIC);
@@ -98,7 +100,7 @@ public class MatrixBuilder {
         System.out.println("DONE!");
     }
 
-    //simplified version create_simple_expression
+    //simplified arithmetic expression creation process
     public static void create_simple_expression(int[] idOperands, String[] operators) {
         //example:  width = rowsA * colsB
 
@@ -134,14 +136,28 @@ public class MatrixBuilder {
         il.append(new ISTORE(idOperands[counterOperands - 1]));
     }
 
-    public static void load_array_index_field(int idArray, int idIndex) {
-        il.append(new DLOAD(idArray));
-        il.append(new ILOAD(idIndex));
-        il.append(new DALOAD());
+    public static void println_array(Integer id_Array) {
+
+        int slot = mg.isStatic() ? 0 : 1;
+        il.append(factory.createFieldAccess(
+                "java.lang.System", "out",
+                new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
+
+        il.append(new DUP());
+        il.append(new DUP());
+
+        il.append(new DLOAD(id_Array));
+        il.append(factory.createInvoke(
+                "java.util.Arrays", "toString",
+                Type.DOUBLE, new Type[]{Type.STRING}, Const.INVOKESTATIC));
+
+        il.append(factory.createInvoke(
+                "java.io.PrintStream", "print",
+                Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
+
     }
 
-    public static void println_integer(Integer result) {
-        final GOTO g = new GOTO(null);
+    public static void println_string(String result) {
         final InstructionHandle ih = il.append(
                 factory.createFieldAccess(
                         "java.lang.System",
@@ -151,22 +167,28 @@ public class MatrixBuilder {
                 )
         );
 
-        g.setTarget(ih);
+        il.append(new LDC(cp.addString(result)));
 
-        il.append(new ILOAD(result));
-
-        il.append(factory.createInvoke(
-                "java.io.PrintStream", "println",
-                Type.VOID, new Type[]{Type.INT}, Const.INVOKEVIRTUAL));
+        il.append(
+                factory.createInvoke(
+                        "java.io.PrintStream", "println",
+                        Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL
+                )
+        );
     }
+
 
     public static void main(String[] args) {
 
         //////////////////////////////////////////////////////////////
-        //        for(int i = 0; i < r1; ++i) {
-        //            for(int j = 0; j < c2; ++j) {
-        //                for(int k = 0; k < r2; ++k) {
-        //                    sum += A[i] * B[j];
+        //        for(int i = 0; i < rowsA; ++i) {
+        //            for(int j = 0; j < colsB; ++j) {
+        //                int id_c = i * colsB + j;
+        //
+        //                for(int k = 0; k < rowsB; ++k) {
+        //                    int id_a = k * rowsA + i;
+        //                    int id_b = j * rowsB + k;
+        //                    C[id_c] += A[id_a] * B[id_b];
         //                }
         //            }
         //        }
@@ -175,21 +197,22 @@ public class MatrixBuilder {
 
         int[] idOperands;
         String[] operators;
+        println_string("COLUMN-MAJOR MATRIX, FILL MATRIXS!\n");
 
         int id_A = create_field_array_type(Type.INT, "A", 1, 6);
-        int id_RowsA = create_field_ldc_integer("rowsA", 2);
-        int id_ColsA = create_field_ldc_integer("colsA", 3);
+        int id_RowsA = create_field_ldc_integer("rowsA", 0);
+        int id_ColsA = create_field_ldc_integer("colsA", 0);
 
         int id_B = create_field_array_type(Type.INT, "B", 1, 6);
-        int id_RowsB = create_field_ldc_integer("rowsB", 3);
-        int id_ColsB = create_field_ldc_integer("colsB", 3);
+        int id_RowsB = create_field_ldc_integer("rowsB", 0);
+        int id_ColsB = create_field_ldc_integer("colsB", 0);
 
 
         //int width = rowsA * colsB => order of operands: rowsA, colsB, width
         int id_Width = create_field_integer("width");
-        idOperands = new int[]{id_RowsA, id_ColsB, id_Width};
-        operators = new String[]{"imul"};
-        create_simple_expression(idOperands, operators);
+        create_simple_expression(
+                new int[]{id_RowsA, id_ColsB, id_Width},
+                new String[]{"imul"});
 
 
         //double[] C = new double[width];
@@ -201,43 +224,56 @@ public class MatrixBuilder {
 
         //2.loopStart2
         int id_J = create_field_ldc_integer("j", 0);
-        int id_index = create_field_integer("id_c");
+        int id_c = create_field_integer("id_c");
 
         InstructionHandle loopStart2 = il.append(new ILOAD(id_I));
-
-        idOperands = new int[]{id_I, id_RowsB, id_J, id_index};
-        operators = new String[]{"imul", "iadd"};
-        create_simple_expression(idOperands, operators);
-
-        int id_Sum = create_field_ldc_integer("sum", 0);
+        create_simple_expression(
+                new int[]{id_I, id_ColsB, id_J, id_c},
+                new String[]{"imul", "iadd"});
 
         //3.loopStart3: body: sum += A[i] * B[j];
         int id_K = create_field_ldc_integer("k", 0);
         InstructionHandle loopStart3 = il.append(new DLOAD(id_A));
 
         int id_a = create_field_integer("id_a");
-        idOperands = new int[]{id_K, id_RowsA, id_J, id_a};
-        operators = new String[]{"imul", "iadd"};
-        create_simple_expression(idOperands, operators);
+        create_simple_expression(
+                new int[]{id_K, id_RowsA, id_I, id_a},
+                new String[]{"imul", "iadd"});
 
         int id_b = create_field_integer("id_b");
-        idOperands = new int[]{id_I, id_ColsA, id_K, id_b};
-        operators = new String[]{"imul", "iadd"};
-        create_simple_expression(idOperands, operators);
+        create_simple_expression(
+                new int[]{id_J, id_RowsB, id_K, id_b},
+                new String[]{"imul", "iadd"});
 
-        load_array_index_field(id_A, id_a);
-        load_array_index_field(id_B, id_b);
+
+        //C[id_c] += A[id_a] * B[id_b];
+
+        il.append(new DLOAD(id_C));
+        il.append(new ILOAD(id_c));
+
+        il.append(new DLOAD(id_A));
+        il.append(new ILOAD(id_a));
+        il.append(new DALOAD());
+
+        il.append(new DLOAD(id_B));
+        il.append(new ILOAD(id_b));
+        il.append(new DALOAD());
 
         il.append(new IMUL());
-        il.append(new ILOAD(id_Sum));
+
+        il.append(new DLOAD(id_C));
+        il.append(new ILOAD(id_c));
+        il.append(new DALOAD());
+
         il.append(new IADD());
-        il.append(new ISTORE(id_Sum));
+
+        il.append(new DASTORE());
 
 
         //3.Compare: k < r2 - for(int j = 0; j < c2; ++j)
         init_compare_for_loop(loopStart3, id_K, id_RowsB, 1);
 
-        println_integer(id_Sum);
+//        println_integer(id_C,id_c);
 
         //2.Compare: j < c2 - for(int j = 0; j < c2; ++j)
         init_compare_for_loop(loopStart2, id_J, id_ColsB, 1);
@@ -245,9 +281,10 @@ public class MatrixBuilder {
         //1.Compare: i < r1 - for(int i = 0; i < r1; ++i)
         init_compare_for_loop(loopStart, id_I, id_RowsA, 1);
 
-        il.append(InstructionConst.RETURN);
+        println_array(id_C);
 
+        il.append(new RETURN());
 
-        confirm_and_save("src/main/java/MatrixBuilder/generated/MulMatrix.class");
+        confirm_and_save("src/main/java/MatrixBuilder/generated/MatrixMul.class");
     }
 }
