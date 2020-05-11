@@ -1,18 +1,24 @@
 /* Imports, JCublas */
+
+import jcuda.Pointer;
+import jcuda.Sizeof;
+import jcuda.jcublas.JCublas;
+
 import java.util.Arrays;
-import jcuda.*;
-import jcuda.jcublas.*;
+
 
 public class JCudaMultiplier {
 
-    float matrix_A[],matrix_B[],matrix_C[];
+    float[] matrix_A;
+    float[] matrix_B;
+    float[] matrix_C;
     int cols_A, rows_A, cols_B, rows_B;
 
     float alpha = 1.0f, beta = 0.0f;
     Pointer ptr_A = new Pointer(), ptr_B = new Pointer(), ptr_C = new Pointer();
 
     /* Main */
-    public static void main(String args[]) {
+    public static void main(String[] args) {
 
         //PRZYPADEK 1   [6.0, 10.0, 10.0, 12.0]
         int[][] matrix_AA = {{3,1,2},{1,2,3}};

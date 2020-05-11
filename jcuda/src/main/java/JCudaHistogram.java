@@ -1,16 +1,14 @@
-import static jcuda.runtime.JCuda.cudaFree;
-import static jcuda.runtime.JCuda.cudaMalloc;
-import static jcuda.runtime.JCuda.cudaMemcpy;
-import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
-import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyHostToDevice;
-
-import java.util.Arrays;
-
 import jcuda.Pointer;
 import jcuda.Sizeof;
 import jcuda.jcublas.JCublas2;
 import jcuda.jcublas.cublasHandle;
 import jcuda.jcublas.cublasOperation;
+
+import java.util.Arrays;
+
+import static jcuda.runtime.JCuda.*;
+import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
+import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyHostToDevice;
 
 public class JCudaHistogram {
     static int N;
@@ -46,7 +44,7 @@ public class JCudaHistogram {
                 pointer_C, N);
 
 // show results
-        float data[] = new float[N];
+        float[] data = new float[N];
         cudaMemcpy(Pointer.to(data), pointer_C, N * Sizeof.FLOAT, cudaMemcpyDeviceToHost);
         System.out.println("=");
         System.out.println(Arrays.toString(data));
@@ -58,7 +56,7 @@ public class JCudaHistogram {
     }
 
     public JCudaHistogram(int[][] matrix_AA) {
-        this.N = matrix_AA.length;
+        N = matrix_AA.length;
         matrix_A = flatten(matrix_AA);
         matrix_B = get_array_value(N,1);
         matrix_C = new float[N];
@@ -74,8 +72,8 @@ public class JCudaHistogram {
         int rows = arr.length;
         int cols = arr[0].length;
 
-        this.N = rows * cols;
-        float[] result = new float[ this.N];
+        N = rows * cols;
+        float[] result = new float[ N];
 
         for (int row = 0; row < cols; row++){
             try{
