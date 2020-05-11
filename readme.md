@@ -61,7 +61,10 @@ The next step will be a dynamic transformation of the existing code, like inject
 
 ### If the above doesn't work:
 ```sh
-An alternative solution to maven is to download the JCUDA library files yourself, to do so go to http://jcuda.org/downloads/downloads.html, to the download section and download the *.zip package. Unpack the content. In IDE, go to the project structure section and point to all/selected *.jar files. If you are asked, indicate that the imported libraries are for the project module with name: jcuda)
+An alternative solution to maven is to download the JCUDA library files yourself, 
+to do so go to http://jcuda.org/downloads/downloads.html, to the download section and download the *.zip package. 
+Unpack the content. In IDE, go to the project structure section and point to all/selected *.jar files. 
+If you are asked, indicate that the imported libraries are for the project module with name: jcuda.
 ```
 
 MIT
