@@ -1,7 +1,8 @@
 package matrix;
 
-import jcuda.*;
-import jcuda.jcublas.*;
+import jcuda.Pointer;
+import jcuda.Sizeof;
+import jcuda.jcublas.JCublas;
 
 import java.util.Arrays;
 

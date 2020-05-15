@@ -8,10 +8,11 @@ package fft;
  * Copyright 2009 Marco Hutter - http://www.jcuda.org
  */
 
-import edu.emory.mathcs.jtransforms.fft.FloatFFT_1D;
+
 import jcuda.jcufft.JCufft;
 import jcuda.jcufft.cufftHandle;
 import jcuda.jcufft.cufftType;
+import org.jtransforms.fft.FloatFFT_1D;
 
 import java.util.Random;
 
@@ -20,7 +21,7 @@ import java.util.Random;
  * forward FFT with JCufft, and compares the result to the
  * reference computed with JTransforms.
  */
-class JCufftSample
+class jCudaFFT
 {
     public static void main(String args[])
     {

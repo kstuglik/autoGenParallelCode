@@ -16,7 +16,7 @@ public class BenchmarkMatrix {
         Options options = new OptionsBuilder()
                 .include(BenchmarkMatrix.class.getSimpleName())
                 .threads(1)
-                .forks(2)
+                .forks(5)
                 .warmupIterations(3)
                 .mode(Mode.AverageTime)
                 .build();
@@ -24,15 +24,15 @@ public class BenchmarkMatrix {
         new Runner(options).run();
     }
 
-    @Benchmark
-    public void MultiplySquareMatricesSerial(TestState state) {
-        state.serialMultiplier.multiply();
-    }
-
-    @Benchmark
-    public void MultiplySquareMatricesParallel(TestState state) {
-        state.parallelMultiplier.multiply();
-    }
+//    @Benchmark
+//    public void MultiplySquareMatricesSerial(TestState state) {
+//        state.serialMultiplier.multiply();
+//    }
+//
+//    @Benchmark
+//    public void MultiplySquareMatricesParallel(TestState state) {
+//        state.parallelMultiplier.multiply();
+//    }
 
     @Benchmark
     public void MultiplySquareMatricesJCuda(TestState state) {
@@ -46,8 +46,8 @@ public class BenchmarkMatrix {
         int bound = 5;
         int[][] A = MatrixUtils.randomIntArrayMatrix(size, size, bound);
         int[][] B = MatrixUtils.randomIntArrayMatrix(size, size, bound);
-        SerialMultiplier serialMultiplier = new SerialMultiplier(A, B);
-        ParallelMultiplier parallelMultiplier = new ParallelMultiplier(A, B);
+//        SerialMultiplier serialMultiplier = new SerialMultiplier(A, B);
+//        ParallelMultiplier parallelMultiplier = new ParallelMultiplier(A, B);
         JCudaMultiplier jcudaMultiplier = new JCudaMultiplier(A,B);
     }
 }
