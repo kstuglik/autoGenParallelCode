@@ -1,9 +1,8 @@
 package utils;
 
-import jcuda.*;
+import jcuda.Pointer;
+import jcuda.Sizeof;
 import jcuda.jcublas.JCublas;
-
-import java.util.Arrays;
 
 
 public class JCudaMatrix {
@@ -90,7 +89,7 @@ public class JCudaMatrix {
         /* Shutdown */
         JCublas.cublasShutdown();
 
-        System.out.println(Arrays.toString(matrix_C));
+//        System.out.println(Arrays.toString(matrix_C));
         return matrix_C;
     }
 }

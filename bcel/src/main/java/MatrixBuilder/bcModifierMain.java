@@ -11,8 +11,11 @@ import java.io.IOException;
 public class bcModifierMain {
 
     private static final String CLASS_PATH = "src/main/java/MatrixBuilder/generated/";
-    private static final String CLASS_NAME = "JCudaMatrixMain2";
-    private static final String METHOD_NAME = "Main";
+    private static final String CLASS_NAME = "Matrix2D";
+    private static final String METHOD_NAME = "multiply";
+
+//    private static final String CLASS_NAME = "jcudaMatrixMain";
+//    private static final String METHOD_NAME = "main";
 
     //    private static BytecodeModifier modifier;
     private static bcModifier builder;
