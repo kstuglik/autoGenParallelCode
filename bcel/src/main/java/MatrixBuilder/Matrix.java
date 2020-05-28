@@ -1,17 +1,20 @@
 package MatrixBuilder;
 
-
 import java.util.Arrays;
 
-public class test {
-    public static void main(String[] argv) {
-        int[] A = {1,4,2,5,3,6};
-        int colsA = 3;
-        int rowsA = 2;
+public class Matrix {
 
-        int[] B = {7,9,11,8,10,12};
-        int colsB = 2;
+    public static void main(String[] args) {
+        //columnar representation of the matrix
+
+        int[] A = {3, 0, 2, 2, 4, 0, 0, 1, 1};
+        int colsA = 3;
+        int rowsA = 3;
+
+        int[] B = {4, 3, 1};
+        int colsB = 1;
         int rowsB = 3;
+
 
         int width = rowsA * colsB;
         int[] C = new int[width];
@@ -28,9 +31,6 @@ public class test {
             }
         }
 
-        System.out.println(Arrays.toString(C));
-    }
-
-    public test() {
+        System.out.print(Arrays.toString(C));
     }
 }

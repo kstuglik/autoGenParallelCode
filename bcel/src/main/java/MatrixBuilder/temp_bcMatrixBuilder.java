@@ -6,7 +6,7 @@ import org.apache.bcel.generic.*;
 import java.io.IOException;
 
 
-public class MatrixBuilder {
+public class temp_bcMatrixBuilder {
 
     static String packageName;
     static String className;
@@ -21,7 +21,7 @@ public class MatrixBuilder {
 
     static ObjectType p_stream;
 
-    public MatrixBuilder() {
+    public temp_bcMatrixBuilder() {
         packageName = "MatrixBuilder";
         className = "MatrixMul";
         fullClassName = packageName + "." + className;
@@ -43,7 +43,7 @@ public class MatrixBuilder {
     }
 
     public static int create_field_ldc_integer(String name, Integer value) {
-        lg = MatrixBuilder.mg.addLocalVariable(name, Type.INT, null, null);
+        lg = temp_bcMatrixBuilder.mg.addLocalVariable(name, Type.INT, null, null);
         int id = lg.getIndex();
         il.append(new LDC(cp.addInteger(value)));
         lg.setStart(il.append(new ISTORE(id)));
@@ -193,7 +193,7 @@ public class MatrixBuilder {
         //            }
         //        }
         /////////////////////////////////////////////////////////////
-        MatrixBuilder fL = new MatrixBuilder();
+        temp_bcMatrixBuilder fL = new temp_bcMatrixBuilder();
 
         int[] idOperands;
         String[] operators;
