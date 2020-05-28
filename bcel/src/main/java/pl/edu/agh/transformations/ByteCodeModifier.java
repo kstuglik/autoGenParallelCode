@@ -46,6 +46,14 @@ public class ByteCodeModifier {
         saveModifiedClass(classPath, className, modifiedClass);
     }
 
+    private void saveModifiedClass(String classPath, String className, ClassGen classGen) {
+        try (FileOutputStream outputStream = new FileOutputStream(classPath + className + MODIFICATION_SUFFIX + CLASS_SUFFIX)) {
+            classGen.getJavaClass().dump(outputStream);
+        } catch (IOException exception) {
+            throw new RuntimeException("Error during modified class save.", exception);
+        }
+    }
+
     private ClassGen getModifiedClass(String className, JavaClass analyzedClass) {
         ClassGen oldClass = new ClassGen(analyzedClass);
         return new ClassGen(analyzedClass.getPackageName() + className + MODIFICATION_SUFFIX,
@@ -66,13 +74,5 @@ public class ByteCodeModifier {
     private void copyFields(JavaClass oldClass, ClassGen newClass) {
         Arrays.stream(oldClass.getFields())
                 .forEach(newClass::addField);
-    }
-
-    private void saveModifiedClass(String classPath, String className, ClassGen classGen) {
-        try (FileOutputStream outputStream = new FileOutputStream(classPath + className + MODIFICATION_SUFFIX + CLASS_SUFFIX)) {
-            classGen.getJavaClass().dump(outputStream);
-        } catch (IOException exception) {
-            throw new RuntimeException("Error during modified class save.", exception);
-        }
     }
 }
