@@ -59,4 +59,5 @@ public class ParallelHistogram {
         }
         return partialResult;
     }
+
 }

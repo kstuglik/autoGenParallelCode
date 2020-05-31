@@ -17,8 +17,8 @@ public class BenchmarkHistogram {
         Options options = new OptionsBuilder()
                 .include(BenchmarkHistogram.class.getSimpleName())
                 .threads(1)
-                .forks(2)
-                .warmupIterations(2)
+                .forks(5)
+                .warmupIterations(1)
                 .mode(Mode.AverageTime)
                 .build();
 
@@ -43,7 +43,7 @@ public class BenchmarkHistogram {
     @State(value = Scope.Benchmark)
     public static class TestState {
         int size = 100;
-        int dataBound = 10;
+        int dataBound = 5;
         int data[] = initArray();
         SerialHistogram serialHistogram = new SerialHistogram(data, dataBound);
         ParallelHistogram parallelHistogram = new ParallelHistogram(data, dataBound);
