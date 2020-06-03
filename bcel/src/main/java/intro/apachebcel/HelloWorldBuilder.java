@@ -2,7 +2,7 @@
 modified example from: https://github.com/apache/commons-bcel/blob/master/src/examples/HelloWorldBuilder.java
 */
 
-package apachebcel;
+package intro.apachebcel;
 
 import java.io.IOException;
 
@@ -123,7 +123,7 @@ public class HelloWorldBuilder {
 
         // Get JavaClass object and dump it to file.
         try {
-            cg.getJavaClass().dump("src/main/java/apachebcel/MatrixBuilder.MatrixBuilder.generated/HelloWorld.class");
+            cg.getJavaClass().dump("src/main/java/intro.apachebcel/MatrixBuilder.MatrixBuilder.generated/HelloWorld.class");
         } catch (final IOException e) {
             System.err.println(e);
         }

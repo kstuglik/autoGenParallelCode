@@ -5,10 +5,8 @@ import jcuda.Sizeof;
 import jcuda.jcublas.JCublas2;
 import jcuda.jcublas.cublasHandle;
 import jcuda.jcublas.cublasOperation;
-
 import java.util.Arrays;
 import java.util.Random;
-
 import static jcuda.runtime.JCuda.*;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyHostToDevice;
@@ -20,7 +18,6 @@ public class JCudaHistogram {
 
     static Pointer pointer_A = new Pointer(), pointer_B = new Pointer(), pointer_C = new Pointer();
     static float[] matrix_A,matrix_B, matrix_C;
-
 
     public void calculate(){
         JCublas2.setExceptionsEnabled(true);
@@ -59,25 +56,22 @@ public class JCudaHistogram {
         JCublas2.cublasDestroy(handle);
     }
 
-
     public JCudaHistogram(int[] matrix_AA, int limit) {
         //limit????
         this.N = matrix_AA.length;
-        matrix_A = flatten(matrix_AA);
+        matrix_A = ArrayIntToFloat(matrix_AA);
         matrix_B = get_array_value(N,limit);
         matrix_C = new float[N];
     }
 
-
-    public float[] flatten(int[] arr) {
-        int n = arr.length;
-        float[] result  = new float[n];
-        for(int i=0;i<n;i++){
-            result[i] = (float) arr[i];
+    public float[] ArrayIntToFloat(int[] array){
+        float[] result = new float[array.length];
+        int i = 0;
+        for (int f : array) {
+            result[i++] = f;
         }
-        return result;
+        return  result;
     }
-
 
     public static float[] get_array_value(int N, int dataBound) {
         float[] arr = new float[N];
@@ -88,9 +82,4 @@ public class JCudaHistogram {
         return arr;
     }
 
-//    public static void main(String[] args) {
-//        float[] A  = get_array_value(1000,5);
-//        JCudaHistogram jcudaHistogram = new JCudaHistogram(flatten(A), 5);
-//        jcudaHistogram.calculate();
-//    }
 }

@@ -44,7 +44,7 @@ public class TransformUtils {
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
 
-    private static void addClassFields(ClassGen cg, ConstantPoolGen cp) {
+    public static void addClassFields(ClassGen cg, ConstantPoolGen cp) {
         FieldGen threadCount = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC | Const.ACC_FINAL,
                 Type.INT,
                 Constants.NUMBER_OF_THREADS_CONSTANT_NAME,

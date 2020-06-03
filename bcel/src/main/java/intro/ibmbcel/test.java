@@ -3,7 +3,7 @@
 // (powered by Fernflower decompiler)
 //
 
-package ibmbcel;
+package intro.ibmbcel;
 
 import java.io.PrintStream;
 

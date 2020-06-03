@@ -1,6 +1,10 @@
-import org.apache.bcel.classfile.*;
+package intro;
+
+import org.apache.bcel.classfile.ClassParser;
+import org.apache.bcel.classfile.Code;
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ClassGen;
-import java.util.Arrays;
 
 import java.io.IOException;
 

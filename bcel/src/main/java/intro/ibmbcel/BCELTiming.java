@@ -1,43 +1,25 @@
-package MatrixBuilder;
+/*
+SOURCE: https://www.ibm.com/developerworks/library/j-dyn0414/
+
+How does it work?
+1: compile intro.ibmbcel.StringBuilder.java with parameters, e.g. 100 200
+2: compile BCELTiming, it make modification *.class file  (added time measurement)
+3: copy the code from bcel/target/classes/intro.ibmbcel/intro.ibmbcel.StringBuilder.class into a new *.java file
+*/
+
+package intro.ibmbcel;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.transformations.util.MethodUtils;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-
-public class bcModifier {
-
-    public static final String MODIFICATION_SUFFIX = "_mod";
-    private static final String CLASS_SUFFIX = ".class";
-    private static final String JAVA_SUFFIX = ".java";
 
 
-    public void modifyBytecode(String classPath, String className, String methodName) throws IOException, TargetLostException {
-
-        JavaClass jclass = new ClassParser(classPath + className + CLASS_SUFFIX).parse();
-        ClassGen cg = new ClassGen(jclass);
-
-        Method[] methods = jclass.getMethods();
-
-        int methodPositionId;
-        for (methodPositionId = 0; methodPositionId < methods.length; methodPositionId++) {
-            if(methods[methodPositionId].getName().equals(methodName)){ break;}
-        }
-
-        if(methodPositionId<methods.length){
-            addWrapper(cg,methods[methodPositionId]);
-            saveModifiedClass(classPath + className + MODIFICATION_SUFFIX + CLASS_SUFFIX, cg);
-        }else{
-            System.err.println("Method: "+methodName+" not found in "+className);
-        }
-
-    }
-
+public class BCELTiming {
     private static void addWrapper(ClassGen cgen, Method method) {
 
         // set up the construction tools
@@ -65,9 +47,7 @@ public class bcModifier {
         // save time prior to invocation
         il.append(factory.createInvoke(
                 "java.lang.System","currentTimeMillis",
-                Type.LONG, Type.NO_ARGS,
-                Const.INVOKESTATIC));
-
+                Type.LONG, Type.NO_ARGS,Const.INVOKESTATIC));
         il.append(InstructionFactory.createStore(Type.LONG, slot));
 
         // call the wrapped method
@@ -96,32 +76,21 @@ public class bcModifier {
         il.append(InstructionConst.DUP);
         String text = "Call to method " + mg.getName() + " took ";
         il.append(new PUSH(cp, text));
-
         il.append(factory.createInvoke(
                 "java.io.PrintStream","print",
-                Type.VOID, new Type[] { Type.STRING },
-                Const.INVOKEVIRTUAL));
-
+                Type.VOID, new Type[] { Type.STRING },Const.INVOKEVIRTUAL));
         il.append(factory.createInvoke(
                 "java.lang.System","currentTimeMillis",
-                Type.LONG, Type.NO_ARGS,
-                Const.INVOKESTATIC));
-
+                Type.LONG, Type.NO_ARGS,Const.INVOKESTATIC));
         il.append(InstructionFactory.createLoad(Type.LONG, slot));
-
         il.append(InstructionConst.LSUB);
-
         il.append(factory.createInvoke(
                 "java.io.PrintStream","print",
-                Type.VOID, new Type[] { Type.LONG },
-                Const.INVOKEVIRTUAL));
-
+                Type.VOID, new Type[] { Type.LONG },Const.INVOKEVIRTUAL));
         il.append(new PUSH(cp, " ms."));
-
         il.append(factory.createInvoke(
                 "java.io.PrintStream","println",
-                Type.VOID, new Type[] { Type.STRING },
-                Const.INVOKEVIRTUAL));
+                Type.VOID, new Type[] { Type.STRING },Const.INVOKEVIRTUAL));
 
         // return result from wrapped method call
         if (result != Type.VOID) {il.append(InstructionFactory.createLoad(result, slot+2));}
@@ -135,41 +104,28 @@ public class bcModifier {
         il.dispose();
     }
 
+    public static void main(String[] argv) {
 
-    private void saveModifiedClass(String pathToModifiedFile, ClassGen cg) {
-       try{
-           FileOutputStream fos = new FileOutputStream(pathToModifiedFile);
-           cg.getJavaClass().dump(fos);
-           fos.close();
-        } catch (IOException e) {
-            throw new RuntimeException("Error during modified class save.", e);
-        }
-        System.out.println("SAVED!");
-    }
+        String path_to_file = "target/classes/intro.ibmbcel/";
+//        String class_file = "StringBuilder.class";
+        String class_file = "Hello.class";
+        String method_file = "buildString";
 
+        try {
+            JavaClass jclass = new ClassParser(path_to_file+class_file).parse();
+            ClassGen cg = new ClassGen(jclass);
+            Method[] methods = jclass.getMethods();
 
-//    ************************* ORYGINALNE METODY ************************
-
-    private void copyMethods(JavaClass oldClass, ClassGen newClass) {
-        Arrays.stream(oldClass.getMethods())
-                .forEach(newClass::addMethod);
-        Arrays.stream(newClass.getMethods())
-                .forEach(method -> MethodUtils.switchConstantRefsToNewClass(newClass, method));
-    }
-
-    private void copyFields(JavaClass oldClass, ClassGen newClass) {
-        Arrays.stream(oldClass.getFields())
-                .forEach(newClass::addField);
-    }
-
-
-    private ClassGen getModifiedClass(String className, JavaClass jclass) {
-        ClassGen oldClass = new ClassGen(jclass);
-        return new ClassGen(jclass.getPackageName() + className + MODIFICATION_SUFFIX,
-                Object.class.getName(),
-                className + MODIFICATION_SUFFIX + JAVA_SUFFIX,
-                Const.ACC_PUBLIC,
-                null,
-                oldClass.getConstantPool());
+            int index;
+            for (index = 0; index < methods.length; index++) {
+                if (methods[index].getName().equals(method_file)) {break;}
+            }
+            if (index < methods.length) {
+                addWrapper(cg, methods[index]);
+                FileOutputStream fos = new FileOutputStream(path_to_file+class_file);
+                cg.getJavaClass().dump(fos);
+                fos.close();
+            } else {System.err.println("Method " + method_file + " not found in " + class_file);}
+        } catch (IOException ex) {ex.printStackTrace(System.err);}
     }
 }

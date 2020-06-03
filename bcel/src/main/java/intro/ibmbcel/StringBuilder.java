@@ -2,12 +2,12 @@
 Source: https://www.ibm.com/developerworks/library/j-dyn0414/
 
 set program arguments: int int ...
-java ibmbcel.StringBuilder.java 1000 2000
+java intro.ibmbcel.StringBuilder.java 1000 2000
 
 recompile
 */
 
-package ibmbcel;
+package intro.ibmbcel;
 public class StringBuilder
 {
     String buildString(int length) {

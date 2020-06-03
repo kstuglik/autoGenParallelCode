@@ -1,4 +1,4 @@
-package itsallbinary;
+package intro.itsallbinary;
 
 public class AnalyzeMeBadCode {
 

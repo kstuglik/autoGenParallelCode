@@ -1,13 +1,15 @@
 
-package MatrixBuilder;
+package mbuilder.MyExperiment;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
+import pl.edu.agh.transformations.util.ArrayUtils;
 
 import java.io.IOException;
-import java.lang.Math;
 
-public class bcCreateMatrix {
+;
+
+public class tryToCreateArray2D {
 
     public static final String MODIFICATION_SUFFIX = "_mod";
     private static final String CLASS_SUFFIX = ".class";
@@ -35,39 +37,9 @@ public class bcCreateMatrix {
                 new String[]{"argv"}, "main", className, il, cp);
         p_stream = new ObjectType("java.io.PrintStream");
 
-        create_array_2D(Type.INT,3, new int[]{1, 3, 9});
+        ArrayUtils.create_array_2D(il,cp,Type.INT,3, new int[]{1, 3, 9});
 
         saveModifiedClass(classPath,className,cg);
-    }
-
-    void create_array_2D(BasicType t, int N, int[] nn){
-
-        int index = cp.addArrayClass(new ArrayType(t, 1));
-
-        il.append(new LDC(cp.addInteger(N)));
-        il.append(new ANEWARRAY(index));
-        il.append(new DUP());
-
-        for (int item = 0; item < N; item++) {
-
-            il.append(new LDC(cp.addInteger(item)));
-            il.append(new LDC(cp.addInteger(nn[item])));
-            il.append(new NEWARRAY(t));
-            il.append(new DUP());
-
-            for (int i = 1; i <= nn[item]; i++) {
-                il.append(new LDC(cp.addInteger(i-1)));
-                il.append(new LDC(cp.addInteger((int) Math.pow(2, i))));
-                il.append(new IASTORE());
-                if(i==nn[item]){
-                   il.append(new AASTORE());
-                }
-                il.append(new DUP());
-            }
-        }
-
-        il.append(new ASTORE(index));
-        il.append(new RETURN());
     }
 
     private void saveModifiedClass(String classPath, String className, ClassGen cg) {
@@ -89,5 +61,15 @@ public class bcCreateMatrix {
             throw new RuntimeException("Error during modified class save.", e);
         }
         System.out.println("DONE!");
+    }
+
+    public static void main(String[] args) throws IOException, TargetLostException {
+
+        String CLASS_PATH = "src/main/java/MatrixBuilder/generated/";
+        String CLASS_NAME = "JCudaMatrixMain2";
+        String METHOD_NAME = "Main";
+
+        tryToCreateArray2D newClass = new tryToCreateArray2D();
+        newClass.modifyBytecode(CLASS_PATH, CLASS_NAME, METHOD_NAME);
     }
 }

@@ -1,4 +1,4 @@
-package geekyarticles;/*
+package intro.geekyarticles;/*
 modified example from: http://www.geekyarticles.com/2011/08/manipulating-java-class-files-with-bcel_25.html
 */
 
@@ -65,7 +65,7 @@ public class SimpleIfBuilder {
 
         cg.addMethod(mg.getMethod()); //Add the method to the class
 
-        try { cg.getJavaClass().dump("src/main/java/geekyarticles/MatrixBuilder.MatrixBuilder.generated/SimpleIf.class");}
+        try { cg.getJavaClass().dump("src/main/java/intro.geekyarticles/MatrixBuilder.MatrixBuilder.generated/SimpleIf.class");}
         catch (IOException e) {System.err.println(e);}
 
         System.out.println("********Constant Pool**********");System.out.println(cp.getFinalConstantPool());

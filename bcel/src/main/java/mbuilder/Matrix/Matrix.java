@@ -1,11 +1,11 @@
-package MatrixBuilder;
+package mbuilder.Matrix;
 
 import java.util.Arrays;
 
 public class Matrix {
 
     public static void main(String[] args) {
-        //columnar representation of the matrix
+        //columnar representation of the MBuilder.matrix
 
         int[] A = {3, 0, 2, 2, 4, 0, 0, 1, 1};
         int colsA = 3;

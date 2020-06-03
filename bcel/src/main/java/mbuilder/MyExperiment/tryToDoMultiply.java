@@ -1,4 +1,4 @@
-package MatrixBuilder;
+package mbuilder.MyExperiment;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
@@ -6,7 +6,7 @@ import org.apache.bcel.generic.*;
 import java.io.IOException;
 
 
-public class temp_bcMatrixBuilder {
+public class tryToDoMultiply {
 
     static String packageName;
     static String className;
@@ -21,8 +21,8 @@ public class temp_bcMatrixBuilder {
 
     static ObjectType p_stream;
 
-    public temp_bcMatrixBuilder() {
-        packageName = "MatrixBuilder";
+    public tryToDoMultiply() {
+        packageName = "mbuilder";
         className = "MatrixMul";
         fullClassName = packageName + "." + className;
         cg = new ClassGen(fullClassName, "java.lang.Object", "<generated>",
@@ -43,7 +43,7 @@ public class temp_bcMatrixBuilder {
     }
 
     public static int create_field_ldc_integer(String name, Integer value) {
-        lg = temp_bcMatrixBuilder.mg.addLocalVariable(name, Type.INT, null, null);
+        lg = tryToDoMultiply.mg.addLocalVariable(name, Type.INT, null, null);
         int id = lg.getIndex();
         il.append(new LDC(cp.addInteger(value)));
         lg.setStart(il.append(new ISTORE(id)));
@@ -193,7 +193,7 @@ public class temp_bcMatrixBuilder {
         //            }
         //        }
         /////////////////////////////////////////////////////////////
-        temp_bcMatrixBuilder fL = new temp_bcMatrixBuilder();
+        tryToDoMultiply fL = new tryToDoMultiply();
 
         int[] idOperands;
         String[] operators;

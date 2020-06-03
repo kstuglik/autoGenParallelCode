@@ -1,4 +1,4 @@
-package ibmbcel;
+package intro.ibmbcel;
 
 public class Hello {
     public static String buildString(int length) {

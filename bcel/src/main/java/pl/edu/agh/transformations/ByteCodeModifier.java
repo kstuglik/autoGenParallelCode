@@ -5,11 +5,10 @@ import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ClassGen;
+import org.apache.bcel.generic.ConstantPoolGen;
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.TargetLostException;
-import pl.edu.agh.transformations.util.AnonymousClassUtils;
-import pl.edu.agh.transformations.util.MethodUtils;
-import pl.edu.agh.transformations.util.TransformUtils;
+import pl.edu.agh.transformations.util.*;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,29 +20,56 @@ public class ByteCodeModifier {
     private static final String CLASS_SUFFIX = ".class";
     private static final String JAVA_SUFFIX = ".java";
 
-    public void modifyBytecode(String classPath, String className, int methodPosition, short dataSize) throws IOException, TargetLostException {
-        JavaClass analyzedClass = new ClassParser(classPath + className + CLASS_SUFFIX).parse();
-        ClassGen modifiedClass = getModifiedClass(className, analyzedClass);
-        copyFields(analyzedClass, modifiedClass);
-        copyMethods(analyzedClass, modifiedClass);
+//    public void modifyBytecode(String classPath, String className, int methodPosition, short dataSize) throws IOException, TargetLostException {
+//        JavaClass analyzedClass = new ClassParser(classPath + className + CLASS_SUFFIX).parse();
+//        ClassGen modifiedClass = getModifiedClass(className, analyzedClass);
+//        copyFields(analyzedClass, modifiedClass);
+//        copyMethods(analyzedClass, modifiedClass);
+//
+//        Method transformedMethod = modifiedClass.getMethodAt(methodPosition);
+//        MethodGen methodGen = new MethodGen(transformedMethod, modifiedClass.getClassName(), modifiedClass.getConstantPool());
+//
+//        TransformUtils.addThreadPool(modifiedClass);
+//        TransformUtils.addExecutorServiceInit(modifiedClass, methodGen);
+//        TransformUtils.addTaskPool(modifiedClass, methodGen);
+//        TransformUtils.addFutureResultsList(modifiedClass, methodGen);
+//        TransformUtils.copyLoopToMethod(modifiedClass, methodGen);
+//        TransformUtils.changeLoopLimitToNumberOfThreads(modifiedClass, methodGen);
+//        TransformUtils.emptyMethodLoop(modifiedClass, methodGen);
+//        TransformUtils.setNewLoopBody(modifiedClass, methodGen, dataSize);
+//        AnonymousClassUtils.addCallableCall(modifiedClass, classPath);
+//
+//        analyzedClass = new ClassParser(classPath + className + MODIFICATION_SUFFIX + CLASS_SUFFIX).parse();
+//        modifiedClass = new ClassGen(analyzedClass);
+//
+//        saveModifiedClass(classPath, className, modifiedClass);
+//    }
 
-        Method transformedMethod = modifiedClass.getMethodAt(methodPosition);
-        MethodGen methodGen = new MethodGen(transformedMethod, modifiedClass.getClassName(), modifiedClass.getConstantPool());
+        public void modifyBytecode(String classPath, String className, int methodPosition, short dataSize) throws IOException, TargetLostException, TargetLostException {
+            JavaClass analyzedClass = new ClassParser(classPath + className).parse();
+            ClassGen modifiedClass = getModifiedClass(className, analyzedClass);
+            copyFields(analyzedClass, modifiedClass);
+            copyMethods(analyzedClass, modifiedClass);
+            ConstantPoolGen cp = modifiedClass.getConstantPool();
 
-        TransformUtils.addThreadPool(modifiedClass);
-        TransformUtils.addExecutorServiceInit(modifiedClass, methodGen);
-        TransformUtils.addTaskPool(modifiedClass, methodGen);
-        TransformUtils.addFutureResultsList(modifiedClass, methodGen);
-        TransformUtils.copyLoopToMethod(modifiedClass, methodGen);
-        TransformUtils.changeLoopLimitToNumberOfThreads(modifiedClass, methodGen);
-        TransformUtils.emptyMethodLoop(modifiedClass, methodGen);
-        TransformUtils.setNewLoopBody(modifiedClass, methodGen, dataSize);
-        AnonymousClassUtils.addCallableCall(modifiedClass, classPath);
+            Method transformedMethod = modifiedClass.getMethodAt(methodPosition);
+            MethodGen methodGen = new MethodGen(transformedMethod, modifiedClass.getClassName(), modifiedClass.getConstantPool());
+//
+//        TransformUtils.addThreadPool(modifiedClass);
+//        TransformUtils.addExecutorServiceInit(modifiedClass, methodGen);
+//        TransformUtils.addTaskPool(modifiedClass, methodGen);
+//        TransformUtils.addFutureResultsList(modifiedClass, methodGen);
+//        TransformUtils.copyLoopToMethod(modifiedClass, methodGen);
+//        TransformUtils.changeLoopLimitToNumberOfThreads(modifiedClass, methodGen);
+//        TransformUtils.emptyMethodLoop(modifiedClass, methodGen);
+//        TransformUtils.setNewLoopBody(modifiedClass, methodGen, dataSize);
+//        AnonymousClassUtils.addCallableCall(modifiedClass, classPath);
+    TransformUtils.addClassFields(modifiedClass,cp);
 
-        analyzedClass = new ClassParser(classPath + className + MODIFICATION_SUFFIX + CLASS_SUFFIX).parse();
-        modifiedClass = new ClassGen(analyzedClass);
+//        analyzedClass = new ClassParser(classPath + className + MODIFICATION_SUFFIX + CLASS_SUFFIX).parse();
+//        modifiedClass = new ClassGen(analyzedClass);
 
-        saveModifiedClass(classPath, className, modifiedClass);
+        saveModifiedClass(classPath, "T"+className, modifiedClass);
     }
 
     private void saveModifiedClass(String classPath, String className, ClassGen classGen) {

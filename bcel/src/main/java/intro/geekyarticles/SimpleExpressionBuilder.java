@@ -1,7 +1,7 @@
 /*
 modified example from: http://www.geekyarticles.com/2011/08/manipulating-java-class-files-with-bcel_18.html
 */
-package geekyarticles;
+package intro.geekyarticles;
 
 import java.io.IOException;
 
@@ -70,7 +70,7 @@ public class SimpleExpressionBuilder {
         cg.addMethod(mg.getMethod()); //Add the method to the class
 
         try {
-            cg.getJavaClass().dump("src/main/java/geekyarticles/generated/SimpleExpression.class");
+            cg.getJavaClass().dump("src/main/java/intro.geekyarticles/generated/SimpleExpression.class");
         } catch (IOException e) {
             System.err.println(e);
         }
