@@ -10,7 +10,7 @@ import java.io.IOException;
 public class newTransformation {
 
     public static void main(final String[] argv) {
-        final ClassGen cg = new ClassGen("HelloWorld", "java.lang.Object",
+        final ClassGen cg = new ClassGen("newTransformation", "java.lang.Object",
                 "<MatrixBuilder.MatrixBuilder.generated>",
                 Const.ACC_PUBLIC |Const.ACC_SUPER,
                 null);
