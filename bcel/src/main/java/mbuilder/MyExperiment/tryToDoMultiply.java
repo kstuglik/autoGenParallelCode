@@ -285,6 +285,6 @@ public class tryToDoMultiply {
 
         il.append(new RETURN());
 
-        confirm_and_save("src/main/java/MatrixBuilder/generated/MatrixMul.class");
+        confirm_and_save("src/main/java/mbuilder/classFiles/MatrixMul.class");
     }
 }

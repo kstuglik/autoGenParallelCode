@@ -3,10 +3,10 @@ package mbuilder.MyExperiment;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
+import pl.edu.agh.transformations.util.New;
 
 import java.io.IOException;
 
-;
 
 public class tryToCreateArray2D {
 
@@ -36,7 +36,7 @@ public class tryToCreateArray2D {
                 new String[]{"argv"}, "main", className, il, cp);
         p_stream = new ObjectType("java.io.PrintStream");
 
-//        ArrayUtils.create_array_2D(il,cp,Type.INT,3, new int[]{1, 3, 9});
+        New.create_array_2D("arrayA",mg,il,cp,Type.INT,5, new int[]{1, 2, 3, 4, 5});
 
         saveModifiedClass(classPath,className,cg);
     }
@@ -64,8 +64,8 @@ public class tryToCreateArray2D {
 
     public static void main(String[] args) throws IOException, TargetLostException {
 
-        String CLASS_PATH = "src/main/java/MatrixBuilder/generated/";
-        String CLASS_NAME = "JCudaMatrixMain2";
+        String CLASS_PATH = "src/main/java/mbuilder/classFiles/";
+        String CLASS_NAME = "Array2D";
         String METHOD_NAME = "Main";
 
         tryToCreateArray2D newClass = new tryToCreateArray2D();
