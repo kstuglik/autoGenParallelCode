@@ -3,6 +3,7 @@ package pl.edu.agh.transformations.util;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ConstantFieldref;
 import org.apache.bcel.generic.*;
+import utils.JCudaMatrix;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,8 +17,11 @@ public class TransformUtils {
     public static void addThreadPool(ClassGen cg) {
         Optional<MethodGen> classInitMethod = MethodUtils.findMethodByName(cg, Const.STATIC_INITIALIZER_NAME);
         ConstantPoolGen cp = cg.getConstantPool();
-        addClassFields(cg, cp);
+//        addClassFields(cg, cp);
+        addClassFields(cg,cp, Type.getType(JCudaMatrix.class),"jcm");
+
         InstructionList il = new InstructionList();
+
         classInitMethod.ifPresent(init -> {
             il.append(init.getInstructionList());
             try {
@@ -27,34 +31,49 @@ public class TransformUtils {
             }
             retargetStaticPuts(cg, il);
         });
+
         InstructionFactory factory = new InstructionFactory(cg, cp);
         String className = cg.getClassName();
+
         appendFieldsInstructions(il, factory, className);
-        MethodGen mg = new MethodGen(Const.ACC_STATIC,
-                Type.VOID,
-                Type.NO_ARGS,
-                new String[0],
+        MethodGen mg = new MethodGen(
+                Const.ACC_STATIC,
+                 Type.getType(JCudaMatrix.class),
+                new Type[]{new ArrayType(Type.INT,1),new ArrayType(Type.INT,1)},
+                new String[]{"A","B"},
                 Const.STATIC_INITIALIZER_NAME,
                 className,
                 il,
                 cp);
-        mg.stripAttributes(true);
+//        mg.stripAttributes(true);
         mg.setMaxLocals();
         mg.setMaxStack();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
 
-    public static void addClassFields(ClassGen cg, ConstantPoolGen cp) {
-        FieldGen threadCount = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC | Const.ACC_FINAL,
-                Type.INT,
-                Constants.NUMBER_OF_THREADS_CONSTANT_NAME,
-                cp);
-        FieldGen service = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
-                Type.getType(ExecutorService.class),
-                Constants.EXECUTOR_SERVICE_CONSTANT_NAME,
-                cp);
-        cg.addField(threadCount.getField());
-        cg.addField(service.getField());
+//    public static void addClassFields(ClassGen cg, ConstantPoolGen cp) {
+//        FieldGen threadCount = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC | Const.ACC_FINAL,
+//                Type.INT,
+//                Constants.NUMBER_OF_THREADS_CONSTANT_NAME,
+//                cp);
+//        FieldGen service = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
+//                Type.getType(ExecutorService.class),
+//                Constants.EXECUTOR_SERVICE_CONSTANT_NAME,
+//                cp);
+//        cg.addField(threadCount.getField());
+//        cg.addField(service.getField());
+//    }
+
+//    ------------------------------------------- addClassFields -------------------------------------------
+//  MY VERSION
+//    Akcesor dostepu jest ustawionu na sztywno
+//    TYP jest dostarczany na 2 sposoby:
+//      standatdowo:      Type.INT
+//      nie standardowo:  Type.getType(ClassName.class)
+
+    public static void addClassFields(ClassGen cg, ConstantPoolGen cp, Type type, String fieldName) {
+        FieldGen newField = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC,type,fieldName,cp);
+        cg.addField(newField.getField());
     }
 
     private static void retargetStaticPuts(ClassGen cg, InstructionList il) {
@@ -70,7 +89,7 @@ public class TransformUtils {
         constant.setClassIndex(classNameIndex);
     }
 
-    private static void appendFieldsInstructions(InstructionList il,
+    public static void appendFieldsInstructions(InstructionList il,
                                                  InstructionFactory factory,
                                                  String className) {
         il.append(factory.createInvoke("java.lang.Runtime",

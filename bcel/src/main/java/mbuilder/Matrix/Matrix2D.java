@@ -10,7 +10,7 @@ public class Matrix2D {
         int rows_C, cols_C;
 
         if (A[0].length != B.length) {
-            throw new RuntimeException("Cannot perform multiplication because dimensions are not equal.");
+            throw new RuntimeException("Dims aren't equal.");
         }
 
         rows_C = A.length;

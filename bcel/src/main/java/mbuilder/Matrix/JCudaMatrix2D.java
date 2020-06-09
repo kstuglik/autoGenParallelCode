@@ -10,14 +10,19 @@ package mbuilder.Matrix;
 import utils.JCudaMatrix;
 import java.util.Arrays;
 
-public class jcudaMatrixMain {
+public class JCudaMatrix2D {
+
     public static void main(String[] args) {
 
         int[][] A = {{3,2,0},{0,4,1},{2,0,1}};
         int[][] B = {{4},{3},{1}};
 
-        JCudaMatrix jcudaMatrix = new JCudaMatrix(A,B);
-        float[] C = jcudaMatrix.multiply();
+        if (A[0].length != B.length) {
+            throw new RuntimeException("Dims aren't equal.");
+        }
+
+        JCudaMatrix jcm = new JCudaMatrix(A,B);
+        float[] C = jcm.multiply();
 
         System.out.println(Arrays.toString(C));
     }

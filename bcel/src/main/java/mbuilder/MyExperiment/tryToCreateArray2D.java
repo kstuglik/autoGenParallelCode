@@ -3,7 +3,6 @@ package mbuilder.MyExperiment;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.transformations.util.ArrayUtils;
 
 import java.io.IOException;
 
@@ -37,7 +36,7 @@ public class tryToCreateArray2D {
                 new String[]{"argv"}, "main", className, il, cp);
         p_stream = new ObjectType("java.io.PrintStream");
 
-        ArrayUtils.create_array_2D(il,cp,Type.INT,3, new int[]{1, 3, 9});
+//        ArrayUtils.create_array_2D(il,cp,Type.INT,3, new int[]{1, 3, 9});
 
         saveModifiedClass(classPath,className,cg);
     }

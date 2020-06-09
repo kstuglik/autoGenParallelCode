@@ -6,6 +6,7 @@ import org.apache.bcel.generic.*;
 public class ExecutorUtils {
 
     public static void addExecutorInvocation(ClassGen cg, MethodGen mg) {
+
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionFactory factory = new InstructionFactory(cg, cp);
         InstructionList il = mg.getInstructionList();
@@ -38,5 +39,6 @@ public class ExecutorUtils {
 
         mg.setMaxLocals();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
+
     }
 }

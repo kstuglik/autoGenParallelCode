@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException, TargetLostException {
         String CLASS_PATH = "src/main/java/mbuilder/classFiles/";
-        String CLASS_NAME = "Matrix2D.class";
+        String CLASS_NAME = "Matrix2D";
         String METHOD_NAME = "Main";
 
         ByteCodeModifier bcn = new ByteCodeModifier();
