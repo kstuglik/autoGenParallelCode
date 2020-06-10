@@ -9,14 +9,14 @@ How does it work?
 
 package intro.ibmbcel;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 
 public class BCELTiming {
@@ -106,13 +106,12 @@ public class BCELTiming {
 
     public static void main(String[] argv) {
 
-        String path_to_file = "target/classes/intro.ibmbcel/";
-//        String class_file = "StringBuilder.class";
-        String class_file = "Hello.class";
+        String path_to_file = "src/main/java/intro/ibmbcel/generated/";
+        String class_file = "StringBuilder";
         String method_file = "buildString";
 
         try {
-            JavaClass jclass = new ClassParser(path_to_file+class_file).parse();
+            JavaClass jclass = new ClassParser(path_to_file+class_file+".class").parse();
             ClassGen cg = new ClassGen(jclass);
             Method[] methods = jclass.getMethods();
 
@@ -122,7 +121,7 @@ public class BCELTiming {
             }
             if (index < methods.length) {
                 addWrapper(cg, methods[index]);
-                FileOutputStream fos = new FileOutputStream(path_to_file+class_file);
+                FileOutputStream fos = new FileOutputStream(path_to_file+class_file+"_mod.class");
                 cg.getJavaClass().dump(fos);
                 fos.close();
             } else {System.err.println("Method " + method_file + " not found in " + class_file);}

@@ -2,44 +2,77 @@ package pl.edu.agh.transformations;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ClassParser;
+import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
+import pl.edu.agh.transformations.util.New;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class MyBcModifier {
 
-    public static final String MODIFICATION_SUFFIX = "_mod";
+    private static final String MODIFICATION_SUFFIX = "_mod";
     private static final String CLASS_SUFFIX = ".class";
-    private static final String JAVA_SUFFIX = ".java";
+
+    private static String CLASS_PATH;
+    private static String CLASS_NAME;
+    private static String CLASS_METHOD;
+
+    private static String PATH_TO_INPUT_FILE;
+    private static String PATH_TO_OUTPUT_FILE;
+
+//    components of bytecode modifier
+
+    private static final ObjectType i_stream = new ObjectType("java.io.InputStream");
+    private static final ObjectType p_stream = new ObjectType("java.io.PrintStream");
+
+    private static JavaClass jclass;
+    private static Method[] methods;
+    private static Field[] fields;
+
+    private static ClassGen cg;
+    private static MethodGen mg;
+    private static ConstantPoolGen cp;
+    private static InstructionList il;
+    private static InstructionFactory factory;
+    private static LocalVariableGen lg;
 
 
-    public void modifyBytecode(String classPath, String className, String methodName) throws IOException, TargetLostException {
+    public void SetParameters(String classPath, String className, String classMethod){
+        CLASS_PATH = classPath;
+        CLASS_NAME = className;
+        CLASS_METHOD = classMethod;
 
-        JavaClass jclass = new ClassParser(classPath + className + CLASS_SUFFIX).parse();
-        ClassGen cg = new ClassGen(jclass);
+        PATH_TO_INPUT_FILE = classPath + className + CLASS_SUFFIX;
+        PATH_TO_OUTPUT_FILE = classPath + className + MODIFICATION_SUFFIX + CLASS_SUFFIX;
+    }
 
-        Method[] methods = jclass.getMethods();
-//        Field[] field = jclass.getFields();
+    public void WrapperExample() throws IOException {
+
+        jclass = new ClassParser(PATH_TO_INPUT_FILE).parse();
+        cg = new ClassGen(jclass);
+
+        methods = jclass.getMethods();
+//      fields = jclass.getFields();
 
         int methodPositionId;
         for (methodPositionId = 0; methodPositionId < methods.length; methodPositionId++) {
-            if(methods[methodPositionId].getName().equals(methodName)){ break;}
+            if(methods[methodPositionId].getName().equals(CLASS_METHOD)){ break;}
         }
 
         if(methodPositionId<methods.length){
-            addTimeWrapper(cg,methods[methodPositionId]);
-            saveModifiedClass(classPath + className + MODIFICATION_SUFFIX + CLASS_SUFFIX, cg);
+            AddTimeWrapper(cg,methods[methodPositionId]);
+            SaveModifiedClass(PATH_TO_OUTPUT_FILE, cg);
         }else{
-            System.err.println("Method: "+methodName+" not found in "+className);
+            System.err.println("Method: "+CLASS_METHOD+" not found in "+CLASS_NAME);
         }
 
     }
 
-
-    private static void addTimeWrapper(ClassGen cg, Method method) {
+//  One of the examples from the intro/ibmbmbcel directory
+    private static void AddTimeWrapper(ClassGen cg, Method method) {
 
         // set up the construction tools
         InstructionFactory factory = new InstructionFactory(cg);
@@ -137,7 +170,10 @@ public class MyBcModifier {
     }
 
 
-    private void saveModifiedClass(String pathToModifiedFile, ClassGen cg) {
+//  Attention to the transmitted parameters, after changes
+//  There may be differences variable values: before and after changes
+    private void SaveModifiedClass(String pathToModifiedFile, ClassGen cg) {
+
        try{
            FileOutputStream fos = new FileOutputStream(pathToModifiedFile);
            cg.getJavaClass().dump(fos);
@@ -146,6 +182,61 @@ public class MyBcModifier {
             throw new RuntimeException("Error during modified class save.", e);
         }
         System.out.println("SAVED!");
+    }
+
+    public void CreateJCudaMatrix2D(){
+        cg = new ClassGen(CLASS_NAME, "java.lang.Object","<generated>",
+            Const.ACC_PUBLIC |Const.ACC_SUPER,null);
+        factory = new InstructionFactory(cg);
+        cp = cg.getConstantPool();
+        il = new InstructionList();
+        mg = new MethodGen(Const.ACC_STATIC | Const.ACC_PUBLIC,
+            Type.VOID,  new Type[]{ new ArrayType(Type.STRING, 1)},
+            new String[]{"argv"}, CLASS_METHOD, CLASS_NAME,
+            il, cp);
+
+
+        //    created array with the dimensions indicated, filled with values
+        //     ex: new int[][]{1,2} -> {{1}, {1,2}}
+
+        int id_A = New.CreateArrayField("A",mg,il,cp,Type.INT,2, new int[]{2,2});
+        int id_B = New.CreateArrayField("B",mg,il,cp,Type.INT,2, new int[]{2,2});
+
+        int jcm_ID = New.CreateObjectClass(
+                "jcm", lg, il,factory,mg,
+                "utils.JCudaMatrix", new int[]{id_A,id_B});
+
+        il.append(new ALOAD(jcm_ID));
+
+        lg = mg.addLocalVariable("C", new ArrayType(Type.FLOAT, 1), null, null);
+        int id = lg.getIndex();
+
+        il.append(factory.createInvoke(
+                "utils.JCudaMatrix", "multiply",
+                new ArrayType(Type.FLOAT,1), new Type[]{},Const.INVOKEVIRTUAL));
+
+        il.append(new ASTORE(id));
+
+        New.PrintArray(il,mg,factory,id,false);
+
+//        the task to be optimized, a part of code to put the content into *.class file
+//        looks almost always the same
+
+        il.append(new RETURN());
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.addMethod(mg.getMethod());
+
+        il.dispose();
+
+        cg.addEmptyConstructor(Const.ACC_PUBLIC);
+
+        try {
+            cg.getJavaClass().dump(CLASS_PATH + CLASS_NAME + CLASS_SUFFIX);
+        } catch (final IOException e) {
+            System.err.println(e);
+        }
+
     }
 
 }

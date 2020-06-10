@@ -36,7 +36,7 @@ public class tryToCreateArray2D {
                 new String[]{"argv"}, "main", className, il, cp);
         p_stream = new ObjectType("java.io.PrintStream");
 
-        New.create_array_2D("arrayA",mg,il,cp,Type.INT,5, new int[]{1, 2, 3, 4, 5});
+        New.CreateArrayField("arrayA",mg,il,cp,Type.INT,5, new int[]{1, 2, 3, 4, 5});
 
         saveModifiedClass(classPath,className,cg);
     }

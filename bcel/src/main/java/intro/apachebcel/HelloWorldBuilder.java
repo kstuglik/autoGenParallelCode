@@ -4,28 +4,28 @@ modified example from: https://github.com/apache/commons-bcel/blob/master/src/ex
 
 package intro.apachebcel;
 
-import java.io.IOException;
-
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
 
+import java.io.IOException;
+
 public class HelloWorldBuilder {
+
     public static void main(final String[] argv) {
+
         final ClassGen cg = new ClassGen("HelloWorld", "java.lang.Object",
-                "<MatrixBuilder.MatrixBuilder.generated>", Const.ACC_PUBLIC |
-                Const.ACC_SUPER,
+                "<MatrixBuilder.MatrixBuilder.generated>",
+                Const.ACC_PUBLIC | Const.ACC_SUPER,
                 null);
+
         final ConstantPoolGen cp = cg.getConstantPool(); // cg creates constant pool
         final InstructionList il = new InstructionList();
+
         final MethodGen mg = new MethodGen(Const.ACC_STATIC |
-                Const.ACC_PUBLIC,// access flags
-                Type.VOID,              // return type
-                new Type[]{            // argument types
-                        new ArrayType(Type.STRING, 1)
-                },
-                new String[]{"argv"}, // arg names
-                "main", "HelloWorld",    // method, class
+                Const.ACC_PUBLIC,Type.VOID, new Type[]{new ArrayType(Type.STRING, 1)},
+                new String[]{"argv"},"main", "HelloWorld",
                 il, cp);
+
         final InstructionFactory factory = new InstructionFactory(cg);
 
         final ObjectType i_stream = new ObjectType("java.io.InputStream");
@@ -59,11 +59,12 @@ public class HelloWorldBuilder {
 
         // try { ...
         final InstructionHandle try_start =
-                il.append(factory.createFieldAccess("java.lang.System", "out", p_stream, Const.GETSTATIC));
+            il.append(factory.createFieldAccess("java.lang.System", "out", p_stream, Const.GETSTATIC));
 
         il.append(new PUSH(cp, "Please enter your name> "));
-        il.append(factory.createInvoke("java.io.PrintStream", "print", Type.VOID,
-                new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
+        il.append(factory.createInvoke("java.io.PrintStream", "print",
+                Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
+
         il.append(new ALOAD(in));
         il.append(factory.createInvoke("java.io.BufferedReader", "readLine",
                 Type.STRING, Type.NO_ARGS, Const.INVOKEVIRTUAL));
@@ -111,7 +112,7 @@ public class HelloWorldBuilder {
                 Type.VOID, new Type[]{Type.STRING},
                 Const.INVOKEVIRTUAL));
 
-        il.append(InstructionConst.RETURN);
+        il.append(new RETURN());
 
         mg.setMaxStack(5); // Needed stack size
         cg.addMethod(mg.getMethod());

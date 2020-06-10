@@ -6,7 +6,7 @@ import org.apache.bcel.generic.*;
 import java.io.IOException;
 
 
-public class tryToDoMultiply {
+public class tryToDoMultiply1D {
 
     static String packageName;
     static String className;
@@ -21,7 +21,7 @@ public class tryToDoMultiply {
 
     static ObjectType p_stream;
 
-    public tryToDoMultiply() {
+    public tryToDoMultiply1D() {
         packageName = "mbuilder";
         className = "MatrixMul";
         fullClassName = packageName + "." + className;
@@ -43,7 +43,7 @@ public class tryToDoMultiply {
     }
 
     public static int create_field_ldc_integer(String name, Integer value) {
-        lg = tryToDoMultiply.mg.addLocalVariable(name, Type.INT, null, null);
+        lg = tryToDoMultiply1D.mg.addLocalVariable(name, Type.INT, null, null);
         int id = lg.getIndex();
         il.append(new LDC(cp.addInteger(value)));
         lg.setStart(il.append(new ISTORE(id)));
@@ -193,7 +193,7 @@ public class tryToDoMultiply {
         //            }
         //        }
         /////////////////////////////////////////////////////////////
-        tryToDoMultiply fL = new tryToDoMultiply();
+        tryToDoMultiply1D fL = new tryToDoMultiply1D();
 
         int[] idOperands;
         String[] operators;
