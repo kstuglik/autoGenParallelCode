@@ -65,7 +65,7 @@ public class tryToCreateArray2D {
     public static void main(String[] args) throws IOException, TargetLostException {
 
         String CLASS_PATH = "src/main/java/mbuilder/classFiles/";
-        String CLASS_NAME = "Array2D";
+        String CLASS_NAME = "Array2D_new";
         String METHOD_NAME = "Main";
 
         tryToCreateArray2D newClass = new tryToCreateArray2D();

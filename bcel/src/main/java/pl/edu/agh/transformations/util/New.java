@@ -6,8 +6,9 @@ import org.apache.bcel.generic.*;
 public class New {
 
 
-    public static int CreateArrayField(String name, MethodGen mg, InstructionList il, ConstantPoolGen cp,
-                                       BasicType t, int N, int[] nn){
+    public static int CreateArrayField(String name,
+                                       MethodGen mg, InstructionList il, ConstantPoolGen cp,
+                                       Type t, int N, int[] nn){
 
         int index = cp.addArrayClass(new ArrayType(t, 1));
 
@@ -18,12 +19,11 @@ public class New {
         il.append(new ANEWARRAY(index));
         il.append(new DUP());
 
-
         for (int item = 0; item < nn.length; item++) {
 
             il.append(new LDC(cp.addInteger(item)));
             il.append(new LDC(cp.addInteger(nn[item])));
-            il.append(new NEWARRAY(t));
+            il.append(new NEWARRAY((BasicType) t));
             il.append(new DUP());
 
             for (int i = 1; i <= nn[item]; i++) {
@@ -42,24 +42,6 @@ public class New {
 //        il.append(new ALOAD(index));
 //        il.append(new RETURN());
         return  id;
-    }
-
-
-    public static int create_simple_array(String name,MethodGen mg, InstructionList il, ConstantPoolGen cp,
-                                       BasicType t, int N){
-
-        LocalVariableGen lg = mg.addLocalVariable(name, new ArrayType(Type.INT, 2), null, null);
-        int id = lg.getIndex();
-        return  id;
-    }
-
-
-    public static int createFieldName(String name,InstructionList il,MethodGen mg){
-        LocalVariableGen lg = mg.addLocalVariable(name, Type.STRING, null, null);
-        int id = lg.getIndex();
-        il.append(InstructionConst.ACONST_NULL);//il.append(new LDC(cp.addInteger(value)));
-        lg.setStart(il.append(new ASTORE(id)));
-        return id;
     }
 
 
@@ -88,17 +70,6 @@ public class New {
         return object_id;
     }
 
-    public static int create_field_array_type(String name, LocalVariableGen lg, InstructionList il, ConstantPoolGen cp, MethodGen mg,
-                                              Type type, Integer dim, Integer n) {
-        lg = mg.addLocalVariable(name, new ArrayType(type, dim), null, null);
-        int id = lg.getIndex();
-        if (n > 0) {
-            il.append(new PUSH(cp, n));
-            il.append(new NEWARRAY((BasicType) type));
-            il.append(new ASTORE(id));
-        }
-        return id;
-    }
 
     public static void PrintArray(
                 InstructionList il, MethodGen mg, InstructionFactory factory,
@@ -121,6 +92,34 @@ public class New {
                 "java.io.PrintStream", "print",
                 Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
 
+    }
+
+    public static int create_simple_array(String name,MethodGen mg,Type t, int N){
+
+        LocalVariableGen lg = mg.addLocalVariable(name, new ArrayType(t, N), null, null);
+        int id = lg.getIndex();
+        return  id;
+    }
+
+
+    public static int createFieldName(String name,InstructionList il,MethodGen mg){
+        LocalVariableGen lg = mg.addLocalVariable(name, Type.STRING, null, null);
+        int id = lg.getIndex();
+        il.append(InstructionConst.ACONST_NULL);//il.append(new LDC(cp.addInteger(value)));
+        lg.setStart(il.append(new ASTORE(id)));
+        return id;
+    }
+
+        public static int create_field_array_type(String name, LocalVariableGen lg, InstructionList il, ConstantPoolGen cp, MethodGen mg,
+                                              Type type, Integer dim, Integer n) {
+        lg = mg.addLocalVariable(name, new ArrayType(type, dim), null, null);
+        int id = lg.getIndex();
+        if (n > 0) {
+            il.append(new PUSH(cp, n));
+            il.append(new NEWARRAY((BasicType) type));
+            il.append(new ASTORE(id));
+        }
+        return id;
     }
 }
 

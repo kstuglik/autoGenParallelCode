@@ -28,16 +28,16 @@ public class MyBcModifier {
     private static final ObjectType i_stream = new ObjectType("java.io.InputStream");
     private static final ObjectType p_stream = new ObjectType("java.io.PrintStream");
 
-    private static JavaClass jclass;
-    private static Method[] methods;
-    private static Field[] fields;
+    protected static JavaClass jclass;
+    protected static Method[] methods;
+    protected static Field[] fields;
 
-    private static ClassGen cg;
-    private static MethodGen mg;
-    private static ConstantPoolGen cp;
-    private static InstructionList il;
-    private static InstructionFactory factory;
-    private static LocalVariableGen lg;
+    protected static ClassGen cg;
+    protected static MethodGen mg;
+    protected static ConstantPoolGen cp;
+    protected static InstructionList il;
+    protected static InstructionFactory factory;
+    protected static LocalVariableGen lg;
 
 
     public void SetParameters(String classPath, String className, String classMethod){
@@ -63,8 +63,8 @@ public class MyBcModifier {
         }
 
         if(methodPositionId<methods.length){
-            AddTimeWrapper(cg,methods[methodPositionId]);
-            SaveModifiedClass(PATH_TO_OUTPUT_FILE, cg);
+            AddTimeWrapper(methods[methodPositionId]);
+            SaveModifiedClass();
         }else{
             System.err.println("Method: "+CLASS_METHOD+" not found in "+CLASS_NAME);
         }
@@ -72,7 +72,7 @@ public class MyBcModifier {
     }
 
 //  One of the examples from the intro/ibmbmbcel directory
-    private static void AddTimeWrapper(ClassGen cg, Method method) {
+    private static void AddTimeWrapper(Method method) {
 
         // set up the construction tools
         InstructionFactory factory = new InstructionFactory(cg);
@@ -94,7 +94,9 @@ public class MyBcModifier {
         // compute the size of the calling parameters
         Type[] types = mg.getArgumentTypes();
         int slot = mg.isStatic() ? 0 : 1;
-        for (int i = 0; i < types.length; i++) {slot += types[i].getSize();}
+        for (Type value : types) {
+            slot += value.getSize();
+        }
 
         // save time prior to invocation
         il.append(factory.createInvoke(
@@ -112,8 +114,7 @@ public class MyBcModifier {
             offset = 1;
             invoke = Const.INVOKEVIRTUAL;
         }
-        for (int i = 0; i < types.length; i++) {
-            Type type = types[i];
+        for (Type type : types) {
             il.append(InstructionFactory.createLoad(type, offset));
             offset += type.getSize();
         }
@@ -172,10 +173,10 @@ public class MyBcModifier {
 
 //  Attention to the transmitted parameters, after changes
 //  There may be differences variable values: before and after changes
-    private void SaveModifiedClass(String pathToModifiedFile, ClassGen cg) {
+    private void SaveModifiedClass() {
 
        try{
-           FileOutputStream fos = new FileOutputStream(pathToModifiedFile);
+           FileOutputStream fos = new FileOutputStream(PATH_TO_OUTPUT_FILE);
            cg.getJavaClass().dump(fos);
            fos.close();
         } catch (IOException e) {

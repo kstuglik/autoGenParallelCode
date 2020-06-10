@@ -39,8 +39,6 @@ public class MainNewEdition {
         String CLASS_PATH = "src/main/java/mbuilder/classFiles/";
         String CLASS_NAME = "Example";
         String CLASS_METHOD = "main";
-
-
         modifier.SetParameters(CLASS_PATH,CLASS_NAME,CLASS_METHOD);
         modifier.CreateJCudaMatrix2D();
 
