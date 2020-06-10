@@ -3,7 +3,7 @@ This file contains a previous version of the byte code modifier,
 and it's the starting point for creating a new version,
 is for me like an anchor to the methods that are used.
  */
-package mbuilder.TestAutoParallel;
+package mbuilder;
 
 import org.apache.bcel.generic.TargetLostException;
 import pl.edu.agh.transformations.ByteCodeModifier;

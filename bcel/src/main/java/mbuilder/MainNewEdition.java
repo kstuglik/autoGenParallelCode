@@ -8,7 +8,7 @@ An example can be seen in the directory:
     src/main/java/mbuilder/classFiles/example.class
  */
 
-package mbuilder.TestAutoParallel;
+package mbuilder;
 
 import org.apache.bcel.generic.TargetLostException;
 import pl.edu.agh.transformations.MyBcModifier;
