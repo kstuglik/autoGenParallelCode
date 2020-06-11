@@ -23,24 +23,33 @@ public class MainNewEdition {
 
         MyBcModifier modifier = new MyBcModifier();
 
-//        uncomment on the chosen option
-//        output in src/main/java/mbuilder/classFiles/
+//        EXAMPLE 1) ADD timewrapper into *.class, that already existed
 
-//        EXAMPLE 1) TIME WRAPPER
+        String CLASS_PATH = "src/main/java/mbuilder/classFiles/";
+        String CLASS_NAME = "Matrix2D";
+        String CLASS_METHOD = "multiply";
 
+        modifier.SetParameters(CLASS_PATH,CLASS_NAME,CLASS_METHOD);
+        modifier.WrapperExample(0);
+
+//        EXAMPLE 2) CREATE JCUDAMATRIX2D - new *.class file
+
+//        String CLASS_PATH = "src/main/java/mbuilder/classFiles/";
+//        String CLASS_NAME = "Example";
+//        String CLASS_METHOD = "main";
+//
+//        modifier.SetParameters(CLASS_PATH,CLASS_NAME,CLASS_METHOD);
+//        modifier.CreateJCudaMatrix2D();
+
+//        EXAMPLE 3) ADD JCudaMatrix2D_multiply() into *.class, combination of examples: 1 and 2
+//        modifier.WrapperExample(1);
+//
 //        String CLASS_PATH = "src/main/java/mbuilder/classFiles/";
 //        String CLASS_NAME = "Matrix2D";
 //        String CLASS_METHOD = "multiply";
+//
 //        modifier.SetParameters(CLASS_PATH,CLASS_NAME,CLASS_METHOD);
-//        modifier.WrapperExample();
-
-//        EXAMPLE 2) CREATE JCUDAMATRIX2D
-
-        String CLASS_PATH = "src/main/java/mbuilder/classFiles/";
-        String CLASS_NAME = "Example";
-        String CLASS_METHOD = "main";
-        modifier.SetParameters(CLASS_PATH,CLASS_NAME,CLASS_METHOD);
-        modifier.CreateJCudaMatrix2D();
+//        modifier.WrapperExample(1);
 
     }
 

@@ -49,13 +49,13 @@ public class MyBcModifier {
         PATH_TO_OUTPUT_FILE = classPath + className + MODIFICATION_SUFFIX + CLASS_SUFFIX;
     }
 
-    public void WrapperExample() throws IOException {
+
+    public void WrapperExample(int choice) throws IOException {
 
         jclass = new ClassParser(PATH_TO_INPUT_FILE).parse();
         cg = new ClassGen(jclass);
 
         methods = jclass.getMethods();
-//      fields = jclass.getFields();
 
         int methodPositionId;
         for (methodPositionId = 0; methodPositionId < methods.length; methodPositionId++) {
@@ -63,13 +63,16 @@ public class MyBcModifier {
         }
 
         if(methodPositionId<methods.length){
-            AddTimeWrapper(methods[methodPositionId]);
-            SaveModifiedClass();
+            if(choice == 0)
+                AddTimeWrapper(methods[methodPositionId]);
+            if(choice == 1)
+                AddNewWrapper(methods[methodPositionId]);
         }else{
             System.err.println("Method: "+CLASS_METHOD+" not found in "+CLASS_NAME);
         }
 
     }
+
 
 //  One of the examples from the intro/ibmbmbcel directory
     private static void AddTimeWrapper(Method method) {
@@ -168,22 +171,53 @@ public class MyBcModifier {
         wrap_mg.setMaxLocals();
         cg.addMethod(wrap_mg.getMethod());
         il.dispose();
+
+        SaveModifiedClass();
     }
 
 
-//  Attention to the transmitted parameters, after changes
-//  There may be differences variable values: before and after changes
-    private void SaveModifiedClass() {
+    private static void AddNewWrapper(Method method) {
 
-       try{
-           FileOutputStream fos = new FileOutputStream(PATH_TO_OUTPUT_FILE);
-           cg.getJavaClass().dump(fos);
-           fos.close();
-        } catch (IOException e) {
-            throw new RuntimeException("Error during modified class save.", e);
-        }
-        System.out.println("SAVED!");
+       // set up the construction tools
+        InstructionFactory factory = new InstructionFactory(cg);
+        InstructionList il = new InstructionList();
+        ConstantPoolGen cp = cg.getConstantPool();
+        String cname = cg.getClassName();
+        MethodGen wrap_mg = new MethodGen(Const.ACC_STATIC | Const.ACC_PUBLIC,
+            Type.VOID,  null,null, "CLASS_METHOD", CLASS_NAME,
+            il, cp);
+
+        int id_A = New.CreateArrayField("A",wrap_mg,il,cp,Type.INT,2, new int[]{2,2});
+        int id_B = New.CreateArrayField("B",wrap_mg,il,cp,Type.INT,2, new int[]{2,2});
+
+        int jcm_ID = New.CreateObjectClass(
+                "jcm", lg, il,factory,wrap_mg,
+                "utils.JCudaMatrix", new int[]{id_A,id_B});
+
+        il.append(new ALOAD(jcm_ID));
+
+        lg = wrap_mg.addLocalVariable("C", new ArrayType(Type.FLOAT, 1), null, null);
+        int id = lg.getIndex();
+
+        il.append(factory.createInvoke(
+                "utils.JCudaMatrix", "multiply",
+                new ArrayType(Type.FLOAT,1), new Type[]{},Const.INVOKEVIRTUAL));
+
+        il.append(new ASTORE(id));
+
+        New.PrintArray(il,wrap_mg,factory,id,false);
+
+        il.append(new RETURN());
+        // finalize the constructed method
+
+        wrap_mg.setMaxStack();
+        wrap_mg.setMaxLocals();
+        cg.addMethod(wrap_mg.getMethod());
+        il.dispose();
+
+        SaveModifiedClass();
     }
+
 
     public void CreateJCudaMatrix2D(){
         cg = new ClassGen(CLASS_NAME, "java.lang.Object","<generated>",
@@ -227,17 +261,23 @@ public class MyBcModifier {
         mg.setMaxStack();
         mg.setMaxLocals();
         cg.addMethod(mg.getMethod());
-
         il.dispose();
 
-        cg.addEmptyConstructor(Const.ACC_PUBLIC);
-
-        try {
-            cg.getJavaClass().dump(CLASS_PATH + CLASS_NAME + CLASS_SUFFIX);
-        } catch (final IOException e) {
-            System.err.println(e);
-        }
+        SaveModifiedClass();
 
     }
 
+
+    private static void SaveModifiedClass() {
+
+       try{
+           FileOutputStream fos = new FileOutputStream(PATH_TO_OUTPUT_FILE);
+           cg.getJavaClass().dump(fos);
+           fos.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Error during modified class save.", e);
+        }
+        System.out.println("*********************************** DONE! ***********************************\n" +
+                "check the locations:\t"    +PATH_TO_OUTPUT_FILE);
+    }
 }
