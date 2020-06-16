@@ -3,6 +3,10 @@ package pl.edu.agh.transformations.util;
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class New {
 
 
@@ -120,6 +124,18 @@ public class New {
             il.append(new ASTORE(id));
         }
         return id;
+    }
+
+    public static void SaveModifiedClass(ClassGen cg, String PATH_TO_OUTPUT_FILE) throws FileNotFoundException {
+       try{
+           FileOutputStream fos = new FileOutputStream(PATH_TO_OUTPUT_FILE);
+           cg.getJavaClass().dump(fos);
+           fos.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Error during modified class save.", e);
+        }
+        System.out.println("*********************************** DONE! ***********************************\n" +
+                "check the locations:\t"    +PATH_TO_OUTPUT_FILE);
     }
 }
 

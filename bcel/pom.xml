@@ -24,9 +24,9 @@
     <dependencies>
 <!--        BCEL - https://github.com/apache/commons-bcel-->
         <dependency>
-            <groupId>org.apache.bcel</groupId>
-            <artifactId>bcel</artifactId>
-            <version>6.4.1</version>
+          <groupId>org.apache.bcel</groupId>
+          <artifactId>bcel</artifactId>
+          <version>6.5.0</version>
         </dependency>
 <!--        JCUDA-->
         <!-- https://mvnrepository.com/artifact/org.jcuda/jcuda -->

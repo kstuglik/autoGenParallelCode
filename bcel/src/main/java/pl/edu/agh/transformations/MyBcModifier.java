@@ -8,8 +8,10 @@ import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
 import pl.edu.agh.transformations.util.New;
 
-import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import static pl.edu.agh.transformations.util.New.SaveModifiedClass;
 
 public class MyBcModifier {
 
@@ -75,7 +77,7 @@ public class MyBcModifier {
 
 
 //  One of the examples from the intro/ibmbmbcel directory
-    private static void AddTimeWrapper(Method method) {
+    private static void AddTimeWrapper(Method method) throws FileNotFoundException {
 
         // set up the construction tools
         InstructionFactory factory = new InstructionFactory(cg);
@@ -172,11 +174,11 @@ public class MyBcModifier {
         cg.addMethod(wrap_mg.getMethod());
         il.dispose();
 
-        SaveModifiedClass();
+        SaveModifiedClass(cg,PATH_TO_OUTPUT_FILE);
     }
 
 
-    private static void AddNewWrapper(Method method) {
+    private static void AddNewWrapper(Method method) throws FileNotFoundException {
 
        // set up the construction tools
         InstructionFactory factory = new InstructionFactory(cg);
@@ -215,11 +217,11 @@ public class MyBcModifier {
         cg.addMethod(wrap_mg.getMethod());
         il.dispose();
 
-        SaveModifiedClass();
+        SaveModifiedClass(cg,PATH_TO_OUTPUT_FILE);
     }
 
 
-    public void CreateJCudaMatrix2D(){
+    public void CreateJCudaMatrix2D() throws FileNotFoundException {
         cg = new ClassGen(CLASS_NAME, "java.lang.Object","<generated>",
             Const.ACC_PUBLIC |Const.ACC_SUPER,null);
         factory = new InstructionFactory(cg);
@@ -263,21 +265,8 @@ public class MyBcModifier {
         cg.addMethod(mg.getMethod());
         il.dispose();
 
-        SaveModifiedClass();
+        SaveModifiedClass(cg,PATH_TO_OUTPUT_FILE);
 
     }
 
-
-    private static void SaveModifiedClass() {
-
-       try{
-           FileOutputStream fos = new FileOutputStream(PATH_TO_OUTPUT_FILE);
-           cg.getJavaClass().dump(fos);
-           fos.close();
-        } catch (IOException e) {
-            throw new RuntimeException("Error during modified class save.", e);
-        }
-        System.out.println("*********************************** DONE! ***********************************\n" +
-                "check the locations:\t"    +PATH_TO_OUTPUT_FILE);
-    }
 }
