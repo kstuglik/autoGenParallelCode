@@ -52,27 +52,42 @@ public class MyBcModifier {
     }
 
 
-    public void WrapperExample(int choice) throws IOException {
+    public void InitWrapper() throws IOException {
 
         jclass = new ClassParser(PATH_TO_INPUT_FILE).parse();
         cg = new ClassGen(jclass);
-
         methods = jclass.getMethods();
 
+    }
+
+
+    public static int GetMethodIndex(Method[] methods, String methodName){
+
         int methodPositionId;
+
         for (methodPositionId = 0; methodPositionId < methods.length; methodPositionId++) {
-            if(methods[methodPositionId].getName().equals(CLASS_METHOD)){ break;}
+            if(methods[methodPositionId].getName().equals(methodName)){ break;}
         }
-
         if(methodPositionId<methods.length){
-            if(choice == 0)
-                AddTimeWrapper(methods[methodPositionId]);
-            if(choice == 1)
-                AddNewWrapper(methods[methodPositionId]);
+            return methodPositionId;
         }else{
-            System.err.println("Method: "+CLASS_METHOD+" not found in "+CLASS_NAME);
+            System.err.println("Method: "+methodName+" not found in "+CLASS_NAME);
+            return -1;
         }
+    }
 
+
+    public void WrapperTime() throws IOException {
+        InitWrapper();
+        int methodPositionId = (int) GetMethodIndex(methods,CLASS_METHOD);
+        AddTimeWrapper(methods[methodPositionId]);
+    }
+
+
+    public void WrapperMatrix() throws IOException {
+        InitWrapper();
+        int methodPositionId = (int) GetMethodIndex(methods,CLASS_METHOD);
+        AddNewWrapper(methods[methodPositionId]);
     }
 
 
@@ -167,14 +182,9 @@ public class MyBcModifier {
         if (result != Type.VOID) {il.append(InstructionFactory.createLoad(result, slot+2));}
         il.append(InstructionFactory.createReturn(result));
 
-        // finalize the constructed method
-        wrap_mg.stripAttributes(true);
-        wrap_mg.setMaxStack();
-        wrap_mg.setMaxLocals();
-        cg.addMethod(wrap_mg.getMethod());
-        il.dispose();
+        il.append(new RETURN());
 
-        SaveModifiedClass(cg,PATH_TO_OUTPUT_FILE);
+        SaveModifiedClass(cg,wrap_mg,il,false,PATH_TO_OUTPUT_FILE);
     }
 
 
@@ -186,15 +196,15 @@ public class MyBcModifier {
         ConstantPoolGen cp = cg.getConstantPool();
         String cname = cg.getClassName();
         MethodGen wrap_mg = new MethodGen(Const.ACC_STATIC | Const.ACC_PUBLIC,
-            Type.VOID,  null,null, "CLASS_METHOD", CLASS_NAME,
+            Type.VOID,  null,null, CLASS_METHOD+"_NEW", CLASS_NAME,
             il, cp);
 
         int id_A = New.CreateArrayField("A",wrap_mg,il,cp,Type.INT,2, new int[]{2,2});
         int id_B = New.CreateArrayField("B",wrap_mg,il,cp,Type.INT,2, new int[]{2,2});
 
         int jcm_ID = New.CreateObjectClass(
-                "jcm", lg, il,factory,wrap_mg,
-                "utils.JCudaMatrix", new int[]{id_A,id_B});
+                "jcm", "utils.JCudaMatrix",
+                il,factory,wrap_mg, new int[]{id_A,id_B});
 
         il.append(new ALOAD(jcm_ID));
 
@@ -210,14 +220,8 @@ public class MyBcModifier {
         New.PrintArray(il,wrap_mg,factory,id,false);
 
         il.append(new RETURN());
-        // finalize the constructed method
 
-        wrap_mg.setMaxStack();
-        wrap_mg.setMaxLocals();
-        cg.addMethod(wrap_mg.getMethod());
-        il.dispose();
-
-        SaveModifiedClass(cg,PATH_TO_OUTPUT_FILE);
+        SaveModifiedClass(cg,wrap_mg,il,false,PATH_TO_OUTPUT_FILE);
     }
 
 
@@ -240,8 +244,8 @@ public class MyBcModifier {
         int id_B = New.CreateArrayField("B",mg,il,cp,Type.INT,2, new int[]{2,2});
 
         int jcm_ID = New.CreateObjectClass(
-                "jcm", lg, il,factory,mg,
-                "utils.JCudaMatrix", new int[]{id_A,id_B});
+                "jcm", "utils.JCudaMatrix",
+                il,factory,mg, new int[]{id_A,id_B});
 
         il.append(new ALOAD(jcm_ID));
 
@@ -256,17 +260,15 @@ public class MyBcModifier {
 
         New.PrintArray(il,mg,factory,id,false);
 
-//        the task to be optimized, a part of code to put the content into *.class file
-//        looks almost always the same
-
         il.append(new RETURN());
-        mg.setMaxStack();
-        mg.setMaxLocals();
-        cg.addMethod(mg.getMethod());
-        il.dispose();
 
-        SaveModifiedClass(cg,PATH_TO_OUTPUT_FILE);
+        SaveModifiedClass(cg,mg,il,false,PATH_TO_OUTPUT_FILE);
 
     }
 
+    public void WrapperTest() throws IOException {
+        InitWrapper();
+        int methodPositionId = (int) GetMethodIndex(methods,CLASS_METHOD);
+        AddNewWrapper(methods[methodPositionId]);
+    }
 }

@@ -5,9 +5,9 @@ import org.apache.bcel.classfile.LocalVariableTable;
 
 import java.util.Arrays;
 
-class LocalVariableUtils {
+public class LocalVariableUtils {
 
-    static LocalVariable findLocalVariableByName(String name, LocalVariableTable localVariableTable) {
+    public static LocalVariable findLocalVariableByName(String name, LocalVariableTable localVariableTable) {
         return Arrays.stream(localVariableTable.getLocalVariableTable())
                 .filter(var -> var.getName().equals(name))
                 .findAny()

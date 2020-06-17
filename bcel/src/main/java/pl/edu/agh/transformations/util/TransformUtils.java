@@ -3,7 +3,6 @@ package pl.edu.agh.transformations.util;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ConstantFieldref;
 import org.apache.bcel.generic.*;
-import utils.JCudaMatrix;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,67 +13,120 @@ import java.util.stream.Collectors;
 
 public class TransformUtils {
 
-    public static void addThreadPool(ClassGen cg) {
-        Optional<MethodGen> classInitMethod = MethodUtils.findMethodByName(cg, Const.STATIC_INITIALIZER_NAME);
-        ConstantPoolGen cp = cg.getConstantPool();
-//        addClassFields(cg, cp);
-        addClassFields(cg,cp, Type.getType(JCudaMatrix.class),"jcm");
+//  FIELDS
 
-        InstructionList il = new InstructionList();
-
+    public static void addThreadPool(ClassGen classGen) {
+        Optional<MethodGen> classInitMethod = MethodUtils.findMethodByName(classGen, Const.STATIC_INITIALIZER_NAME);
+        ConstantPoolGen constantPoolGen = classGen.getConstantPool();
+        addClassFields_old(classGen, constantPoolGen);
+        InstructionList instructionList = new InstructionList();
         classInitMethod.ifPresent(init -> {
-            il.append(init.getInstructionList());
+            instructionList.append(init.getInstructionList());
             try {
-                il.delete(il.getEnd());
+                instructionList.delete(instructionList.getEnd());
             } catch (TargetLostException e) {
                 e.printStackTrace();
             }
-            retargetStaticPuts(cg, il);
+            retargetStaticPuts(classGen, instructionList);
         });
-
-        InstructionFactory factory = new InstructionFactory(cg, cp);
-        String className = cg.getClassName();
-
-        appendFieldsInstructions(il, factory, className);
-        MethodGen mg = new MethodGen(
-                Const.ACC_STATIC,
-                 Type.getType(JCudaMatrix.class),
-                new Type[]{new ArrayType(Type.INT,1),new ArrayType(Type.INT,1)},
-                new String[]{"A","B"},
-                Const.STATIC_INITIALIZER_NAME,
-                className,
-                il,
-                cp);
-//        mg.stripAttributes(true);
-        mg.setMaxLocals();
-        mg.setMaxStack();
-        cg.replaceMethod(mg.getMethod(), mg.getMethod());
+        InstructionFactory instructionFactory = new InstructionFactory(classGen, constantPoolGen);
+        String className = classGen.getClassName();
+        appendFieldsInstructions(instructionList, instructionFactory, className);
+        MethodGen methodGen = new MethodGen(Const.ACC_STATIC,
+                                            Type.VOID,
+                                            Type.NO_ARGS,
+                                            new String[0],
+                                            Const.STATIC_INITIALIZER_NAME,
+                                            className,
+                                            instructionList,
+                                            constantPoolGen);
+        methodGen.stripAttributes(true);
+        methodGen.setMaxLocals();
+        methodGen.setMaxStack();
+        classGen.replaceMethod(methodGen.getMethod(), methodGen.getMethod());
     }
 
-//    public static void addClassFields(ClassGen cg, ConstantPoolGen cp) {
-//        FieldGen threadCount = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC | Const.ACC_FINAL,
-//                Type.INT,
-//                Constants.NUMBER_OF_THREADS_CONSTANT_NAME,
-//                cp);
-//        FieldGen service = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
-//                Type.getType(ExecutorService.class),
-//                Constants.EXECUTOR_SERVICE_CONSTANT_NAME,
-//                cp);
-//        cg.addField(threadCount.getField());
-//        cg.addField(service.getField());
-//    }
+//  addClassFields_old- add thread fields in class
 
-//    ------------------------------------------- addClassFields -------------------------------------------
-//  MY VERSION
-//    Akcesor dostepu jest ustawionu na sztywno
-//    TYP jest dostarczany na 2 sposoby:
-//      standatdowo:      Type.INT
-//      nie standardowo:  Type.getType(ClassName.class)
+    public static void addClassFields_old(ClassGen cg, ConstantPoolGen cp) {
+        FieldGen threadCount = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC | Const.ACC_FINAL,
+                Type.INT,
+                Constants.NUMBER_OF_THREADS_CONSTANT_NAME,
+                cp);
+        FieldGen service = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
+                Type.getType(ExecutorService.class),
+                Constants.EXECUTOR_SERVICE_CONSTANT_NAME,
+                cp);
+        cg.addField(threadCount.getField());
+        cg.addField(service.getField());
+    }
+
+/*  >>> JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW
+
+------------------------------------------- addClassFields -------------------------------------------
+      type:      Type.INT       OR      object type:  Type.getType(ClassName.class)                        */
+
 
     public static void addClassFields(ClassGen cg, ConstantPoolGen cp, Type type, String fieldName) {
         FieldGen newField = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC,type,fieldName,cp);
         cg.addField(newField.getField());
     }
+
+
+    public static void addCallJMultiply(ClassGen cg, MethodGen mg) {
+
+        ConstantPoolGen cp = cg.getConstantPool();
+        InstructionFactory factory = new InstructionFactory(cg, cp);
+        InstructionList appendedInstructions = new InstructionList();
+
+        int id_A = New.CreateArrayField("AA",mg,appendedInstructions,cp,Type.INT,2, new int[]{2,2});
+        int id_B = New.CreateArrayField("BB",mg,appendedInstructions,cp,Type.INT,2, new int[]{2,2});
+
+//        int id_A = New.getLoacalVariableID("A",cp,mg);
+//        int id_B = New.getLoacalVariableID("B",cp,mg);
+
+        int jcm_ID = New.CreateObjectClass(
+                "jcm", "utils.JCudaMatrix",
+                appendedInstructions,factory,mg, new int[]{id_A,id_B});
+
+        appendedInstructions.append(new ALOAD(jcm_ID));
+
+        appendedInstructions.append(factory.createInvoke(
+                "utils.JCudaMatrix", "multiply",
+                new ArrayType(Type.FLOAT,1), new Type[]{},Const.INVOKEVIRTUAL));
+        LocalVariableGen lg = mg.addLocalVariable("CC", new ArrayType(Type.FLOAT, 1), null, null);
+        int id = lg.getIndex();
+
+        appendedInstructions.append(new ASTORE(id));
+
+        New.PrintArray(appendedInstructions,mg,factory,id,false);
+
+        InstructionList currentList = mg.getInstructionList();
+
+        appendedInstructions.append(currentList);
+        mg.setInstructionList(appendedInstructions);
+mg.removeNOPs();
+        updateMethodParametersScope(mg, cp);
+
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.removeMethod(mg.getMethod());
+        cg.addMethod(mg.getMethod());
+
+    }
+
+/*
+CHECK IN FUTURE: id for field or variable
+
+        int id = ConstantPoolUtils.getFieldIndex(cg,"jcm");
+        int id = New.getLoacalVariableID("jcm",cp,mg);
+        forLoop[3].setInstruction(new GETSTATIC(numThreadsConstantIndex));
+
+* */
+
+
+
+/*  <<< JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW */
 
     private static void retargetStaticPuts(ClassGen cg, InstructionList il) {
         int classNameIndex = cg.getClassNameIndex();
@@ -120,6 +172,7 @@ public class TransformUtils {
     }
 
     public static void addExecutorServiceInit(ClassGen cg, MethodGen mg) {
+
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionFactory factory = new InstructionFactory(cg, cp);
         InstructionList appendedInstructions = new InstructionList();
@@ -137,6 +190,7 @@ public class TransformUtils {
         InstructionList il = mg.getInstructionList();
         appendedInstructions.append(il);
         mg.setInstructionList(appendedInstructions);
+
     }
 
     public static void addTaskPool(ClassGen cg, MethodGen mg) {
@@ -172,6 +226,8 @@ public class TransformUtils {
                 .forEach(var -> var.setStart(startHandle));
     }
 
+//    ?? alone ArrayList()
+
     public static void addFutureResultsList(ClassGen cg, MethodGen mg) {
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionFactory factory = new InstructionFactory(cg, cp);
@@ -196,17 +252,20 @@ public class TransformUtils {
         mg.setMaxLocals();
         cg.removeMethod(mg.getMethod());
         cg.addMethod(mg.getMethod());
+
     }
 
     public static void copyLoopToMethod(ClassGen cg, MethodGen mg) {
 
         InstructionList il = getSubtaskInstructions(mg);
 
-        il.append(new ICONST(1));
-        il.append(InstructionFactory.createReturn(Type.INT));//TODO - would be nicer to get it by param from analyzer
+//        il.append(new ICONST(1));
+//        TODO - get Type param from analyzer => PROBABLY DONE
+        il.append(InstructionFactory.createReturn(mg.getReturnType()));
 
         MethodGen subTaskmg = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
-                Type.INT,//TODO - would be nicer to get it by param from analyzer
+//                Type.INT,//TODO - would be nicer to get it by param from analyzer
+                mg.getReturnType(),
                 new Type[]{},
                 new String[]{},
                 Constants.SUBTASK_METHOD_NAME,
@@ -222,7 +281,9 @@ public class TransformUtils {
                 Type.INT,
                 //1,
                 null, null);
+
         transferLocalVariables(mg, subTaskmg);
+
         updateBranchInstructions(il);
         int newLoopIteratorVariableIndex = LocalVariableUtils.findLocalVariableByName(Constants.LOOP_ITERATOR_NAME, subTaskmg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         LoopUtils.broadenCompareCondition(il.getInstructionHandles());
@@ -235,6 +296,8 @@ public class TransformUtils {
         subTaskmg.setMaxStack();
         cg.addMethod(subTaskmg.getMethod());
         cg.getConstantPool().addMethodref(subTaskmg);
+        mg.setMaxStack();
+        mg.setMaxLocals();
     }
 
     private static InstructionList getSubtaskInstructions(MethodGen mg) {

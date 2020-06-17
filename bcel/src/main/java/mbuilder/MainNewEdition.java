@@ -19,36 +19,56 @@ import java.io.IOException;
 
 public class MainNewEdition {
 
+
+    private static String CLASS_PATH;
+    private static String CLASS_NAME;
+    private static String CLASS_METHOD;
+
+
     public static void main(final String[] argv) throws IOException, TargetLostException {
 
         MyBcModifier modifier = new MyBcModifier();
 
+        int choice = 2;
+
+        switch(choice) {
+
 //        EXAMPLE 1) ADD timewrapper into *.class, that already existed
+        case 1:
+            CLASS_PATH = "src/main/java/mbuilder/classFiles/";
+            CLASS_NAME = "Matrix2D";
+            CLASS_METHOD = "multiply";
 
-        String CLASS_PATH = "src/main/java/mbuilder/classFiles/";
-        String CLASS_NAME = "Matrix2D";
-        String CLASS_METHOD = "multiply";
+            modifier.SetParameters(CLASS_PATH,CLASS_NAME,CLASS_METHOD);
+            modifier.WrapperTime();
 
-        modifier.SetParameters(CLASS_PATH,CLASS_NAME,CLASS_METHOD);
-        modifier.WrapperExample(0);
+            break;
 
 //        EXAMPLE 2) CREATE JCUDAMATRIX2D - new *.class file
+        case 2:
+            CLASS_PATH = "src/main/java/mbuilder/classFiles/";
+            CLASS_NAME = "CreateJCudaMatrix2D";
+            CLASS_METHOD = "main";
 
-       /* String CLASS_PATH = "src/main/java/mbuilder/classFiles/";
-        String CLASS_NAME = "Example";
-        String CLASS_METHOD = "main";
+            modifier.SetParameters(CLASS_PATH,CLASS_NAME,CLASS_METHOD);
+            modifier.CreateJCudaMatrix2D();
 
-        modifier.SetParameters(CLASS_PATH,CLASS_NAME,CLASS_METHOD);
-        modifier.CreateJCudaMatrix2D();*/
+            break;
 
 //        EXAMPLE 3) ADD JCudaMatrix2D_multiply() into *.class, combination of examples: 1 and 2
+        case 3:
+            CLASS_PATH = "src/main/java/mbuilder/classFiles/";
+            CLASS_NAME = "Matrix2D";
+            CLASS_METHOD = "multiply";
 
-/*        String CLASS_PATH = "src/main/java/mbuilder/classFiles/";
-        String CLASS_NAME = "Matrix2D";
-        String CLASS_METHOD = "multiply";
+            modifier.SetParameters(CLASS_PATH,CLASS_NAME,CLASS_METHOD);
+            modifier.WrapperMatrix();
+            break;
 
-        modifier.SetParameters(CLASS_PATH,CLASS_NAME,CLASS_METHOD);
-        modifier.WrapperExample(1);*/
+        default:
+            System.out.println("Wrong value, set correct value for variable choice!");
+            break;
+        }
 
     }
 

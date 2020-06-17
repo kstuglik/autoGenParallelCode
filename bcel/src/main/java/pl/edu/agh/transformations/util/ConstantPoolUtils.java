@@ -6,9 +6,9 @@ import org.apache.bcel.generic.ClassGen;
 import java.util.Arrays;
 import java.util.Objects;
 
-class ConstantPoolUtils {
+public class ConstantPoolUtils {
 
-    static int getFieldIndex(ClassGen cg, String constantName) {
+    public static int getFieldIndex(ClassGen cg, String constantName) {
         ConstantPool cp = cg.getConstantPool().getConstantPool();
         ConstantFieldref numThreadsField = Arrays.stream(cp.getConstantPool())
                 .filter(ConstantFieldref.class::isInstance)
