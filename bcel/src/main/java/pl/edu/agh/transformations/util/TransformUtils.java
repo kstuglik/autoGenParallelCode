@@ -73,6 +73,25 @@ public class TransformUtils {
     }
 
 
+    static private void deleteIns(InstructionList il, InstructionHandle ih,
+                                  InstructionHandle new_target) {
+        // System.out.println("deleteIns: instructionList = " + il);
+        // System.out.println("   handle = " + ih);
+        try {
+            il.delete(ih);
+        } catch (TargetLostException e) {
+            InstructionHandle[] targets = e.getTargets();
+            for (int i = 0; i < targets.length; i++) {
+                InstructionTargeter[] targeters = targets[i].getTargeters();
+
+                for (int j = 0; j < targeters.length; j++) {
+                    targeters[j].updateTarget(targets[i], new_target);
+                }
+            }
+        }
+    }
+
+
     public static void addCallJMultiply(ClassGen cg, MethodGen mg) {
 
         ConstantPoolGen cp = cg.getConstantPool();
@@ -105,7 +124,7 @@ public class TransformUtils {
 
         appendedInstructions.append(currentList);
         mg.setInstructionList(appendedInstructions);
-mg.removeNOPs();
+        mg.removeNOPs();
         updateMethodParametersScope(mg, cp);
 
         mg.setMaxStack();

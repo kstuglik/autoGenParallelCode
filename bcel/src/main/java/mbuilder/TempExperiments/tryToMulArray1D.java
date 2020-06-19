@@ -234,23 +234,17 @@ public class tryToMulArray1D {
 
         il.append(new DLOAD(id_C));
         il.append(new ILOAD(id_c));
-
         il.append(new DLOAD(id_A));
         il.append(new ILOAD(id_a));
         il.append(new DALOAD());
-
         il.append(new DLOAD(id_B));
         il.append(new ILOAD(id_b));
         il.append(new DALOAD());
-
         il.append(new IMUL());
-
         il.append(new DLOAD(id_C));
         il.append(new ILOAD(id_c));
         il.append(new DALOAD());
-
         il.append(new IADD());
-
         il.append(new DASTORE());
 
 

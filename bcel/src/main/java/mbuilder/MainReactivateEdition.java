@@ -27,35 +27,38 @@ public class MainReactivateEdition {
 
     public static void main(String[] args) throws IOException {
 
-        int choice = 2;
+        CLASS_PATH = "src/main/java/mbuilder/classFiles/";
 
+        int choice = 3;
 
         switch (choice){
             case 1:// NBODY CASE
-                CLASS_PATH = "src/main/java/mbuilder/classFiles/";
                 CLASS_NAME = "IntegrationTestClass";
                 CLASS_METHOD = "moveBodies";
                 break;
 
             case 2:// NEW CASE FOR JCUDA (activities in progress)
-                CLASS_PATH = "src/main/java/mbuilder/classFiles/";
                 CLASS_NAME = "Matrix2D_v2";
                 CLASS_METHOD = "multiply";
                 break;
-                /* ogarnac dodanie nowych instrukcji na koncu a nie na poczatku w funkcji,
-                 bo nie mogę pobrac-przekazac id tabeli ktore sa dopiero w nastepnych liniach */
+
+            case 3:
+                CLASS_NAME = "Example";
+                CLASS_METHOD = "doSomething";
+                break;
 
             default:
                 System.out.println("incorrect value, select a number between 1 - 2");
                 break;
-
         }
 
 
         JavaClass analyzedClass = new ClassParser(CLASS_PATH+CLASS_NAME+".class").parse();
-        ClassGen modifiedClass = getModifiedClass(CLASS_METHOD, analyzedClass);
+        ClassGen modifiedClass = new ClassGen(analyzedClass);
+
+        /*ClassGen modifiedClass = getModifiedClass(CLASS_METHOD, analyzedClass);
         copyFields(analyzedClass, modifiedClass);
-        copyMethods(analyzedClass, modifiedClass);
+        copyMethods(analyzedClass, modifiedClass);*/
 
         Method[] methods = modifiedClass.getMethods();
         int methodPositionId = (int) MyBcModifier.GetMethodIndex(methods,CLASS_METHOD);
@@ -66,7 +69,7 @@ public class MainReactivateEdition {
 
 
 //        TRANSFORMATION
-        if(choice == 2){
+        if(choice == 2 || choice == 3){
              TransformUtils.addCallJMultiply(modifiedClass, mg);
         }
         else{
@@ -88,7 +91,7 @@ public class MainReactivateEdition {
         String PATH_TO_OUTPUT_FILE = CLASS_PATH+CLASS_NAME+"_MOD.class";
         modifiedClass.getJavaClass().dump(PATH_TO_OUTPUT_FILE);
         System.out.println("*********************************** DONE! ***********************************\n" +
-                "check the locations:\t"    +PATH_TO_OUTPUT_FILE);
+                "Go to file:\t"    +PATH_TO_OUTPUT_FILE);
 
     }
 

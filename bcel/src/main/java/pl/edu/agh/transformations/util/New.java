@@ -98,6 +98,7 @@ public class New {
     }
 
 
+/*
     public static int create_simple_array(String name,MethodGen mg,Type t, int N){
 
         LocalVariableGen lg = mg.addLocalVariable(name, new ArrayType(t, N), null, null);
@@ -120,6 +121,7 @@ public class New {
         return id;
     }
 
+*/
 
 //    public static int create_field_array_type(String name,
 //        LocalVariableGen lg, InstructionList il, ConstantPoolGen cp, MethodGen mg, Type type, Integer dim, Integer n) {
@@ -160,7 +162,7 @@ public class New {
         } catch (IOException e) { throw new RuntimeException("Error during modified class save.", e); }
 
         System.out.println("*********************************** DONE! ***********************************\n" +
-                "check the locations:\t"    +PATH_TO_OUTPUT_FILE);
+                "Go to file:\t"    +PATH_TO_OUTPUT_FILE);
     }
 
 }
