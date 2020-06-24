@@ -99,6 +99,12 @@ public class TransformUtils {
         InstructionHandle handle;
         InstructionHandle[] handles = il_old.getInstructionHandles();
 
+        /* rewrite instructions until you meet RETURN,
+        then add new instructions and finally add RETURN
+        this assumption is weak,
+        if the conditional instruction is the last instruction in the method,
+        then there are two places where RETURN */
+
         for (int handleIndex = 0; handleIndex < handles.length; handleIndex++) {
 
             handle = handles[handleIndex];
@@ -112,7 +118,17 @@ public class TransformUtils {
         }
 
         //CODE INJECTION
-        codeInjection(mg, cp, factory, il_new);
+        //codeInjection(mg, cp, factory, il_new);
+
+        int id = New.getLoacalVariableID("luckyNumber",cp,mg);
+
+        il_new.append(factory.createFieldAccess(
+                "java.lang.System", "out",
+                new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
+        il_new.append(new DUP());
+        il_new.append(new ALOAD(id));
+        il_new.append(factory.createInvoke("java.io.PrintStream", "println",
+                Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
 
         il_new.append(new RETURN());
 
@@ -143,6 +159,16 @@ public class TransformUtils {
         id = lg.getIndex();
         il_new.append(new ASTORE(id));
         New.PrintArray(il_new,mg,factory,id,false);
+    }
+
+    public void printSomething(InstructionList il_new, InstructionFactory factory, ConstantPoolGen cp){
+        il_new.append(factory.createFieldAccess(
+                "java.lang.System", "out",
+                new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
+        il_new.append(InstructionConst.DUP);
+        il_new.append(new PUSH(cp, "Hello, "));
+        il_new.append(factory.createInvoke("java.io.PrintStream", "println",
+                Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
     }
 
 /*

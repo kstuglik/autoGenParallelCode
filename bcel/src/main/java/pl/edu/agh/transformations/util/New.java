@@ -3,16 +3,11 @@ package pl.edu.agh.transformations.util;
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class New {
 
-
-    public static int CreateArrayField(String name,
-                                       MethodGen mg, InstructionList il, ConstantPoolGen cp,
-                                       Type t, int N, int[] nn){
+    public static int CreateArrayField(String name,MethodGen mg, InstructionList il, ConstantPoolGen cp,Type t, int N, int[] nn){
 
         int index = cp.addArrayClass(new ArrayType(t, 1));
 
@@ -48,9 +43,7 @@ public class New {
         return  id;
     }
 
-
-    public static int CreateObjectClass(String name, String ClassName,
-    InstructionList il, InstructionFactory factory, MethodGen mg, int[] paramsID){
+    public static int CreateObjectClass(String name, String ClassName, InstructionList il, InstructionFactory factory, MethodGen mg, int[] paramsID){
 
         il.append(factory.createNew(ClassName));
         il.append(InstructionConst.DUP);
@@ -74,9 +67,7 @@ public class New {
         return object_id;
     }
 
-
-    public static void PrintArray(
-        InstructionList il, MethodGen mg, InstructionFactory factory, Integer id_Array, boolean isMultiDim) {
+    public static void PrintArray(InstructionList il, MethodGen mg, InstructionFactory factory, Integer id_Array, boolean isMultiDim) {
 
         il.append(factory.createFieldAccess(
                 "java.lang.System", "out",
@@ -97,73 +88,19 @@ public class New {
 
     }
 
-
-/*
-    public static int create_simple_array(String name,MethodGen mg,Type t, int N){
-
-        LocalVariableGen lg = mg.addLocalVariable(name, new ArrayType(t, N), null, null);
-        int id = lg.getIndex();
-        return  id;
+    public static void saveNewClassFile(ClassGen modifiedClass, String CLASS_PATH, String CLASS_NAME) throws IOException {
+        String PATH_TO_OUTPUT_FILE = CLASS_PATH+CLASS_NAME+"_MOD.class";
+        try{
+            modifiedClass.getJavaClass().dump(PATH_TO_OUTPUT_FILE);
+            System.out.println("*********************************** DONE! ***********************************\n" +
+                    "Go to file:\t"    +PATH_TO_OUTPUT_FILE);
+        } catch (IOException e) { throw new RuntimeException("Error during modified class save.", e); }
     }
-
-
-    public static void createField(String name, Type type, ConstantPoolGen cp, ClassGen cg) {
-        FieldGen fg = new FieldGen(Const.ACC_PUBLIC, type, name, cp);
-        cg.addField(fg.getField());
-    }
-
-
-    public static int CreateLocalVariable(String name, InstructionList il, MethodGen mg){
-        LocalVariableGen lg = mg.addLocalVariable(name, Type.STRING, null, null);
-        int id = lg.getIndex();
-        il.append(InstructionConst.ACONST_NULL);//il.append(new LDC(cp.addInteger(value)));
-        lg.setStart(il.append(new ASTORE(id)));
-        return id;
-    }
-
-*/
-
-//    public static int create_field_array_type(String name,
-//        LocalVariableGen lg, InstructionList il, ConstantPoolGen cp, MethodGen mg, Type type, Integer dim, Integer n) {
-//
-//        lg = mg.addLocalVariable(name, new ArrayType(type, dim), null, null);
-//        int id = lg.getIndex();
-//        if (n > 0) {
-//            il.append(new PUSH(cp, n));
-//            il.append(new NEWARRAY((BasicType) type));
-//            il.append(new ASTORE(id));
-//        }
-//        return id;
-//    }
-
 
     public static int getLoacalVariableID(String fieldName, ConstantPoolGen cp, MethodGen mg) {
         return LocalVariableUtils.findLocalVariableByName(fieldName,mg.getLocalVariableTable(cp)).getIndex();
     }
 
-
-    public static void SaveModifiedClass(ClassGen cg, MethodGen mg,
-        InstructionList il, boolean stripAttributes, String PATH_TO_OUTPUT_FILE) throws FileNotFoundException {
-
-
-        //        il.append(new RETURN());
-        if(stripAttributes == true)
-            mg.stripAttributes(true);
-
-        mg.setMaxStack();
-        mg.setMaxLocals();
-        cg.addMethod(mg.getMethod());
-        il.dispose();
-
-        try{
-           FileOutputStream fos = new FileOutputStream(PATH_TO_OUTPUT_FILE);
-           cg.getJavaClass().dump(fos);
-           fos.close();
-        } catch (IOException e) { throw new RuntimeException("Error during modified class save.", e); }
-
-        System.out.println("*********************************** DONE! ***********************************\n" +
-                "Go to file:\t"    +PATH_TO_OUTPUT_FILE);
-    }
 
 }
 

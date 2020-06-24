@@ -1,8 +1,3 @@
-/*
-This file contains a previous version of the byte code modifier,
-and it's the starting point for creating a new version,
-is for me like an anchor to the methods that are used.
- */
 package mbuilder;
 
 import org.apache.bcel.Const;
@@ -15,6 +10,7 @@ import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.TargetLostException;
 import pl.edu.agh.transformations.MyBcModifier;
 import pl.edu.agh.transformations.util.MethodUtils;
+import pl.edu.agh.transformations.util.New;
 import pl.edu.agh.transformations.util.TransformUtils;
 
 import java.io.IOException;
@@ -29,6 +25,9 @@ public class MainReactivateEdition {
     public static void main(String[] args) throws IOException, TargetLostException {
 
         CLASS_PATH = "src/main/java/mbuilder/classFiles/";
+
+/*        1 nbody parallel */
+/*        3 jcuda for multiply*/
 
         int choice = 3;
 
@@ -64,12 +63,14 @@ public class MainReactivateEdition {
         MethodGen mg = new MethodGen(transformedMethod, modifiedClass.getClassName(), modifiedClass.getConstantPool());
         ConstantPoolGen cp = modifiedClass.getConstantPool();
 
-
 //        TRANSFORMATION
         if(choice == 2 || choice == 3){
-             TransformUtils.addCallJMultiply(modifiedClass, mg);
+            //transformation for jcuda
+            TransformUtils.addCallJMultiply(modifiedClass, mg);
         }
         else{
+            //tansformation for parallel
+
           /*  TransformUtils.addThreadPool(modifiedClass);
             TransformUtils.addExecutorServiceInit(modifiedClass, mg);
             TransformUtils.addTaskPool(modifiedClass, mg);*/
@@ -79,13 +80,11 @@ public class MainReactivateEdition {
             TransformUtils.emptyMethodLoop(modifiedClass, mg);
             short dataSize = 1000;
             TransformUtils.setNewLoopBody(modifiedClass, mg, dataSize);*/
+
 //            AnonymousClassUtils.addCallableCall(modifiedClass, classPath);
         }
 
-        String PATH_TO_OUTPUT_FILE = CLASS_PATH+CLASS_NAME+"_MOD.class";
-        modifiedClass.getJavaClass().dump(PATH_TO_OUTPUT_FILE);
-        System.out.println("*********************************** DONE! ***********************************\n" +
-                "Go to file:\t"    +PATH_TO_OUTPUT_FILE);
+        New.saveNewClassFile(modifiedClass,CLASS_PATH,CLASS_NAME);
 
     }
 

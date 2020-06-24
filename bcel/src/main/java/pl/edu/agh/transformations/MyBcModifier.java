@@ -8,10 +8,8 @@ import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
 import pl.edu.agh.transformations.util.New;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import static pl.edu.agh.transformations.util.New.SaveModifiedClass;
 
 public class MyBcModifier {
 
@@ -42,11 +40,10 @@ public class MyBcModifier {
     protected static LocalVariableGen lg;
 
 
+
     public void SetParameters(String classPath, String className, String classMethod){
         CLASS_PATH = classPath;
-        CLASS_NAME = className;
         CLASS_METHOD = classMethod;
-
         PATH_TO_INPUT_FILE = classPath + className + CLASS_SUFFIX;
         PATH_TO_OUTPUT_FILE = classPath + className + MODIFICATION_SUFFIX + CLASS_SUFFIX;
     }
@@ -78,6 +75,7 @@ public class MyBcModifier {
 
 
     public void WrapperTime() throws IOException {
+
         InitWrapper();
         int methodPositionId = (int) GetMethodIndex(methods,CLASS_METHOD);
         AddTimeWrapper(methods[methodPositionId]);
@@ -92,7 +90,7 @@ public class MyBcModifier {
 
 
 //  One of the examples from the intro/ibmbmbcel directory
-    private static void AddTimeWrapper(Method method) throws FileNotFoundException {
+    private static void AddTimeWrapper(Method method) throws IOException {
 
         // set up the construction tools
         InstructionFactory factory = new InstructionFactory(cg);
@@ -184,11 +182,21 @@ public class MyBcModifier {
 
         il.append(new RETURN());
 
-        SaveModifiedClass(cg,wrap_mg,il,false,PATH_TO_OUTPUT_FILE);
+
+/*        if(stripAttributes == true)
+            mg.stripAttributes(true);*/
+
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.addMethod(mg.getMethod());
+        il.dispose();
+
+        New.saveNewClassFile(cg,CLASS_PATH,CLASS_NAME);
+
     }
 
 
-    private static void AddNewWrapper(Method method) throws FileNotFoundException {
+    private static void AddNewWrapper(Method method) throws IOException {
 
        // set up the construction tools
         InstructionFactory factory = new InstructionFactory(cg);
@@ -221,11 +229,19 @@ public class MyBcModifier {
 
         il.append(new RETURN());
 
-        SaveModifiedClass(cg,wrap_mg,il,false,PATH_TO_OUTPUT_FILE);
+        /*        if(stripAttributes == true)
+            mg.stripAttributes(true);*/
+
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.addMethod(mg.getMethod());
+        il.dispose();
+
+        New.saveNewClassFile(cg,CLASS_PATH,CLASS_NAME);
     }
 
 
-    public void CreateJCudaMatrix2D() throws FileNotFoundException {
+    public void CreateJCudaMatrix2D() throws IOException {
         cg = new ClassGen(CLASS_NAME, "java.lang.Object","<generated>",
             Const.ACC_PUBLIC |Const.ACC_SUPER,null);
         factory = new InstructionFactory(cg);
@@ -262,7 +278,15 @@ public class MyBcModifier {
 
         il.append(new RETURN());
 
-        SaveModifiedClass(cg,mg,il,false,PATH_TO_OUTPUT_FILE);
+        /*        if(stripAttributes == true)
+            mg.stripAttributes(true);*/
+
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.addMethod(mg.getMethod());
+        il.dispose();
+
+        New.saveNewClassFile(cg,CLASS_PATH,CLASS_NAME);
 
     }
 
@@ -271,4 +295,5 @@ public class MyBcModifier {
         int methodPositionId = (int) GetMethodIndex(methods,CLASS_METHOD);
         AddNewWrapper(methods[methodPositionId]);
     }
+
 }
