@@ -8,7 +8,8 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import util.MatrixUtils;
+
+import static utils.ArrayUtils.randomIntArray2D;
 
 public class BenchmarkMatrix {
 
@@ -21,7 +22,7 @@ public class BenchmarkMatrix {
         new Runner(options).run();
     }
 
-    @Benchmark
+   /* @Benchmark
     public void MultiplySquareMatricesSerial(TestState state) {
         state.serialMultiplier.multiply();
     }
@@ -30,7 +31,7 @@ public class BenchmarkMatrix {
     public void MultiplySquareMatricesParallel(TestState state) {
         state.parallelMultiplier.multiply();
     }
-
+*/
     @Benchmark
     public void MultiplySquareMatricesJCuda(TestState state) {
         state.jcudaMultiplier.multiply();
@@ -41,10 +42,10 @@ public class BenchmarkMatrix {
     public static class TestState {
         int size = 1000;
         int bound = 5;
-        int[][] A = MatrixUtils.randomIntArrayMatrix(size, size, bound);
-        int[][] B = MatrixUtils.randomIntArrayMatrix(size, size, bound);
-        SerialMultiplier serialMultiplier = new SerialMultiplier(A, B);
-        ParallelMultiplier parallelMultiplier = new ParallelMultiplier(A, B);
+        int[][] A = randomIntArray2D(size, size, bound);
+        int[][] B = randomIntArray2D(size, size, bound);
+      /*  SerialMultiplier serialMultiplier = new SerialMultiplier(A, B);
+        ParallelMultiplier parallelMultiplier = new ParallelMultiplier(A, B);*/
         JCudaMultiplier jcudaMultiplier = new JCudaMultiplier(A,B);
     }
 }
