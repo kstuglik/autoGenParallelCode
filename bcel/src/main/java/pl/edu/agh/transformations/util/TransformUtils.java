@@ -61,10 +61,7 @@ public class TransformUtils {
         cg.addField(service.getField());
     }
 
-/*  >>> JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW
-
-------------------------------------------- addClassFields -------------------------------------------
-      type:      Type.INT       OR      object type:  Type.getType(ClassName.class)                        */
+/*  >>> JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW  */
 
 
     public static void addClassFields(ClassGen cg, ConstantPoolGen cp, Type type, String fieldName) {
@@ -73,8 +70,7 @@ public class TransformUtils {
     }
 
 
-    static private void deleteIns(InstructionList il, InstructionHandle ih,
-                                  InstructionHandle new_target) {
+    static private void deleteIns(InstructionList il, InstructionHandle ih, InstructionHandle new_target) {
         // System.out.println("deleteIns: instructionList = " + il);
         // System.out.println("   handle = " + ih);
         try {
@@ -92,46 +88,61 @@ public class TransformUtils {
     }
 
 
-    public static void addCallJMultiply(ClassGen cg, MethodGen mg) {
+    public static void addCallJMultiply(ClassGen cg, MethodGen mg) throws TargetLostException {
 
         ConstantPoolGen cp = cg.getConstantPool();
+
         InstructionFactory factory = new InstructionFactory(cg, cp);
-        InstructionList appendedInstructions = new InstructionList();
+        InstructionList il_new = new InstructionList();
+        InstructionList il_old = mg.getInstructionList();
+        Instruction i_current;
+        InstructionHandle handle;
+        InstructionHandle[] handles = il_old.getInstructionHandles();
 
-        int id_A = New.CreateArrayField("AA",mg,appendedInstructions,cp,Type.INT,2, new int[]{2,2});
-        int id_B = New.CreateArrayField("BB",mg,appendedInstructions,cp,Type.INT,2, new int[]{2,2});
+        for (int handleIndex = 0; handleIndex < handles.length; handleIndex++) {
 
-//        int id_A = New.getLoacalVariableID("A",cp,mg);
-//        int id_B = New.getLoacalVariableID("B",cp,mg);
+            handle = handles[handleIndex];
+            i_current = handle.getInstruction();
 
-        int jcm_ID = New.CreateObjectClass(
-                "jcm", "utils.JCudaMatrix",
-                appendedInstructions,factory,mg, new int[]{id_A,id_B});
+            if (i_current.getOpcode() == Const.RETURN && mg.getName().equals(mg.getName())) {
+                System.out.println("We have RETURN at inst " + mg.getName());
+            }else{
+                il_new.append(i_current);
+            }
+        }
 
-        appendedInstructions.append(new ALOAD(jcm_ID));
+        //CODE INJECTION
+        codeInjection(mg, cp, factory, il_new);
 
-        appendedInstructions.append(factory.createInvoke(
-                "utils.JCudaMatrix", "multiply",
-                new ArrayType(Type.FLOAT,1), new Type[]{},Const.INVOKEVIRTUAL));
-        LocalVariableGen lg = mg.addLocalVariable("CC", new ArrayType(Type.FLOAT, 1), null, null);
-        int id = lg.getIndex();
+        il_new.append(new RETURN());
 
-        appendedInstructions.append(new ASTORE(id));
-
-        New.PrintArray(appendedInstructions,mg,factory,id,false);
-
-        InstructionList currentList = mg.getInstructionList();
-
-        appendedInstructions.append(currentList);
-        mg.setInstructionList(appendedInstructions);
-        mg.removeNOPs();
-        updateMethodParametersScope(mg, cp);
-
+        mg.setInstructionList(il_new);
+        mg.stripAttributes(true);
         mg.setMaxStack();
         mg.setMaxLocals();
+
         cg.removeMethod(mg.getMethod());
         cg.addMethod(mg.getMethod());
 
+    }
+
+    private static void codeInjection(MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
+        int id_A;
+        int id_B;
+        int jcm_ID;
+        int id;
+        id_A = New.CreateArrayField("AA",mg,il_new,cp, Type.INT,2, new int[]{2,2});
+        id_B = New.CreateArrayField("BB",mg,il_new,cp,Type.INT,2, new int[]{2,2});
+
+        jcm_ID = New.CreateObjectClass("jcm", "utils.JCudaMatrix", il_new,factory,mg, new int[]{id_A,id_B});
+        il_new.append(new ALOAD(jcm_ID));
+
+        il_new.append(factory.createInvoke("utils.JCudaMatrix", "multiply",new ArrayType(Type.FLOAT,1), new Type[]{}, Const.INVOKEVIRTUAL));
+        LocalVariableGen lg = mg.addLocalVariable("CC", new ArrayType(Type.FLOAT, 1), null, null);
+
+        id = lg.getIndex();
+        il_new.append(new ASTORE(id));
+        New.PrintArray(il_new,mg,factory,id,false);
     }
 
 /*
@@ -142,8 +153,6 @@ CHECK IN FUTURE: id for field or variable
         forLoop[3].setInstruction(new GETSTATIC(numThreadsConstantIndex));
 
 * */
-
-
 
 /*  <<< JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW */
 
@@ -160,9 +169,7 @@ CHECK IN FUTURE: id for field or variable
         constant.setClassIndex(classNameIndex);
     }
 
-    public static void appendFieldsInstructions(InstructionList il,
-                                                 InstructionFactory factory,
-                                                 String className) {
+    public static void appendFieldsInstructions(InstructionList il, InstructionFactory factory, String className) {
         il.append(factory.createInvoke("java.lang.Runtime",
                 "getRuntime",
                 Type.getType(Runtime.class),
@@ -391,9 +398,7 @@ CHECK IN FUTURE: id for field or variable
                 .forEach(instr -> adjustInstructionTarget(instr, returnHandle, loopBeginning));
     }
 
-    private static void adjustInstructionTarget(InstructionHandle instruction,
-                                                InstructionHandle returnHandle,
-                                                InstructionHandle loopBeginning) {
+    private static void adjustInstructionTarget(InstructionHandle instruction, InstructionHandle returnHandle, InstructionHandle loopBeginning) {
         short opCode = instruction.getInstruction().getOpcode();
         BranchHandle branchHandle = (BranchHandle) instruction;
         if (opCode == Const.GOTO) {
