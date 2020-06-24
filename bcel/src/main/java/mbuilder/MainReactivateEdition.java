@@ -12,6 +12,7 @@ import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.ConstantPoolGen;
 import org.apache.bcel.generic.MethodGen;
+import org.apache.bcel.generic.TargetLostException;
 import pl.edu.agh.transformations.MyBcModifier;
 import pl.edu.agh.transformations.util.MethodUtils;
 import pl.edu.agh.transformations.util.TransformUtils;
@@ -25,7 +26,7 @@ public class MainReactivateEdition {
     private static String CLASS_PATH;
     private static String CLASS_METHOD;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, TargetLostException {
 
         CLASS_PATH = "src/main/java/mbuilder/classFiles/";
 
@@ -56,10 +57,6 @@ public class MainReactivateEdition {
         JavaClass analyzedClass = new ClassParser(CLASS_PATH+CLASS_NAME+".class").parse();
         ClassGen modifiedClass = new ClassGen(analyzedClass);
 
-        /*ClassGen modifiedClass = getModifiedClass(CLASS_METHOD, analyzedClass);
-        copyFields(analyzedClass, modifiedClass);
-        copyMethods(analyzedClass, modifiedClass);*/
-
         Method[] methods = modifiedClass.getMethods();
         int methodPositionId = (int) MyBcModifier.GetMethodIndex(methods,CLASS_METHOD);
         Method transformedMethod = methods[methodPositionId];//        Method transformedMethod = modifiedClass.getMethodAt(2);
@@ -73,20 +70,17 @@ public class MainReactivateEdition {
              TransformUtils.addCallJMultiply(modifiedClass, mg);
         }
         else{
-            TransformUtils.addThreadPool(modifiedClass);
+          /*  TransformUtils.addThreadPool(modifiedClass);
             TransformUtils.addExecutorServiceInit(modifiedClass, mg);
-            TransformUtils.addTaskPool(modifiedClass, mg);
+            TransformUtils.addTaskPool(modifiedClass, mg);*/
             TransformUtils.addFutureResultsList(modifiedClass, mg);
-            TransformUtils.copyLoopToMethod(modifiedClass, mg);
+            /*TransformUtils.copyLoopToMethod(modifiedClass, mg);
             TransformUtils.changeLoopLimitToNumberOfThreads(modifiedClass, mg);
             TransformUtils.emptyMethodLoop(modifiedClass, mg);
             short dataSize = 1000;
-            TransformUtils.setNewLoopBody(modifiedClass, mg, dataSize);
+            TransformUtils.setNewLoopBody(modifiedClass, mg, dataSize);*/
 //            AnonymousClassUtils.addCallableCall(modifiedClass, classPath);
         }
-
-        mg.setMaxStack();
-        mg.setMaxLocals();
 
         String PATH_TO_OUTPUT_FILE = CLASS_PATH+CLASS_NAME+"_MOD.class";
         modifiedClass.getJavaClass().dump(PATH_TO_OUTPUT_FILE);
