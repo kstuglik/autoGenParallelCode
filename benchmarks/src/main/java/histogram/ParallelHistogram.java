@@ -8,18 +8,18 @@ public class ParallelHistogram {
 
     private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
 
-    private final int[] data;
-    private final int[] results;
+    private final float[] data;
+    private final float[] results;
 
-    public ParallelHistogram(int[] data, int limit) {
+    public ParallelHistogram(float[] data, int N) {
         this.data = data;
-        results = new int[limit + 1];
+        results = new float[N];
     }
 
     public void calculate() {
         ExecutorService service = Executors.newFixedThreadPool(NUM_THREADS);
-        List<Callable<int[]>> tasks = new LinkedList<>();
-        List<Future<int[]>> partialResults = new LinkedList<>();
+        List<Callable<float[]>> tasks = new LinkedList<>();
+        List<Future<float[]>> partialResults = new LinkedList<>();
         int dataSize = data.length;
         for (int i = 0; i < NUM_THREADS; i++) {
             int start = i * (dataSize / NUM_THREADS);
@@ -36,9 +36,9 @@ public class ParallelHistogram {
             e.printStackTrace();
         }
         service.shutdown();
-        for (Future<int[]> partialResult : partialResults) {
+        for (Future<float[]> partialResult : partialResults) {
             try {
-                int[] part = partialResult.get();
+                float[] part = partialResult.get();
                 for (int i = 0; i < results.length; i++) {
                     results[i] += part[i];
                 }
@@ -48,14 +48,14 @@ public class ParallelHistogram {
         }
     }
 
-    public int[] getResult() {
+    public float[] getResult() {
         return results;
     }
 
-    private int[] processChunk(int start, int stop) {
-        int[] partialResult = new int[results.length];
+    private float[] processChunk(int start, int stop) {
+        float[] partialResult = new float[results.length];
         for (int i = start; i <= stop; i++) {
-            partialResult[data[i]]++;
+            partialResult[i] = data[i]+ 1;
         }
         return partialResult;
     }

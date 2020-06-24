@@ -8,6 +8,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import utils.ArrayUtils;
 
 import java.util.Random;
 
@@ -42,20 +43,12 @@ public class BenchmarkHistogram {
 
     @State(value = Scope.Benchmark)
     public static class TestState {
-        int size = 100;
-        int dataBound = 5;
-        int data[] = initArray();
-        SerialHistogram serialHistogram = new SerialHistogram(data, dataBound);
-        ParallelHistogram parallelHistogram = new ParallelHistogram(data, dataBound);
-        JCudaHistogram jcudaHistogram = new JCudaHistogram(data, dataBound);
+        int N = 100;
+        int range = 5;
+        float[] data = ArrayUtils.randomFloatArray1D(N,range);
+        SerialHistogram serialHistogram = new SerialHistogram(data, range);
+        ParallelHistogram parallelHistogram = new ParallelHistogram(data, range);
+        JCudaHistogram jcudaHistogram = new JCudaHistogram(data, range);
 
-        private int[] initArray() {
-            int arr[] = new int[size];
-            Random random = new Random();
-            for (int i = 0; i < size; i++) {
-                arr[i] = random.nextInt(dataBound + 1);
-            }
-            return arr;
-        }
     }
 }
