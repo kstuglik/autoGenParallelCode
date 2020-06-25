@@ -27,9 +27,10 @@ public class MainReactivateEdition {
 
         CLASS_PATH = "src/main/java/mbuilder/classFiles/";
 
-        /*choice:2 width option:1 or 3 => Example_MOD.class*/
-        /*choice:1 width option: NONE => nbody*/
-        /*choice:3 width option: 4 => add invoke methode jcm.multiply*/
+        /*choice:2 and option:1 or 3 => Example_MOD.class*/
+        /*choice:1 and option: NONE => nbody*/
+        /*choice:3 and option: 4 => add invoke methode jcm.multiply*/
+
 
         int choice = 3;
         int option = 4; //operation variant for insertion instructions
@@ -95,28 +96,6 @@ public class MainReactivateEdition {
             System.err.println(ERR_MESSAGE + e.getClass() + "\n\t" + e.getMessage());
         }
 
-    }
-
-    private static ClassGen getModifiedClass(String className, JavaClass analyzedClass) {
-        ClassGen oldClass = new ClassGen(analyzedClass);
-        return new ClassGen(analyzedClass.getClassName() ,
-                            Object.class.getName(),
-                            "<generated>",
-                            Const.ACC_PUBLIC,
-                            null,
-                            oldClass.getConstantPool());
-    }
-
-    private static void copyMethods(JavaClass oldClass, ClassGen newClass) {
-        Arrays.stream(oldClass.getMethods())
-                .forEach(newClass::addMethod);
-        Arrays.stream(newClass.getMethods())
-                .forEach(method -> MethodUtils.switchConstantRefsToNewClass(newClass, method));
-    }
-
-    private static void copyFields(JavaClass oldClass, ClassGen newClass) {
-        Arrays.stream(oldClass.getFields())
-                .forEach(newClass::addField);
     }
 
 }

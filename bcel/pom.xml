@@ -33,19 +33,19 @@
         <dependency>
             <groupId>org.jcuda</groupId>
             <artifactId>jcuda</artifactId>
-            <version>10.2.0</version>
+            <version>0.9.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.jcuda/jcublas -->
         <dependency>
             <groupId>org.jcuda</groupId>
             <artifactId>jcublas</artifactId>
-            <version>10.2.0</version>
+            <version>0.9.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.jcuda/jcufft -->
         <dependency>
             <groupId>org.jcuda</groupId>
             <artifactId>jcufft</artifactId>
-            <version>10.2.0</version>
+            <version>0.9.1</version>
         </dependency>
 
         <dependency>

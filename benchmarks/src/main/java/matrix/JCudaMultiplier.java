@@ -6,6 +6,8 @@ import jcuda.jcublas.JCublas;
 
 import java.util.Arrays;
 
+import static utils.ArrayUtils.randomIntArray2D;
+
 public class JCudaMultiplier {
 
     float matrix_A[],matrix_B[],matrix_C[];
@@ -85,4 +87,14 @@ public class JCudaMultiplier {
         System.out.println(Arrays.toString(result));
         return result;
     }
+
+/*    public static void main(String[] args) {
+        int size = 1000;
+        int bound = 5;
+        int[][] A = randomIntArray2D(size, size, bound);
+        int[][] B = randomIntArray2D(size, size, bound);
+        JCudaMultiplier jcudaMultiplier = new JCudaMultiplier(A,B);
+        float[] C = jcudaMultiplier.multiply();
+        System.out.println(Arrays.toString(C));
+    }*/
 }
