@@ -21,30 +21,31 @@ public class MainReactivateEdition {
     private static String CLASS_NAME;
     private static String CLASS_PATH;
     private static String CLASS_METHOD;
+    private static String ERR_MESSAGE = "IT WAS NOT POSSIBLE to add a new piece of code!\n\t";
 
     public static void main(String[] args) throws IOException, TargetLostException {
 
         CLASS_PATH = "src/main/java/mbuilder/classFiles/";
 
-/*        1 nbody parallel */
-/*        3 jcuda for multiply*/
+        /*choice:2 width option:1 or 3 => Example_MOD.class*/
+        /*choice:1 width option: NONE => nbody*/
+        /*choice:3 width option: 4 => add invoke methode jcm.multiply*/
 
         int choice = 3;
+        int option = 4; //operation variant for insertion instructions
 
         switch (choice){
             case 1:// NBODY CASE
                 CLASS_NAME = "IntegrationTestClass";
                 CLASS_METHOD = "moveBodies";
                 break;
-
-            case 2:// NEW CASE FOR JCUDA (activities in progress)
-                CLASS_NAME = "Matrix2D_v2";
-                CLASS_METHOD = "multiply";
-                break;
-
-            case 3:
+            case 2:
                 CLASS_NAME = "Example";
                 CLASS_METHOD = "doSomething";
+                break;
+            case 3:
+                CLASS_NAME = "Multiply";
+                CLASS_METHOD = "multiply";
                 break;
 
             default:
@@ -64,17 +65,18 @@ public class MainReactivateEdition {
         ConstantPoolGen cp = modifiedClass.getConstantPool();
 
 //        TRANSFORMATION
-        if(choice == 2 || choice == 3){
+
+        try {
             //transformation for jcuda
-            TransformUtils.addCallJMultiply(modifiedClass, mg);
-        }
-        else{
-            //tansformation for parallel
+            if (choice == 2 || choice == 3 || choice == 4)
+                TransformUtils.insertNewInstruciton(modifiedClass, mg, option);
+            else {
+                //tansformation for parallel
 
           /*  TransformUtils.addThreadPool(modifiedClass);
             TransformUtils.addExecutorServiceInit(modifiedClass, mg);
             TransformUtils.addTaskPool(modifiedClass, mg);*/
-            TransformUtils.addFutureResultsList(modifiedClass, mg);
+                TransformUtils.addFutureResultsList(modifiedClass, mg);
             /*TransformUtils.copyLoopToMethod(modifiedClass, mg);
             TransformUtils.changeLoopLimitToNumberOfThreads(modifiedClass, mg);
             TransformUtils.emptyMethodLoop(modifiedClass, mg);
@@ -82,9 +84,16 @@ public class MainReactivateEdition {
             TransformUtils.setNewLoopBody(modifiedClass, mg, dataSize);*/
 
 //            AnonymousClassUtils.addCallableCall(modifiedClass, classPath);
-        }
+            }
 
-        New.saveNewClassFile(modifiedClass,CLASS_PATH,CLASS_NAME);
+            New.saveNewClassFile(modifiedClass, CLASS_PATH, CLASS_NAME);
+        } catch (IOException e) {
+            System.err.println(ERR_MESSAGE + e.getClass() + "\n\t" + e.getMessage());
+        } catch (IllegalStateException e) {
+            System.err.println(ERR_MESSAGE + e.getClass() + "\n\t" + e.getMessage());
+        } catch (Exception e) {
+            System.err.println(ERR_MESSAGE + e.getClass() + "\n\t" + e.getMessage());
+        }
 
     }
 
@@ -109,8 +118,5 @@ public class MainReactivateEdition {
         Arrays.stream(oldClass.getFields())
                 .forEach(newClass::addField);
     }
-
-/*    ByteCodeModifier bcn = new ByteCodeModifier();
-    bcn.modifyBytecode(CLASS_PATH, CLASS_NAME, 2, (short) 1000);*/
 
 }

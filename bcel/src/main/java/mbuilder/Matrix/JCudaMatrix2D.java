@@ -9,14 +9,17 @@ package mbuilder.Matrix;
 
 import utils.JCudaMatrix;
 
+import java.util.Arrays;
+
 public class JCudaMatrix2D {
 
     public static void main(String[] args) {
 
-        int[][] A = {{1},{1}};
-        int[][] B = {{1},{1}};
+        int[][] A = {{2,4},{1,3}};
+        int[][] B = {{2,4},{1,3}};
 
         JCudaMatrix jcm = new JCudaMatrix(A,B);
         float[] C = jcm.multiply();
+        System.out.println(Arrays.toString(C));
     }
 }
