@@ -2,6 +2,7 @@ package pl.edu.agh.transformations.util;
 
 import org.apache.bcel.classfile.*;
 import org.apache.bcel.generic.ClassGen;
+import pl.edu.agh.transformations.Constants;
 
 import java.util.Arrays;
 import java.util.Objects;

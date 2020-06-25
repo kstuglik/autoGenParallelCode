@@ -3,6 +3,7 @@ package pl.edu.agh.transformations.util;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.*;
 import org.apache.bcel.generic.*;
+import pl.edu.agh.transformations.Constants;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

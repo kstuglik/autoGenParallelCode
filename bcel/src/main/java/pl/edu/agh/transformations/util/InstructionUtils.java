@@ -1,6 +1,7 @@
 package pl.edu.agh.transformations.util;
 
 import org.apache.bcel.generic.*;
+import pl.edu.agh.transformations.Constants;
 
 import java.util.Arrays;
 

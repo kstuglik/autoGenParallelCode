@@ -3,6 +3,7 @@ package pl.edu.agh.transformations.util;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ConstantFieldref;
 import org.apache.bcel.generic.*;
+import pl.edu.agh.transformations.Constants;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,13 +34,13 @@ public class TransformUtils {
         String className = classGen.getClassName();
         appendFieldsInstructions(instructionList, instructionFactory, className);
         MethodGen methodGen = new MethodGen(Const.ACC_STATIC,
-                                            Type.VOID,
-                                            Type.NO_ARGS,
-                                            new String[0],
-                                            Const.STATIC_INITIALIZER_NAME,
-                                            className,
-                                            instructionList,
-                                            constantPoolGen);
+                Type.VOID,
+                Type.NO_ARGS,
+                new String[0],
+                Const.STATIC_INITIALIZER_NAME,
+                className,
+                instructionList,
+                constantPoolGen);
         methodGen.stripAttributes(true);
         methodGen.setMaxLocals();
         methodGen.setMaxStack();
@@ -61,8 +62,7 @@ public class TransformUtils {
         cg.addField(service.getField());
     }
 
-/*  >>> JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW  */
-
+    /*  START JCUDA-SECTION  */
 
     public static void addClassFields(ClassGen cg, ConstantPoolGen cp, Type type, String fieldName) {
         FieldGen newField = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC,type,fieldName,cp);
@@ -77,76 +77,84 @@ public class TransformUtils {
             il.delete(ih);
         } catch (TargetLostException e) {
             InstructionHandle[] targets = e.getTargets();
-            for (int i = 0; i < targets.length; i++) {
-                InstructionTargeter[] targeters = targets[i].getTargeters();
+            for (InstructionHandle target : targets) {
+                InstructionTargeter[] targeters = target.getTargeters();
 
-                for (int j = 0; j < targeters.length; j++) {
-                    targeters[j].updateTarget(targets[i], new_target);
+                for (InstructionTargeter targeter : targeters) {
+                    targeter.updateTarget(target, new_target);
                 }
             }
         }
     }
 
 
-    public static void addCallJMultiply(ClassGen cg, MethodGen mg) throws TargetLostException {
+    public static void insertNewInstruciton(ClassGen cg, MethodGen mg, int option) throws Exception, IllegalStateException {
 
         ConstantPoolGen cp = cg.getConstantPool();
 
         InstructionFactory factory = new InstructionFactory(cg, cp);
+
         InstructionList il_new = new InstructionList();
         InstructionList il_old = mg.getInstructionList();
+
         Instruction i_current;
+
         InstructionHandle handle;
         InstructionHandle[] handles = il_old.getInstructionHandles();
 
-        /* rewrite instructions until you meet RETURN,
-        then add new instructions and finally add RETURN
-        this assumption is weak,
-        if the conditional instruction is the last instruction in the method,
+        /* rewrite instructions until you meet RETURN,then add new instructions and finally add RETURN.
+        WEAKNESS: if the conditional instruction is the last instruction in the method,
         then there are two places where RETURN */
 
-        for (int handleIndex = 0; handleIndex < handles.length; handleIndex++) {
+        for (InstructionHandle instructionHandle : handles) {
 
-            handle = handles[handleIndex];
-            i_current = handle.getInstruction();
+            handle = instructionHandle;i_current = handle.getInstruction();
 
-            if (i_current.getOpcode() == Const.RETURN && mg.getName().equals(mg.getName())) {
-                System.out.println("We have RETURN at inst " + mg.getName());
-            }else{
-                il_new.append(i_current);
-            }
+            System.out.println("opcode: " + i_current.getOpcode() +  "\tname: " + i_current.getName());
+
+            if (i_current.getOpcode() == Const.RETURN
+                    && mg.getName().equals(mg.getName())) {
+                System.out.println(i_current.getOpcode() + " appears in " + mg.getName());
+            } else il_new.append(i_current);
+
         }
 
-        //CODE INJECTION
-        //codeInjection(mg, cp, factory, il_new);
 
-        int id = New.getLoacalVariableID("luckyNumber",cp,mg);
+        System.out.println("last instruction: " + handles[handles.length-1].getInstruction().getOpcode());
 
-        il_new.append(factory.createFieldAccess(
-                "java.lang.System", "out",
-                new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
-        il_new.append(new DUP());
-        il_new.append(new ALOAD(id));
-        il_new.append(factory.createInvoke("java.io.PrintStream", "println",
-                Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
+        switch (option) {
+
+            case 1: //CODE INJECTION - instruction jcm.multiply
+                injectJcmMultiply(mg, cp, factory, il_new);
+                break;
+            case 2: //CODE INJECTION - printArray
+                injectPrintArrName(cg, mg, factory, il_new);
+                break;
+            case 3: //CODE INJECTION - get id luckyNumber
+                injectPrintVarName(mg, cp, factory, il_new);
+                break;
+            case 4: //CODE INJECTION - instruction jcm.multiply(A,B)
+                injectJcmMultiplyAB(cg, mg, cp, factory, il_new);
+                break;
+            default:
+                System.out.println("wrong option!");
+                break;
+        }
 
         il_new.append(new RETURN());
-
         mg.setInstructionList(il_new);
         mg.stripAttributes(true);
         mg.setMaxStack();
         mg.setMaxLocals();
-
         cg.removeMethod(mg.getMethod());
         cg.addMethod(mg.getMethod());
+        il_new.dispose();//what's this for?
 
     }
 
-    private static void codeInjection(MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
-        int id_A;
-        int id_B;
-        int jcm_ID;
-        int id;
+    private static void injectJcmMultiply(MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
+        int id_A, id_B, jcm_ID, id;
+
         id_A = New.CreateArrayField("AA",mg,il_new,cp, Type.INT,2, new int[]{2,2});
         id_B = New.CreateArrayField("BB",mg,il_new,cp,Type.INT,2, new int[]{2,2});
 
@@ -161,6 +169,39 @@ public class TransformUtils {
         New.PrintArray(il_new,mg,factory,id,false);
     }
 
+    private static void injectJcmMultiplyAB(ClassGen cg, MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
+        int id_A, id_B, jcm_ID, id;
+
+        id_A = LocalVariableUtils.findLocalVariableByName(Constants.ARRAY_1 ,mg.getLocalVariableTable(cp)).getIndex();
+        id_B = LocalVariableUtils.findLocalVariableByName(Constants.ARRAY_2 ,mg.getLocalVariableTable(cp)).getIndex();
+
+
+        jcm_ID = New.CreateObjectClass("jcm", "utils.JCudaMatrix", il_new,factory,mg, new int[]{id_A,id_B});
+        il_new.append(new ALOAD(jcm_ID));
+
+        il_new.append(factory.createInvoke("utils.JCudaMatrix", "multiply",new ArrayType(Type.FLOAT,1), new Type[]{}, Const.INVOKEVIRTUAL));
+        LocalVariableGen lg = mg.addLocalVariable("CC", new ArrayType(Type.FLOAT, 1), null, null);
+
+        id = lg.getIndex();
+        il_new.append(new ASTORE(id));
+        New.PrintArray(il_new,mg,factory,id,true);
+    }
+
+    private static void injectPrintArrName(ClassGen cg, MethodGen mg, InstructionFactory factory, InstructionList il_new) {
+        int id = ConstantPoolUtils.getFieldIndex(cg, "C");
+        New.PrintArray(il_new, mg, factory, id, false);
+    }
+
+    private static void injectPrintVarName(MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
+        int id = New.getLoacalVariableID("luckyNumber",cp,mg);
+        il_new.append(factory.createFieldAccess("java.lang.System", "out",
+                new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
+        il_new.append(new DUP());
+        il_new.append(new ALOAD(id));
+        il_new.append(factory.createInvoke("java.io.PrintStream", "println",
+                Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
+    }
+
     public void printSomething(InstructionList il_new, InstructionFactory factory, ConstantPoolGen cp){
         il_new.append(factory.createFieldAccess(
                 "java.lang.System", "out",
@@ -171,16 +212,13 @@ public class TransformUtils {
                 Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
     }
 
-/*
-CHECK IN FUTURE: id for field or variable
-
+/*CHECK IN FUTURE: id for field or variable
         int id = ConstantPoolUtils.getFieldIndex(cg,"jcm");
         int id = New.getLoacalVariableID("jcm",cp,mg);
-        forLoop[3].setInstruction(new GETSTATIC(numThreadsConstantIndex));
+        forLoop[3].setInstruction(new GETSTATIC(numThreadsConstantIndex));*/
 
-* */
 
-/*  <<< JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW JCUDA NEW */
+    /*  END JCUDA-SECTION  */
 
     private static void retargetStaticPuts(ClassGen cg, InstructionList il) {
         int classNameIndex = cg.getClassNameIndex();

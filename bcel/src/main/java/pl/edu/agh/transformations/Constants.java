@@ -1,7 +1,8 @@
-package pl.edu.agh.transformations.util;
+package pl.edu.agh.transformations;
 
 public class Constants {
 
+    /*PARALLEL CONSTSANTS*/
     public static final String NUMBER_OF_THREADS_CONSTANT_NAME = "NUM_THREADS";
     public static final String EXECUTOR_SERVICE_CONSTANT_NAME = "SERVICE";
     public static final String START_RANGE_CONSTANT_NAME = "START_RANGE";
@@ -14,4 +15,8 @@ public class Constants {
     public static final String LOOP_ITERATOR_NAME = "i";
 
     public static final String GOTO_INSTRUCTION_NAME = "goto";
+
+    /*JCUDA CONSTANTS*/
+    public static final String ARRAY_1 = "var1";
+    public static final String ARRAY_2 = "var2";
 }

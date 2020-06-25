@@ -73,14 +73,14 @@ public class New {
                 "java.lang.System", "out",
                 new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
 
-        il.append(new DUP2());
+        il.append(isMultiDim == true ? new DUP() : new DUP2());
+
         il.append(new DLOAD(id_Array));
 
-        String printNameMethod = isMultiDim == false ? "toString" : "deepToString";
-
         il.append(factory.createInvoke(
-                "java.util.Arrays", printNameMethod,
-                Type.DOUBLE, new Type[]{Type.STRING}, Const.INVOKESTATIC));
+                "java.util.Arrays",
+                isMultiDim == true ? "toString" : "deepToString",
+                Type.FLOAT, new Type[]{Type.STRING}, Const.INVOKESTATIC));
 
         il.append(factory.createInvoke(
                 "java.io.PrintStream", "print",
@@ -90,11 +90,9 @@ public class New {
 
     public static void saveNewClassFile(ClassGen modifiedClass, String CLASS_PATH, String CLASS_NAME) throws IOException {
         String PATH_TO_OUTPUT_FILE = CLASS_PATH+CLASS_NAME+"_MOD.class";
-        try{
-            modifiedClass.getJavaClass().dump(PATH_TO_OUTPUT_FILE);
-            System.out.println("*********************************** DONE! ***********************************\n" +
-                    "Go to file:\t"    +PATH_TO_OUTPUT_FILE);
-        } catch (IOException e) { throw new RuntimeException("Error during modified class save.", e); }
+        modifiedClass.getJavaClass().dump(PATH_TO_OUTPUT_FILE);
+        System.out.println("*********************************** DONE! ***********************************\n" +
+                "Go to file:\t"    +PATH_TO_OUTPUT_FILE);
     }
 
     public static int getLoacalVariableID(String fieldName, ConstantPoolGen cp, MethodGen mg) {
