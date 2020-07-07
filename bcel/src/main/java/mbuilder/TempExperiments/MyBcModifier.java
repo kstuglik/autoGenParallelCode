@@ -1,4 +1,4 @@
-package pl.edu.agh.transformations;
+package mbuilder.TempExperiments;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ClassParser;
@@ -6,6 +6,7 @@ import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
+import pl.edu.agh.transformations.LaunchProperties;
 import pl.edu.agh.transformations.util.New;
 
 import java.io.IOException;

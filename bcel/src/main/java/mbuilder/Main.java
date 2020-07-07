@@ -63,7 +63,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        menu(true);
+        menu(false);
         ByteCodeModifier o = new ByteCodeModifier();
         o.initialize();
         o.transformation();
