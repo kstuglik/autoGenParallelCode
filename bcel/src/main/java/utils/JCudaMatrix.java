@@ -22,8 +22,8 @@ public class JCudaMatrix {
             throw new RuntimeException("Cannot perform multiplication because dimensions are not equal.");
         }
 
-        this.matrix_A = ArrayUtils.flatten(matrix_AA);
-        this.matrix_B = ArrayUtils.flatten(matrix_BB);
+        this.matrix_A = ArrayUtils.flattenIARRAY2D(matrix_AA);
+        this.matrix_B = ArrayUtils.flattenIARRAY2D(matrix_BB);
 
         cols_A = matrix_AA[0].length;
         rows_A = matrix_AA.length;
