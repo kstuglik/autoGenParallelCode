@@ -1,4 +1,4 @@
-package mbuilder;
+package intro2useBCEL.useful;
 
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;

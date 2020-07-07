@@ -1,6 +1,17 @@
-package pl.edu.agh.transformations;
+package pl.edu.agh.transformations.util;
 
-public class Constants {
+public class Parameters {
+
+    public static String CLASS_NAME;
+    public static String CLASS_PATH;
+    public static String CLASS_METHOD;
+    public static final String ERR_MESSAGE = "IT WAS NOT POSSIBLE to add a new piece of code!\n\t";
+
+    public static int CHOICE;
+    public static int OPTION;
+
+    public static final String MODIFICATION_SUFFIX = "_MOD";
+    public static final String CLASS_SUFFIX = ".class";
 
     /*PARALLEL CONSTSANTS*/
     public static final String NUMBER_OF_THREADS_CONSTANT_NAME = "NUM_THREADS";

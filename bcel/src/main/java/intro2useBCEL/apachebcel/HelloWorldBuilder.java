@@ -2,7 +2,7 @@
 modified example from: https://github.com/apache/commons-bcel/blob/master/src/examples/HelloWorldBuilder.java
 */
 
-package intro.apachebcel;
+package intro2useBCEL.apachebcel;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;

@@ -1,4 +1,4 @@
-package mbuilder;
+package mbuilder.TempExperiments;
 
 import utils.JCudaMatrix;
 

@@ -13,9 +13,6 @@ import java.io.IOException;
 
 public class MyBcModifier {
 
-    private static final String MODIFICATION_SUFFIX = "_mod";
-    private static final String CLASS_SUFFIX = ".class";
-
     private static String CLASS_PATH;
     private static String CLASS_NAME;
     private static String CLASS_METHOD;
@@ -44,8 +41,8 @@ public class MyBcModifier {
     public void SetParameters(String classPath, String className, String classMethod){
         CLASS_PATH = classPath;
         CLASS_METHOD = classMethod;
-        PATH_TO_INPUT_FILE = classPath + className + CLASS_SUFFIX;
-        PATH_TO_OUTPUT_FILE = classPath + className + MODIFICATION_SUFFIX + CLASS_SUFFIX;
+        PATH_TO_INPUT_FILE = classPath + className + LaunchProperties.CLASS_SUFFIX;
+        PATH_TO_OUTPUT_FILE = classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX;
     }
 
 
@@ -54,6 +51,7 @@ public class MyBcModifier {
         jclass = new ClassParser(PATH_TO_INPUT_FILE).parse();
         cg = new ClassGen(jclass);
         methods = jclass.getMethods();
+        CLASS_NAME = cg.getClassName();
 
     }
 
@@ -191,7 +189,7 @@ public class MyBcModifier {
         cg.addMethod(mg.getMethod());
         il.dispose();
 
-        New.saveNewClassFile(cg,CLASS_PATH,CLASS_NAME);
+        New.saveNewClassFile(cg);
 
     }
 
@@ -237,7 +235,7 @@ public class MyBcModifier {
         cg.addMethod(mg.getMethod());
         il.dispose();
 
-        New.saveNewClassFile(cg,CLASS_PATH,CLASS_NAME);
+        New.saveNewClassFile(cg);
     }
 
 
@@ -286,7 +284,7 @@ public class MyBcModifier {
         cg.addMethod(mg.getMethod());
         il.dispose();
 
-        New.saveNewClassFile(cg,CLASS_PATH,CLASS_NAME);
+        New.saveNewClassFile(cg);
 
     }
 

@@ -1,4 +1,4 @@
-package intro.geekyarticles;
+package intro2useBCEL.geekyarticles;
 
 public class TestClass {
     public static void main(String[] args) {

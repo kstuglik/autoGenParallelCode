@@ -7,7 +7,7 @@ How does it work?
 3: copy the code from bcel/target/classes/intro.ibmbcel/intro.ibmbcel.StringBuilder.class into a new *.java file
 */
 
-package intro.ibmbcel;
+package intro2useBCEL.ibmbcel;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ClassParser;

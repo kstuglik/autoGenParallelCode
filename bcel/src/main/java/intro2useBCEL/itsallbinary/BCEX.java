@@ -1,7 +1,7 @@
 /*
 SOURCE: https://itsallbinary.com/do-your-own-static-code-analysis-programmatically-in-java-similar-to-findbugs-using-apache-bcel/
 */
-package intro.itsallbinary;
+package intro2useBCEL.itsallbinary;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.Repository;

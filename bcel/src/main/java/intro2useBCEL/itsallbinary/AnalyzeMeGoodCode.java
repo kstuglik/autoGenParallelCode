@@ -1,4 +1,4 @@
-package intro.itsallbinary;
+package intro2useBCEL.itsallbinary;
 
 public class AnalyzeMeGoodCode {
 

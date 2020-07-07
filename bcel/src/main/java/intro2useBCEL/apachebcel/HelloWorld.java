@@ -1,4 +1,4 @@
-package intro.apachebcel;
+package intro2useBCEL.apachebcel;
 //
 // Source code recreated from a .class file by IntelliJ IDEA
 // (powered by Fernflower decompiler)

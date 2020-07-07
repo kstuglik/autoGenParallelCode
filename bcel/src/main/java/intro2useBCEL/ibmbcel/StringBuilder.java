@@ -7,7 +7,7 @@ java intro.ibmbcel.StringBuilder.java 1000 2000
 recompile
 */
 
-package intro.ibmbcel;
+package intro2useBCEL.ibmbcel;
 public class StringBuilder
 {
     String buildString(int length) {

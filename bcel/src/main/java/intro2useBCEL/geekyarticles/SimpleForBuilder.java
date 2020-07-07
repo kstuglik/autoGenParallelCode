@@ -1,4 +1,4 @@
-package intro.geekyarticles;/*
+package intro2useBCEL.geekyarticles;/*
 modified example from: http://www.geekyarticles.com/2011/08/manipulating-java-class-files-with-bcel_25.html
 */
 
