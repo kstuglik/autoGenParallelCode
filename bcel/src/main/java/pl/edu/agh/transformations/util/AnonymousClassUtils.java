@@ -3,7 +3,7 @@ package pl.edu.agh.transformations.util;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.*;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.transformations.Constants;
+import pl.edu.agh.transformations.LaunchProperties;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,9 +36,9 @@ public class AnonymousClassUtils {
         ConstantPoolGen constantPool = classGen.getConstantPool();
         LocalVariableTable localVariableTable = methodGen.getLocalVariableTable(constantPool);
         InstructionFactory instructionFactory = new InstructionFactory(classGen, constantPool);
-        int tasksListIndex = LocalVariableUtils.findLocalVariableByName(Constants.TASK_POOL_NAME, localVariableTable).getIndex();
-        int startIndex = LocalVariableUtils.findLocalVariableByName(Constants.START_INDEX_VARIABLE_NAME, localVariableTable).getIndex();
-        int endIndex = LocalVariableUtils.findLocalVariableByName(Constants.END_INDEX_VARIABLE_NAME, localVariableTable).getIndex();
+        int tasksListIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.TASK_POOL_NAME, localVariableTable).getIndex();
+        int startIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.START_INDEX_VARIABLE_NAME, localVariableTable).getIndex();
+        int endIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_INDEX_VARIABLE_NAME, localVariableTable).getIndex();
 
         InstructionList addedInstructionsList = new InstructionList();
         addedInstructionsList.append(new ALOAD(tasksListIndex));
@@ -57,7 +57,7 @@ public class AnonymousClassUtils {
 
         forLoop = LoopUtils.getForLoop(methodGen);
         InstructionHandle lastLoopHandle = forLoop[forLoop.length - 1];
-        int executorIndex = ConstantPoolUtils.getFieldIndex(classGen, Constants.EXECUTOR_SERVICE_CONSTANT_NAME);
+        int executorIndex = ConstantPoolUtils.getFieldIndex(classGen, LaunchProperties.EXECUTOR_SERVICE_CONSTANT_NAME);
         InstructionList invokeInstructions = new InstructionList();
         invokeInstructions.append(new GETSTATIC(executorIndex));
         invokeInstructions.append(new ALOAD(tasksListIndex));
@@ -67,7 +67,7 @@ public class AnonymousClassUtils {
                 new Type[]{Type.getType("Ljava/util/Collection;")},
                 Const.INVOKEINTERFACE));
         //STORE in partialResults
-        int resultsIndex = LocalVariableUtils.findLocalVariableByName(Constants.RESULTS_POOL_NAME, localVariableTable).getIndex();
+        int resultsIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.RESULTS_POOL_NAME, localVariableTable).getIndex();
         invokeInstructions.append(new ASTORE(resultsIndex));
 //        invokeInstructions.append(new POP());
 

@@ -2,7 +2,7 @@ package pl.edu.agh.transformations.util;
 
 import org.apache.bcel.classfile.*;
 import org.apache.bcel.generic.ClassGen;
-import pl.edu.agh.transformations.Constants;
+import pl.edu.agh.transformations.LaunchProperties;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -35,7 +35,7 @@ public class ConstantPoolUtils {
         ConstantMethodref subTaskMethod = Arrays.stream(cp.getConstantPool())
                 .filter(ConstantMethodref.class::isInstance)
                 .map(ConstantMethodref.class::cast)
-                .filter(method -> Constants.SUBTASK_METHOD_NAME.equals(getConstantName(cp, method)))
+                .filter(method -> LaunchProperties.SUBTASK_METHOD_NAME.equals(getConstantName(cp, method)))
                 .findAny()
                 .orElseThrow(() -> new IllegalStateException("No subTask method found."));
         for (int i = 1; i < cp.getConstantPool().length; i++) {

@@ -1,7 +1,7 @@
 package pl.edu.agh.transformations.util;
 
 import org.apache.bcel.generic.*;
-import pl.edu.agh.transformations.Constants;
+import pl.edu.agh.transformations.LaunchProperties;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +22,7 @@ public class LoopUtils {
 
     static InstructionHandle getGoto(InstructionHandle[] ih) {
         return Arrays.stream(ih)
-                .filter(handle -> Constants.GOTO_INSTRUCTION_NAME.equals(handle.getInstruction().getName()))
+                .filter(handle -> LaunchProperties.GOTO_INSTRUCTION_NAME.equals(handle.getInstruction().getName()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Method passed to 'getForLoop' does not have for loop."));
     }

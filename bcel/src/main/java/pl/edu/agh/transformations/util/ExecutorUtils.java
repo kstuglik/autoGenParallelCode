@@ -2,7 +2,7 @@ package pl.edu.agh.transformations.util;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.transformations.Constants;
+import pl.edu.agh.transformations.LaunchProperties;
 
 public class ExecutorUtils {
 
@@ -13,8 +13,8 @@ public class ExecutorUtils {
         InstructionList il = mg.getInstructionList();
         InstructionHandle[] forLoop = LoopUtils.getForLoop(mg);
         InstructionHandle lastLoopHandle = forLoop[forLoop.length - 1];
-        int executorIndex = ConstantPoolUtils.getFieldIndex(cg, Constants.EXECUTOR_SERVICE_CONSTANT_NAME);
-        int tasksListIndex = LocalVariableUtils.findLocalVariableByName(Constants.TASK_POOL_NAME, mg.getLocalVariableTable(cp)).getIndex();
+        int executorIndex = ConstantPoolUtils.getFieldIndex(cg, LaunchProperties.EXECUTOR_SERVICE_CONSTANT_NAME);
+        int tasksListIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.TASK_POOL_NAME, mg.getLocalVariableTable(cp)).getIndex();
         InstructionList invokeInstructions = new InstructionList();
         invokeInstructions.append(new GETSTATIC(executorIndex));
         invokeInstructions.append(new ALOAD(tasksListIndex));

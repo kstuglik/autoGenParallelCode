@@ -2,6 +2,7 @@ package pl.edu.agh.transformations.util;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
+import pl.edu.agh.transformations.LaunchProperties;
 
 import java.io.IOException;
 
@@ -88,11 +89,16 @@ public class New {
 
     }
 
-    public static void saveNewClassFile(ClassGen modifiedClass, String CLASS_PATH, String CLASS_NAME) throws IOException {
-        String PATH_TO_OUTPUT_FILE = CLASS_PATH+CLASS_NAME+"_MOD.class";
+    public static void saveNewClassFile(ClassGen modifiedClass) throws IOException {
+        String CLASS_NAME = modifiedClass.getClassName();
+        CLASS_NAME = CLASS_NAME.substring(CLASS_NAME.lastIndexOf('.') + 1);
+        String PATH_TO_OUTPUT_FILE = LaunchProperties.CLASS_DIR + CLASS_NAME +
+                LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX;
+
         modifiedClass.getJavaClass().dump(PATH_TO_OUTPUT_FILE);
+
         System.out.println("*********************************** DONE! ***********************************\n" +
-                "Go to file:\t"    +PATH_TO_OUTPUT_FILE);
+                "Go to file:\t" + PATH_TO_OUTPUT_FILE);
     }
 
     public static int getLoacalVariableID(String fieldName, ConstantPoolGen cp, MethodGen mg) {

@@ -3,7 +3,7 @@ package pl.edu.agh.transformations.util;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ConstantFieldref;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.transformations.Constants;
+import pl.edu.agh.transformations.LaunchProperties;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,11 +52,11 @@ public class TransformUtils {
     public static void addClassFields_old(ClassGen cg, ConstantPoolGen cp) {
         FieldGen threadCount = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC | Const.ACC_FINAL,
                 Type.INT,
-                Constants.NUMBER_OF_THREADS_CONSTANT_NAME,
+                LaunchProperties.NUMBER_OF_THREADS_CONSTANT_NAME,
                 cp);
         FieldGen service = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
                 Type.getType(ExecutorService.class),
-                Constants.EXECUTOR_SERVICE_CONSTANT_NAME,
+                LaunchProperties.EXECUTOR_SERVICE_CONSTANT_NAME,
                 cp);
         cg.addField(threadCount.getField());
         cg.addField(service.getField());
@@ -172,8 +172,8 @@ public class TransformUtils {
     private static void injectJcmMultiplyAB(ClassGen cg, MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
         int id_A, id_B, jcm_ID, id;
 
-        id_A = LocalVariableUtils.findLocalVariableByName(Constants.ARRAY_1 ,mg.getLocalVariableTable(cp)).getIndex();
-        id_B = LocalVariableUtils.findLocalVariableByName(Constants.ARRAY_2 ,mg.getLocalVariableTable(cp)).getIndex();
+        id_A = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_1 ,mg.getLocalVariableTable(cp)).getIndex();
+        id_B = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_2 ,mg.getLocalVariableTable(cp)).getIndex();
 
 
         jcm_ID = New.CreateObjectClass("jcm", "utils.JCudaMatrix", il_new,factory,mg, new int[]{id_A,id_B});
@@ -245,7 +245,7 @@ public class TransformUtils {
                 Type.NO_ARGS,
                 Const.INVOKEVIRTUAL));
         il.append(factory.createPutStatic(className,
-                Constants.NUMBER_OF_THREADS_CONSTANT_NAME,
+                LaunchProperties.NUMBER_OF_THREADS_CONSTANT_NAME,
                 Type.INT));
 //        il.append(factory.createGetStatic(className,
 //                                                                  Constants.NUMBER_OF_THREADS_CONSTANT_NAME,
@@ -267,7 +267,7 @@ public class TransformUtils {
         InstructionFactory factory = new InstructionFactory(cg, cp);
         InstructionList appendedInstructions = new InstructionList();
         appendedInstructions.append(factory.createGetStatic(cg.getClassName(),
-                Constants.NUMBER_OF_THREADS_CONSTANT_NAME,
+                LaunchProperties.NUMBER_OF_THREADS_CONSTANT_NAME,
                 Type.INT));
         appendedInstructions.append(factory.createInvoke("java.util.concurrent.Executors",
                 "newFixedThreadPool",
@@ -275,7 +275,7 @@ public class TransformUtils {
                 new Type[]{Type.INT},
                 Const.INVOKESTATIC));
         appendedInstructions.append(factory.createPutStatic(cg.getClassName(),
-                Constants.EXECUTOR_SERVICE_CONSTANT_NAME,
+                LaunchProperties.EXECUTOR_SERVICE_CONSTANT_NAME,
                 Type.getType(ExecutorService.class)));
         InstructionList il = mg.getInstructionList();
         appendedInstructions.append(il);
@@ -295,7 +295,7 @@ public class TransformUtils {
                 new Type[]{},
                 Const.INVOKESPECIAL));
         appendedInstructions.append(InstructionFactory.createStore(Type.getType("Ljava/util/List;"), mg.getMaxLocals()));
-        mg.addLocalVariable(Constants.TASK_POOL_NAME,
+        mg.addLocalVariable(LaunchProperties.TASK_POOL_NAME,
                 Type.getType("Ljava/util/List;"),
                 appendedInstructions.getEnd(),
                 null);
@@ -330,7 +330,7 @@ public class TransformUtils {
                 new Type[]{},
                 Const.INVOKESPECIAL));
         appendedInstructions.append(InstructionFactory.createStore(Type.getType("Ljava/util/List;"), mg.getMaxLocals()));
-        mg.addLocalVariable(Constants.RESULTS_POOL_NAME,
+        mg.addLocalVariable(LaunchProperties.RESULTS_POOL_NAME,
                 Type.getType("Ljava/util/List;"),
                 appendedInstructions.getEnd(),
                 null);
@@ -358,16 +358,16 @@ public class TransformUtils {
                 mg.getReturnType(),
                 new Type[]{},
                 new String[]{},
-                Constants.SUBTASK_METHOD_NAME,
+                LaunchProperties.SUBTASK_METHOD_NAME,
                 cg.getClassName(),
                 il,
                 cg.getConstantPool());
 
-        LocalVariableGen startVariable = subTaskmg.addLocalVariable(Constants.START_INDEX_VARIABLE_NAME,
+        LocalVariableGen startVariable = subTaskmg.addLocalVariable(LaunchProperties.START_INDEX_VARIABLE_NAME,
                 Type.INT,
                 //0,
                 null, null);
-        LocalVariableGen endVariable = subTaskmg.addLocalVariable(Constants.END_INDEX_VARIABLE_NAME,
+        LocalVariableGen endVariable = subTaskmg.addLocalVariable(LaunchProperties.END_INDEX_VARIABLE_NAME,
                 Type.INT,
                 //1,
                 null, null);
@@ -375,12 +375,12 @@ public class TransformUtils {
         transferLocalVariables(mg, subTaskmg);
 
         updateBranchInstructions(il);
-        int newLoopIteratorVariableIndex = LocalVariableUtils.findLocalVariableByName(Constants.LOOP_ITERATOR_NAME, subTaskmg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int newLoopIteratorVariableIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.LOOP_ITERATOR_NAME, subTaskmg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         LoopUtils.broadenCompareCondition(il.getInstructionHandles());
         LoopUtils.updateLoopVariableIndex(il.getInstructionHandles(), newLoopIteratorVariableIndex);
         LoopUtils.updateLoopStartCondition(il.getInstructionHandles(), startVariable.getIndex());
         LoopUtils.updateLoopEndCondition(il.getInstructionHandles(), endVariable.getIndex());
-        subTaskmg.setArgumentNames(new String[]{Constants.START_INDEX_VARIABLE_NAME, Constants.END_INDEX_VARIABLE_NAME});
+        subTaskmg.setArgumentNames(new String[]{LaunchProperties.START_INDEX_VARIABLE_NAME, LaunchProperties.END_INDEX_VARIABLE_NAME});
         subTaskmg.setArgumentTypes(new Type[]{Type.INT, Type.INT});
         subTaskmg.setMaxLocals();
         subTaskmg.setMaxStack();
@@ -474,7 +474,7 @@ public class TransformUtils {
 
     public static void changeLoopLimitToNumberOfThreads(ClassGen cg, MethodGen mg) {
         InstructionHandle[] forLoop = LoopUtils.getForLoop(mg);
-        int numThreadsConstantIndex = ConstantPoolUtils.getFieldIndex(cg, Constants.NUMBER_OF_THREADS_CONSTANT_NAME);
+        int numThreadsConstantIndex = ConstantPoolUtils.getFieldIndex(cg, LaunchProperties.NUMBER_OF_THREADS_CONSTANT_NAME);
         forLoop[3].setInstruction(new GETSTATIC(numThreadsConstantIndex));
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
@@ -491,11 +491,11 @@ public class TransformUtils {
         InstructionHandle firstLoopInstruction = loopHandles[0];
         InstructionHandle lastInstructionBeforeLoopBody = loopHandles[4];
         InstructionHandle lastLoopInstruction = loopHandles[loopHandles.length - 1];
-        mg.addLocalVariable(Constants.START_INDEX_VARIABLE_NAME,
+        mg.addLocalVariable(LaunchProperties.START_INDEX_VARIABLE_NAME,
                 Type.INT,
                 firstLoopInstruction,
                 lastLoopInstruction);
-        mg.addLocalVariable(Constants.END_INDEX_VARIABLE_NAME,
+        mg.addLocalVariable(LaunchProperties.END_INDEX_VARIABLE_NAME,
                 Type.INT,
                 firstLoopInstruction,
                 lastLoopInstruction);
