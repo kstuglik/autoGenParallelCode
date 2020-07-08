@@ -3,7 +3,7 @@ package mbuilder.TempExperiments;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.transformations.util.New;
+import pl.edu.agh.transformations.utils.New;
 
 import java.io.IOException;
 

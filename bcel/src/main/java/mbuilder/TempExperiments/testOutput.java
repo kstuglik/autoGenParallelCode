@@ -1,6 +1,6 @@
 package mbuilder.TempExperiments;
 
-import utils.JCudaMatrix;
+import pl.edu.agh.transformations.utils.JCudaMatrix;
 
 import java.util.Arrays;
 

@@ -7,7 +7,7 @@ import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
 import pl.edu.agh.transformations.LaunchProperties;
-import pl.edu.agh.transformations.util.New;
+import pl.edu.agh.transformations.utils.New;
 
 import java.io.IOException;
 
@@ -37,7 +37,17 @@ public class MyBcModifier {
     protected static InstructionFactory factory;
     protected static LocalVariableGen lg;
 
+   public static void saveNewClassFile(ClassGen modifiedClass) throws IOException {
+        String CLASS_NAME = modifiedClass.getClassName();
+        CLASS_NAME = CLASS_NAME.substring(CLASS_NAME.lastIndexOf('.') + 1);
+        String PATH_TO_OUTPUT_FILE = LaunchProperties.CLASS_DIR + CLASS_NAME +
+                LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX;
 
+        modifiedClass.getJavaClass().dump(PATH_TO_OUTPUT_FILE);
+
+        System.out.println("*********************************** DONE! ***********************************\n" +
+                "Go to file:\t" + PATH_TO_OUTPUT_FILE);
+    }
 
     public void SetParameters(String classPath, String className, String classMethod){
         CLASS_PATH = classPath;
@@ -190,7 +200,7 @@ public class MyBcModifier {
         cg.addMethod(mg.getMethod());
         il.dispose();
 
-        New.saveNewClassFile(cg);
+        saveNewClassFile(cg);
 
     }
 
@@ -210,7 +220,7 @@ public class MyBcModifier {
         int id_B = New.CreateArrayField("B",wrap_mg,il,cp,Type.INT,2, new int[]{2,2});
 
         int jcm_ID = New.CreateObjectClass(
-                "jcm", "utils.JCudaMatrix",
+                "jcm", "pl.edu.agh.transformations.bytecode.JCudaMatrix",
                 il,factory,wrap_mg, new int[]{id_A,id_B});
 
         il.append(new ALOAD(jcm_ID));
@@ -219,7 +229,7 @@ public class MyBcModifier {
         int id = lg.getIndex();
 
         il.append(factory.createInvoke(
-                "utils.JCudaMatrix", "multiply",
+                "pl.edu.agh.transformations.bytecode.JCudaMatrix", "multiply",
                 new ArrayType(Type.FLOAT,1), new Type[]{},Const.INVOKEVIRTUAL));
 
         il.append(new ASTORE(id));
@@ -236,7 +246,7 @@ public class MyBcModifier {
         cg.addMethod(mg.getMethod());
         il.dispose();
 
-        New.saveNewClassFile(cg);
+        saveNewClassFile(cg);
     }
 
 
@@ -259,7 +269,7 @@ public class MyBcModifier {
         int id_B = New.CreateArrayField("B",mg,il,cp,Type.INT,2, new int[]{2,2});
 
         int jcm_ID = New.CreateObjectClass(
-                "jcm", "utils.JCudaMatrix",
+                "jcm", "pl.edu.agh.transformations.bytecode.JCudaMatrix",
                 il,factory,mg, new int[]{id_A,id_B});
 
         il.append(new ALOAD(jcm_ID));
@@ -268,7 +278,7 @@ public class MyBcModifier {
         int id = lg.getIndex();
 
         il.append(factory.createInvoke(
-                "utils.JCudaMatrix", "multiply",
+                "pl.edu.agh.transformations.bytecode.JCudaMatrix", "multiply",
                 new ArrayType(Type.FLOAT,1), new Type[]{},Const.INVOKEVIRTUAL));
 
         il.append(new ASTORE(id));
@@ -285,7 +295,7 @@ public class MyBcModifier {
         cg.addMethod(mg.getMethod());
         il.dispose();
 
-        New.saveNewClassFile(cg);
+        saveNewClassFile(cg);
 
     }
 

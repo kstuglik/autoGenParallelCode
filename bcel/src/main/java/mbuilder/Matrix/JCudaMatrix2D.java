@@ -7,7 +7,7 @@ to the function that will perform the JCUDA multiplication
 
 package mbuilder.Matrix;
 
-import utils.JCudaMatrix;
+import pl.edu.agh.transformations.utils.JCudaMatrix;
 
 import java.util.Arrays;
 
