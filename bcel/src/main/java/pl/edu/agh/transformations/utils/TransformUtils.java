@@ -1,4 +1,4 @@
-package pl.edu.agh.transformations.util;
+package pl.edu.agh.transformations.utils;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ConstantFieldref;
@@ -14,9 +14,8 @@ import java.util.stream.Collectors;
 
 public class TransformUtils {
 
-//  FIELDS
-
     public static void addThreadPool(ClassGen classGen) {
+
         Optional<MethodGen> classInitMethod = MethodUtils.findMethodByName(classGen, Const.STATIC_INITIALIZER_NAME);
         ConstantPoolGen constantPoolGen = classGen.getConstantPool();
         addClassFields_old(classGen, constantPoolGen);
@@ -65,7 +64,7 @@ public class TransformUtils {
     /*  START JCUDA-SECTION  */
 
     public static void addClassFields(ClassGen cg, ConstantPoolGen cp, Type type, String fieldName) {
-        FieldGen newField = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC,type,fieldName,cp);
+        FieldGen newField = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC, type, fieldName, cp);
         cg.addField(newField.getField());
     }
 
@@ -108,9 +107,10 @@ public class TransformUtils {
 
         for (InstructionHandle instructionHandle : handles) {
 
-            handle = instructionHandle;i_current = handle.getInstruction();
+            handle = instructionHandle;
+            i_current = handle.getInstruction();
 
-            System.out.println("opcode: " + i_current.getOpcode() +  "\tname: " + i_current.getName());
+            System.out.println("opcode: " + i_current.getOpcode() + "\tname: " + i_current.getName());
 
             if (i_current.getOpcode() == Const.RETURN
                     && mg.getName().equals(mg.getName())) {
@@ -120,7 +120,7 @@ public class TransformUtils {
         }
 
 
-        System.out.println("last instruction: " + handles[handles.length-1].getInstruction().getOpcode());
+        System.out.println("last instruction: " + handles[handles.length - 1].getInstruction().getOpcode());
 
         switch (option) {
 
@@ -155,36 +155,36 @@ public class TransformUtils {
     private static void injectJcmMultiply(MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
         int id_A, id_B, jcm_ID, id;
 
-        id_A = New.CreateArrayField("AA",mg,il_new,cp, Type.INT,2, new int[]{2,2});
-        id_B = New.CreateArrayField("BB",mg,il_new,cp,Type.INT,2, new int[]{2,2});
+        id_A = New.CreateArrayField("AA", mg, il_new, cp, Type.INT, 2, new int[]{2, 2});
+        id_B = New.CreateArrayField("BB", mg, il_new, cp, Type.INT, 2, new int[]{2, 2});
 
-        jcm_ID = New.CreateObjectClass("jcm", "utils.JCudaMatrix", il_new,factory,mg, new int[]{id_A,id_B});
+        jcm_ID = New.CreateObjectClass("jcm", "pl.edu.agh.transformations.bytecode.JCudaMatrix", il_new, factory, mg, new int[]{id_A, id_B});
         il_new.append(new ALOAD(jcm_ID));
 
-        il_new.append(factory.createInvoke("utils.JCudaMatrix", "multiply",new ArrayType(Type.FLOAT,1), new Type[]{}, Const.INVOKEVIRTUAL));
+        il_new.append(factory.createInvoke("pl.edu.agh.transformations.bytecode.JCudaMatrix", "multiply", new ArrayType(Type.FLOAT, 1), new Type[]{}, Const.INVOKEVIRTUAL));
         LocalVariableGen lg = mg.addLocalVariable("CC", new ArrayType(Type.FLOAT, 1), null, null);
 
         id = lg.getIndex();
         il_new.append(new ASTORE(id));
-        New.PrintArray(il_new,mg,factory,id,false);
+        New.PrintArray(il_new, mg, factory, id, false);
     }
 
     private static void injectJcmMultiplyAB(ClassGen cg, MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
         int id_A, id_B, jcm_ID, id;
 
-        id_A = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_1 ,mg.getLocalVariableTable(cp)).getIndex();
-        id_B = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_2 ,mg.getLocalVariableTable(cp)).getIndex();
+        id_A = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_1, mg.getLocalVariableTable(cp)).getIndex();
+        id_B = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_2, mg.getLocalVariableTable(cp)).getIndex();
 
 
-        jcm_ID = New.CreateObjectClass("jcm", "utils.JCudaMatrix", il_new,factory,mg, new int[]{id_A,id_B});
+        jcm_ID = New.CreateObjectClass("jcm", "pl.edu.agh.transformations.bytecode.JCudaMatrix", il_new, factory, mg, new int[]{id_A, id_B});
         il_new.append(new ALOAD(jcm_ID));
 
-        il_new.append(factory.createInvoke("utils.JCudaMatrix", "multiply",new ArrayType(Type.FLOAT,1), new Type[]{}, Const.INVOKEVIRTUAL));
+        il_new.append(factory.createInvoke("pl.edu.agh.transformations.bytecode.JCudaMatrix", "multiply", new ArrayType(Type.FLOAT, 1), new Type[]{}, Const.INVOKEVIRTUAL));
         LocalVariableGen lg = mg.addLocalVariable("CC", new ArrayType(Type.FLOAT, 1), null, null);
 
         id = lg.getIndex();
         il_new.append(new ASTORE(id));
-        New.PrintArray(il_new,mg,factory,id,true);
+        New.PrintArray(il_new, mg, factory, id, true);
     }
 
     private static void injectPrintArrName(ClassGen cg, MethodGen mg, InstructionFactory factory, InstructionList il_new) {
@@ -193,7 +193,7 @@ public class TransformUtils {
     }
 
     private static void injectPrintVarName(MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
-        int id = New.getLoacalVariableID("luckyNumber",cp,mg);
+        int id = New.getLoacalVariableID("luckyNumber", cp, mg);
         il_new.append(factory.createFieldAccess("java.lang.System", "out",
                 new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
         il_new.append(new DUP());
@@ -202,7 +202,7 @@ public class TransformUtils {
                 Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
     }
 
-    public void printSomething(InstructionList il_new, InstructionFactory factory, ConstantPoolGen cp){
+    public void printSomething(InstructionList il_new, InstructionFactory factory, ConstantPoolGen cp) {
         il_new.append(factory.createFieldAccess(
                 "java.lang.System", "out",
                 new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
@@ -429,7 +429,7 @@ public class TransformUtils {
         return Arrays.stream(il.getInstructionHandles())
                 .filter(handle -> !handle.equals(irrelevant))
                 .filter(handle -> handle.getInstruction() instanceof LoadInstruction)
-                .map(handle -> (LoadInstruction)handle.getInstruction())
+                .map(handle -> (LoadInstruction) handle.getInstruction())
                 .map(LoadInstruction::getIndex)
                 .distinct()
                 .collect(Collectors.toList());
@@ -449,7 +449,7 @@ public class TransformUtils {
                 .collect(Collectors.toList());
         Arrays.stream(instructionHandles)
                 .filter(handle -> handle.getInstruction() instanceof LocalVariableInstruction)
-                .map(handle -> (LocalVariableInstruction)handle.getInstruction())
+                .map(handle -> (LocalVariableInstruction) handle.getInstruction())
                 .filter(instruction -> indexes.contains(instruction.getIndex()))
                 .forEach(instruction -> instruction.setIndex(oldIndexesToNewIndexes.get(instruction.getIndex())));
     }
@@ -506,5 +506,26 @@ public class TransformUtils {
         allInstructionsList.append(endOfStartInit, endInitInstructions);
         mg.setMaxStack();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
+    }
+
+    public static void insertTryCatchBlock(InstructionList il, InstructionFactory factory, ConstantPoolGen cp, MethodGen mg) {
+        // try { ...
+        final InstructionHandle try_start = il.append(factory.createFieldAccess("java.lang.System", "out", LaunchProperties.p_stream, Const.GETSTATIC));
+
+        il.append(new PUSH(cp, "Please enter your name> "));
+        il.append(factory.createInvoke("java.io.PrintStream", "print",
+                Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
+
+        // Upon normal execution we jump behind exception handler, the target address is not known yet.
+        final GOTO g = new GOTO(null);
+        final InstructionHandle try_end = il.append(g);
+
+        /* } catch() { ... } */
+        final InstructionHandle handler = il.append(factory.createFieldAccess("java.lang.System", "out", LaunchProperties.p_stream, Const.GETSTATIC));
+        // Little trick in order not to save exception object temporarily
+        il.append(InstructionConst.SWAP);
+        il.append(factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[]{Type.OBJECT}, Const.INVOKEVIRTUAL));
+        il.append(InstructionConst.RETURN);
+        mg.addExceptionHandler(try_start, try_end, handler, new ObjectType("java.io.IOException"));
     }
 }

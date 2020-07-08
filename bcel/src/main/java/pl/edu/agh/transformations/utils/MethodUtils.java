@@ -1,4 +1,4 @@
-package pl.edu.agh.transformations.util;
+package pl.edu.agh.transformations.utils;
 
 import org.apache.bcel.classfile.*;
 import org.apache.bcel.generic.*;

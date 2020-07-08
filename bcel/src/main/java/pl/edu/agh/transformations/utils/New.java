@@ -1,14 +1,11 @@
-package pl.edu.agh.transformations.util;
+package pl.edu.agh.transformations.utils;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.transformations.LaunchProperties;
-
-import java.io.IOException;
 
 public class New {
 
-    public static int CreateArrayField(String name,MethodGen mg, InstructionList il, ConstantPoolGen cp,Type t, int N, int[] nn){
+    public static int CreateArrayField(String name, MethodGen mg, InstructionList il, ConstantPoolGen cp, Type t, int N, int[] nn) {
 
         int index = cp.addArrayClass(new ArrayType(t, 1));
 
@@ -27,11 +24,11 @@ public class New {
             il.append(new DUP());
 
             for (int i = 1; i <= nn[item]; i++) {
-                il.append(new LDC(cp.addInteger(i-1)));
+                il.append(new LDC(cp.addInteger(i - 1)));
                 il.append(new LDC(cp.addInteger((int) Math.pow(2, i))));
                 il.append(new IASTORE());
-                if(i==nn[item]){
-                   il.append(new AASTORE());
+                if (i == nn[item]) {
+                    il.append(new AASTORE());
                 }
                 il.append(new DUP());
             }
@@ -41,10 +38,10 @@ public class New {
         il.append(new ASTORE(id));
 //        il.append(new ALOAD(index));
 //        il.append(new RETURN());
-        return  id;
+        return id;
     }
 
-    public static int CreateObjectClass(String name, String ClassName, InstructionList il, InstructionFactory factory, MethodGen mg, int[] paramsID){
+    public static int CreateObjectClass(String name, String ClassName, InstructionList il, InstructionFactory factory, MethodGen mg, int[] paramsID) {
 
         il.append(factory.createNew(ClassName));
         il.append(InstructionConst.DUP);
@@ -57,8 +54,8 @@ public class New {
 //      NA PRZYSZLOSC TRZEBA BY OBSLUGIWAC DOWOLNY PRZYPADEK
 
 
-        il.append(factory.createInvoke( ClassName, "<init>", Type.VOID,
-                new Type[]{new ArrayType(Type.INT,2),new ArrayType(Type.INT,2)},
+        il.append(factory.createInvoke(ClassName, "<init>", Type.VOID,
+                new Type[]{new ArrayType(Type.INT, 2), new ArrayType(Type.INT, 2)},
                 Const.INVOKESPECIAL));
 
         LocalVariableGen lg = mg.addLocalVariable(name, new ObjectType(ClassName), null, null);
@@ -89,22 +86,17 @@ public class New {
 
     }
 
-    public static void saveNewClassFile(ClassGen modifiedClass) throws IOException {
-        String CLASS_NAME = modifiedClass.getClassName();
-        CLASS_NAME = CLASS_NAME.substring(CLASS_NAME.lastIndexOf('.') + 1);
-        String PATH_TO_OUTPUT_FILE = LaunchProperties.CLASS_DIR + CLASS_NAME +
-                LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX;
-
-        modifiedClass.getJavaClass().dump(PATH_TO_OUTPUT_FILE);
-
-        System.out.println("*********************************** DONE! ***********************************\n" +
-                "Go to file:\t" + PATH_TO_OUTPUT_FILE);
-    }
-
     public static int getLoacalVariableID(String fieldName, ConstantPoolGen cp, MethodGen mg) {
-        return LocalVariableUtils.findLocalVariableByName(fieldName,mg.getLocalVariableTable(cp)).getIndex();
+        return LocalVariableUtils.findLocalVariableByName(fieldName, mg.getLocalVariableTable(cp)).getIndex();
     }
 
+    public static String center(String s, int length, char c) {
+        StringBuilder sb = new StringBuilder(length);
+        sb.setLength((length - s.length()) / 2);
+        sb.append(s);
+        sb.setLength(length);
+        return sb.toString().replace('\0', c);
+    }
 
 }
 
