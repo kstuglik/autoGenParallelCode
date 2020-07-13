@@ -9,6 +9,7 @@ public class LaunchProperties {
     public static final String MODIFICATION_SUFFIX = "_MOD";
     public static final String CLASS_SUFFIX = ".class";
 
+    public static String CLASS_NAME;
     public static String CLASS_FILE;
     public static String CLASS_METHOD;
 
@@ -21,6 +22,8 @@ public class LaunchProperties {
 
     public static final String ARRAY_1 = "var1";
     public static final String ARRAY_2 = "var2";
+
+    public static final String DIM = "2D";
 
     private static final ObjectType i_stream = new ObjectType("java.io.InputStream");
     public static final ObjectType p_stream = new ObjectType("java.io.PrintStream");

@@ -1,4 +1,4 @@
-package intro2useBCEL.useful;
+package mbuilder.useful;
 
 import org.apache.bcel.classfile.*;
 
@@ -10,7 +10,7 @@ public class ScanClassFile {
     public static void main(String[] argv) throws IOException {
 
         String path_to_file = "src/main/java/mbuilder/classFiles/";
-        String class_file = "jcudaMatrix.class";
+        String class_file = "Arr.class";
 
         JavaClass jclass = new ClassParser(path_to_file+class_file).parse();
         System.out.println("Class:\t"+jclass.getClassName());

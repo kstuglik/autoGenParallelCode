@@ -49,4 +49,21 @@ public class MethodUtils {
             fieldref.setClassIndex(classNameIndex);
         }
     }
+
+    public static int GetMethodIndex(Method[] methods, String methodName) {
+
+        int methodPositionId;
+
+        for (methodPositionId = 0; methodPositionId < methods.length; methodPositionId++) {
+            if (methods[methodPositionId].getName().equals(methodName)) {
+                break;
+            }
+        }
+        if (methodPositionId < methods.length) {
+            return methodPositionId;
+        } else {
+            System.err.println("Method: " + methodName + " not found!");
+            return -1;
+        }
+    }
 }

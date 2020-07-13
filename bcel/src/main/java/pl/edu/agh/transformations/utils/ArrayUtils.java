@@ -47,7 +47,7 @@ public class ArrayUtils {
     }
 
     public static void writeFARRAY1D(int size, String filePath) throws IOException {
-        float A[] = createFARRAY1D(size);/*        System.out.println(Arrays.toString(A));*/
+        float[] A = createFARRAY1D(size);/*        System.out.println(Arrays.toString(A));*/
         System.out.println(filePath);
 
         File file = new File(filePath);
