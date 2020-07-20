@@ -1,4 +1,4 @@
-package pl.edu.agh.transformations.utils;
+package pl.edu.agh.utils;
 
 import org.apache.bcel.classfile.LocalVariable;
 import org.apache.bcel.classfile.LocalVariableTable;

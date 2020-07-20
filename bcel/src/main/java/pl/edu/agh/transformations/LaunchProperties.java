@@ -6,11 +6,11 @@ public class LaunchProperties {
 
     public static String CLASS_DIR = "src/main/java/mbuilder/classFiles/";
 
-    public static final String MODIFICATION_SUFFIX = "_MOD";
+    public static String MODIFICATION_SUFFIX = "_MOD";
     public static final String CLASS_SUFFIX = ".class";
+    public static final String JAVA_SUFFIX = ".java";
 
     public static String CLASS_NAME;
-    public static String CLASS_FILE;
     public static String CLASS_METHOD;
 
     public static final String ERR_MESSAGE = "IT WAS NOT POSSIBLE to add a new piece of code!\n\t";
@@ -29,10 +29,10 @@ public class LaunchProperties {
     public static final ObjectType p_stream = new ObjectType("java.io.PrintStream");
 
     /*PARALLEL PARAMS*/
-    public static final String NUMBER_OF_THREADS_CONSTANT_NAME = "NUM_THREADS";
-    public static final String EXECUTOR_SERVICE_CONSTANT_NAME = "SERVICE";
-    public static final String START_RANGE_CONSTANT_NAME = "START_RANGE";
-    public static final String END_RANGE_CONSTANT_NAME = "END_RANGE";
+    public static final String NUMBER_OF_THREADS_NAME = "NUM_THREADS";
+    public static final String EXECUTOR_SERVICE_NAME = "SERVICE";
+    public static final String START_RANGE_NAME = "START_RANGE";
+    public static final String END_RANGE_NAME = "END_RANGE";
     public static final String TASK_POOL_NAME = "tasks";
     public static final String RESULTS_POOL_NAME = "partialResults";
     public static final String START_INDEX_VARIABLE_NAME = "start";

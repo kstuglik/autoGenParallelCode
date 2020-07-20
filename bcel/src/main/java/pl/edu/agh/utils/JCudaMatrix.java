@@ -1,4 +1,4 @@
-package pl.edu.agh.transformations.utils;
+package pl.edu.agh.utils;
 
 import jcuda.Pointer;
 import jcuda.Sizeof;
@@ -35,7 +35,7 @@ public class JCudaMatrix {
         matrix_C = new float[cols_B * rows_A];
     }
 
-    public JCudaMatrix(float[] matrix_A, float[]matrix_B,int cols_A,int rows_A,int cols_B, int rows_B) {
+    public JCudaMatrix(float[] matrix_A, float[] matrix_B, int cols_A, int rows_A, int cols_B, int rows_B) {
 
         if (cols_A != rows_B) {
             throw new RuntimeException("Cannot perform multiplication because dimensions are not equal.");

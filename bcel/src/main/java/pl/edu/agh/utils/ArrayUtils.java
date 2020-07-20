@@ -1,4 +1,4 @@
-package pl.edu.agh.transformations.utils;
+package pl.edu.agh.utils;
 
 import java.io.*;
 import java.util.Arrays;
@@ -30,11 +30,11 @@ public class ArrayUtils {
     public static float[] flattenIARRAY2D(int[][] arr) {
         int rows = arr.length;
         int cols = arr[0].length;
-        float[] result = new float[rows*cols];
+        float[] result = new float[rows * cols];
 
-        for (int row = 0; row < cols; row++){
-            for(int col=0; col<rows; col++){
-                result[row*rows+col] = arr[col][row];
+        for (int row = 0; row < cols; row++) {
+            for (int col = 0; col < rows; col++) {
+                result[row * rows + col] = arr[col][row];
             }
         }
         System.out.println(Arrays.toString(result));
@@ -51,10 +51,14 @@ public class ArrayUtils {
         System.out.println(filePath);
 
         File file = new File(filePath);
-        if (file.exists()) {System.out.println("File already exists");}
-        else {file.getParentFile().mkdirs();file.createNewFile();}
+        if (file.exists()) {
+            System.out.println("File already exists");
+        } else {
+            file.getParentFile().mkdirs();
+            file.createNewFile();
+        }
 
-        FileOutputStream fos = new FileOutputStream(file,false);
+        FileOutputStream fos = new FileOutputStream(file, false);
         DataOutputStream dos = new DataOutputStream(fos);
 
         for (float v : A) dos.writeFloat(v);
@@ -64,7 +68,7 @@ public class ArrayUtils {
 
     public static float[] readFARRAY1D(String fileName) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(new FileInputStream(fileName));
-        int size = dataInputStream.available()/(Float.SIZE/8);
+        int size = dataInputStream.available() / (Float.SIZE / 8);
         float[] A = new float[size];
         for (int i = 0; i < size; i++) A[i] = dataInputStream.readFloat();
         return A;
