@@ -1,4 +1,4 @@
-package mbuilder.Matrix;
+package mbuilder._matrix;
 
 import java.util.Arrays;
 
