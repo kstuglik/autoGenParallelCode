@@ -1,0 +1,2 @@
+JMH S 20 nbody.NbodyBenchmark S 59 nbody.generated.NbodyBenchmark_serialNbodyBenchmark_jmhTest S 20 serialNbodyBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
+JMH S 20 nbody.NbodyBenchmark S 61 nbody.generated.NbodyBenchmark_parallelNbodyBenchmark_jmhTest S 22 parallelNbodyBenchmark S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
