@@ -18,7 +18,7 @@ public class NewTest {
     public void createArraysAndChcekIDs() throws Exception {
 
         ByteCodeModifier bcm = new ByteCodeModifier();
-
+        LaunchProperties.CLASS_DIR = "target/classes/matrix/";
         LaunchProperties.CLASS_NAME = "HelloWorld";
         LaunchProperties.CLASS_METHOD = "main";
         bcm.prepareToCreate();
