@@ -2,7 +2,7 @@
  *   Exampple of use, answer for the question about CLASS_NAME: Arrays
  */
 
-package intro2useBCEL.useful;
+package useful;
 
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;

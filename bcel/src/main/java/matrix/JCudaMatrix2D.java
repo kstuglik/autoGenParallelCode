@@ -5,7 +5,7 @@ the simplification consists in transferring only 2 parameters (arrays)
 to the function that will perform the JCUDA multiplication
  */
 
-package mbuilder._matrix;
+package matrix;
 
 import pl.edu.agh.utils.JCudaMatrix;
 

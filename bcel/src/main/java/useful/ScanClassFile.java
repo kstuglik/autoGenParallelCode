@@ -1,4 +1,4 @@
-package intro2useBCEL.useful;
+package useful;
 
 import org.apache.bcel.classfile.*;
 
