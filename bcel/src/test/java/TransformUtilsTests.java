@@ -29,7 +29,7 @@ public class TransformUtilsTests {
         ByteCodeModifier bcm = new ByteCodeModifier();
         bcm.prepareToModify();
 
-        TransformUtils.addThreadPool(bcm._modifiedClass);// metoda samodzielna, można od razu zapisywać do pliku
+        TransformUtils.addThreadPoolExecutorService(bcm._modifiedClass);// metoda samodzielna, można od razu zapisywać do pliku
         ArrayList<String> fields = bcm.getNameFields();
 
         assertTrue(fields.contains(LaunchProperties.NUMBER_OF_THREADS_NAME));
@@ -67,7 +67,7 @@ public class TransformUtilsTests {
         bcm.extraMe();
 
         int before = bcm.getMethodsArray().length;
-        TransformUtils.copyLoopToMethod(bcm._modifiedClass, bcm._mg);
+        TransformUtils.copyLoopToSubTaskMethod(bcm._modifiedClass, bcm._mg);
 
         bcm.setMethodsArray();
         int after = bcm.getMethodsArray().length;

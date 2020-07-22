@@ -5,6 +5,7 @@ import pl.edu.agh.transformations.ByteCodeModifier;
 import pl.edu.agh.transformations.LaunchProperties;
 import pl.edu.agh.utils.LocalVariableUtils;
 import pl.edu.agh.utils.New;
+import pl.edu.agh.utils.TransformUtils;
 
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -44,21 +45,21 @@ public class NewTest {
     @Test
     public void shouldAddJCudaMultiplyCall() throws Exception {
 
-        ByteCodeModifier bcm = new ByteCodeModifier();
-
         LaunchProperties.CLASS_DIR = "target/classes/matrix/";
         LaunchProperties.CLASS_NAME = "Multiply";
-        LaunchProperties.CLASS_METHOD = "multiply";
-        LaunchProperties.MODIFICATION_SUFFIX = "_jcuda";
+        LaunchProperties.CLASS_METHOD = "multiplyMatrix";
+        LaunchProperties.MODIFICATION_SUFFIX = "_jcuda2";
 
+        ByteCodeModifier bcm = new ByteCodeModifier();
         bcm.prepareToModify();
-        bcm.transformations(1);
+
+        TransformUtils.insertNewInstruciton(bcm._modifiedClass, bcm._mg, 4);
+
         bcm.setLocalVariables();
         LocalVariable var = LocalVariableUtils.findLocalVariableByName("jcm", bcm._mg.getLocalVariableTable(bcm._cp));
 
         assertTrue(bcm._lvgs[var.getIndex()].getType().toString().contains("JCudaMatrix"));
 
-        bcm.updateMethodBeforeSave();
         bcm.saveNewClassFile();
 
     }

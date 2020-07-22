@@ -28,8 +28,6 @@ public class IntegrationTest {
         String command = System.getProperty("java.home") + "/bin/java -cp " +
                 LaunchProperties.CLASS_DIR + " " + LaunchProperties.CLASS_NAME + LaunchProperties.MODIFICATION_SUFFIX;
 
-        System.out.println(command);
-
         try {
             Process process = runtime.exec(command);
             process.waitFor();
@@ -40,15 +38,21 @@ public class IntegrationTest {
 
     }
 
-//    NBODY
+    //    NBODY
     @Test
     public void test() throws IOException, TargetLostException {
         bcm.prepareToModify();
-        bcm.modifyBytecode(LaunchProperties.CLASS_DIR,LaunchProperties.CLASS_NAME,(short)1000);
+
+//TODO:
+//  Problem with generic type in BCEL
+//  is not possiible generate directly instruction like: List<Callable<Integer>> tasks = new ArrayList<>();
+//  we should use trick with initialize this object with use external method (in progress)
+
+        bcm.modifyBytecode(LaunchProperties.CLASS_DIR, LaunchProperties.CLASS_NAME, (short) 1000);
 
         Runtime runtime = Runtime.getRuntime();
         String command = System.getProperty("java.home") + "/bin/java -cp " +
-                LaunchProperties.CLASS_DIR + " " + LaunchProperties.CLASS_NAME + LaunchProperties.MODIFICATION_SUFFIX+"2";
+                LaunchProperties.CLASS_DIR + " " + LaunchProperties.CLASS_NAME + LaunchProperties.MODIFICATION_SUFFIX + "2";
 
         try {
             Process process = runtime.exec(command);
