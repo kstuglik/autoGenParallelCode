@@ -17,12 +17,12 @@ public class AnonymousClassUtils {
         InnerClassData innerClassData = addAnonymousClassConstants(classGen);
         redumpClassGen(classGen, classPath);
 
-        JavaClass analyzedClass = new ClassParser(classPath + "\\" + classGen.getClassName() + ".class").parse();
+        JavaClass analyzedClass = new ClassParser(classPath + classGen.getClassName() + ".class").parse();
         classGen = new ClassGen(analyzedClass);
 
         addInnerClassAttribute(analyzedClass, classGen, innerClassData, classPath);
 
-        analyzedClass = new ClassParser(classPath + "\\" + classGen.getClassName() + ".class").parse();
+        analyzedClass = new ClassParser(classPath + classGen.getClassName() + ".class").parse();
         classGen = new ClassGen(analyzedClass);
 //        MethodGen methodGen = new MethodGen(MethodUtils.findMethodByNameOrThrow(classGen, "main").getMethod(), classGen.getClassName(), classGen.getConstantPool());
         MethodGen methodGen = new MethodGen(MethodUtils.findMethodByNameOrThrow(classGen, "moveBodies").getMethod(), classGen.getClassName(), classGen.getConstantPool());
@@ -103,7 +103,7 @@ public class AnonymousClassUtils {
     }
 
     private static void redumpClassGen(ClassGen classGen, String classPath) {
-        try (FileOutputStream outputStream = new FileOutputStream(classPath + "\\" + classGen.getClassName() + ".class")) {
+        try (FileOutputStream outputStream = new FileOutputStream(classPath + classGen.getClassName() + ".class")) {
             classGen.getJavaClass().dump(outputStream);
         } catch (IOException exception) {
             throw new RuntimeException("Error during modified class save.", exception);
@@ -127,7 +127,7 @@ public class AnonymousClassUtils {
 
     private static void redumpJavaClass(JavaClass analyzedClass, ClassGen classGen, String classPath) {
         classGen = new ClassGen(analyzedClass);
-        try (FileOutputStream outputStream = new FileOutputStream(classPath + "\\" + analyzedClass.getClassName() + ".class")) {//TODO double "_modified"
+        try (FileOutputStream outputStream = new FileOutputStream(classPath + analyzedClass.getClassName() + ".class")) {//TODO double "_modified"
             classGen.getJavaClass().dump(outputStream);
         } catch (IOException exception) {
             throw new RuntimeException("Error during modified class save.", exception);

@@ -3,7 +3,6 @@ package pl.edu.agh.utils;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ConstantFieldref;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.transformations.ByteCodeModifier;
 import pl.edu.agh.transformations.LaunchProperties;
 
 import java.util.Arrays;
@@ -13,9 +12,9 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
-public class TransformUtils extends ByteCodeModifier {
+public class TransformUtils {
 
-    public static void addThreadPool(ClassGen _cg) {
+    public static void addThreadPoolExecutorService(ClassGen _cg) {
 
         Optional<MethodGen> classInitMethod = MethodUtils.findMethodByName(_cg, Const.STATIC_INITIALIZER_NAME);
         ConstantPoolGen _cp = _cg.getConstantPool();
@@ -68,13 +67,10 @@ public class TransformUtils extends ByteCodeModifier {
         cg.addField(service.getField());
     }
 
-    /*  START JCUDA-SECTION  */
-
     public static void addClassFields(ClassGen cg, ConstantPoolGen cp, Type type, String fieldName) {
         FieldGen newField = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC, type, fieldName, cp);
         cg.addField(newField.getField());
     }
-
 
     static private void deleteIns(InstructionList il, InstructionHandle ih, InstructionHandle new_target) {
         // System.out.println("deleteIns: instructionList = " + il);
@@ -93,54 +89,54 @@ public class TransformUtils extends ByteCodeModifier {
         }
     }
 
-
-    public static void injectJcmMultiply(ByteCodeModifier bcm) throws Exception {
+    private static void injectJcmMultiply(MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
         int id_A, id_B, jcm_ID, id;
 
-        id_A = New.createFieldArray2D("AA", Type.INT, new int[][]{{1, 2}, {3, 4}}, bcm);
-        id_B = New.createFieldArray2D("BB", Type.INT, new int[][]{{1, 2}, {3, 4}}, bcm);
+        id_A = New.CreateArrayField("AA", mg, il_new, cp, Type.INT, 2, new int[]{2, 2});
+        id_B = New.CreateArrayField("BB", mg, il_new, cp, Type.INT, 2, new int[]{2, 2});
 
-        jcm_ID = New.createFieldObjectClass("jcm", "pl.edu.agh.transformations.bytecode.JCudaMatrix", new int[]{id_A, id_B}, bcm);
-        bcm._il_new.append(new ALOAD(jcm_ID));
+        jcm_ID = New.CreateObjectClass("jcm", "utils.JCudaMatrix", il_new, factory, mg, new int[]{id_A, id_B});
+        il_new.append(new ALOAD(jcm_ID));
 
-        bcm._il_new.append(bcm._factory.createInvoke("pl.edu.agh.transformations.bytecode.JCudaMatrix", "multiply", new ArrayType(Type.FLOAT, 1), Type.NO_ARGS, Const.INVOKEVIRTUAL));
-        LocalVariableGen lg = bcm._mg.addLocalVariable("CC", new ArrayType(Type.FLOAT, 1), null, null);
+        il_new.append(factory.createInvoke("utils.JCudaMatrix", "multiply", new ArrayType(Type.FLOAT, 1), new Type[]{}, Const.INVOKEVIRTUAL));
+        LocalVariableGen lg = mg.addLocalVariable("CC", new ArrayType(Type.FLOAT, 1), null, null);
 
         id = lg.getIndex();
-        bcm._il_new.append(new ASTORE(id));
-        New.printArray(id, false, bcm);
+        il_new.append(new ASTORE(id));
+        New.PrintArray(il_new, mg, factory, id, false);
     }
 
-    public static void injectJcmMultiplyAB(ByteCodeModifier bcm) {
+    private static void injectJcmMultiplyAB(ClassGen cg, MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
         int id_A, id_B, jcm_ID, id;
 
-        id_A = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_1, bcm._mg.getLocalVariableTable(bcm._cp)).getIndex();
-        id_B = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_2, bcm._mg.getLocalVariableTable(bcm._cp)).getIndex();
+        id_A = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_1, mg.getLocalVariableTable(cp)).getIndex();
+        id_B = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_2, mg.getLocalVariableTable(cp)).getIndex();
 
 
-        jcm_ID = New.createFieldObjectClass("jcm", "pl.edu.agh.transformations.bytecode.JCudaMatrix", new int[]{id_A, id_B}, bcm);
-        bcm._il_new.append(new ALOAD(jcm_ID));
+        jcm_ID = New.CreateObjectClass("jcm", "utils.JCudaMatrix", il_new, factory, mg, new int[]{id_A, id_B});
+        il_new.append(new ALOAD(jcm_ID));
 
-        bcm._il_new.append(bcm._factory.createInvoke("pl.edu.agh.transformations.bytecode.JCudaMatrix", "multiply", new ArrayType(Type.FLOAT, 1), Type.NO_ARGS, Const.INVOKEVIRTUAL));
-        LocalVariableGen lg = bcm._mg.addLocalVariable("CC", new ArrayType(Type.FLOAT, 1), null, null);
+        il_new.append(factory.createInvoke("utils.JCudaMatrix", "multiply", new ArrayType(Type.FLOAT, 1), new Type[]{}, Const.INVOKEVIRTUAL));
+        LocalVariableGen lg = mg.addLocalVariable("CC", new ArrayType(Type.FLOAT, 1), null, null);
 
         id = lg.getIndex();
-        bcm._il_new.append(new ASTORE(id));
-        New.printArray(id, true, bcm);
+        il_new.append(new ASTORE(id));
+        New.PrintArray(il_new, mg, factory, id, true);
     }
 
-    public static void injectPrintArrName(ByteCodeModifier bcm, boolean isMultiDim) {
-        int id = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_1, bcm._mg.getLocalVariableTable(bcm._cp)).getIndex();
-
-        New.printArray(id, true, bcm);
+    private static void injectPrintArrName(ClassGen cg, MethodGen mg, InstructionFactory factory, InstructionList il_new) {
+        int id = ConstantPoolUtils.getFieldIndex(cg, "C");
+        New.PrintArray(il_new, mg, factory, id, false);
     }
 
-    public static void injectPrintVarName(ByteCodeModifier bcm) {
-        int id = LocalVariableUtils.findLocalVariableByName("luckyNumber", bcm._mg.getLocalVariableTable(bcm._cp)).getIndex();
-        bcm._il_new.append(bcm._factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
-        bcm._il_new.append(new DUP());
-        bcm._il_new.append(new ALOAD(id));
-        bcm._il_new.append(bcm._factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
+    private static void injectPrintVarName(MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
+        int id = New.getLoacalVariableID("luckyNumber", cp, mg);
+        il_new.append(factory.createFieldAccess("java.lang.System", "out",
+                new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
+        il_new.append(new DUP());
+        il_new.append(new ALOAD(id));
+        il_new.append(factory.createInvoke("java.io.PrintStream", "println",
+                Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
     }
 
     public static void printSomething(InstructionList il_new, InstructionFactory factory, ConstantPoolGen cp) {
@@ -157,9 +153,6 @@ public class TransformUtils extends ByteCodeModifier {
         int id = ConstantPoolUtils.getFieldIndex(cg,"jcm");
         int id = New.getLoacalVariableID("jcm",cp,mg);
         forLoop[3].setInstruction(new GETSTATIC(numThreadsConstantIndex));*/
-
-
-    /*  END JCUDA-SECTION  */
 
     private static void retargetStaticPuts(ClassGen cg, InstructionList il) {
         int classNameIndex = cg.getClassNameIndex();
@@ -192,26 +185,31 @@ public class TransformUtils extends ByteCodeModifier {
         il.append(new RETURN());
     }
 
-    public static void addExecutorServiceInit(ClassGen cg, MethodGen mg) {
+    public static void initExecutorService(ClassGen cg, MethodGen mg) {
 
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionFactory factory = new InstructionFactory(cg, cp);
-        InstructionList appendedInstructions = new InstructionList();
-        appendedInstructions.append(factory.createGetStatic(cg.getClassName(),
+        InstructionList il_append = new InstructionList();
+
+        il_append.append(factory.createGetStatic(cg.getClassName(),
                 LaunchProperties.NUMBER_OF_THREADS_NAME,
                 Type.INT));
-        appendedInstructions.append(factory.createInvoke("java.util.concurrent.Executors",
+        il_append.append(factory.createInvoke("java.util.concurrent.Executors",
                 "newFixedThreadPool",
                 Type.getType(ExecutorService.class),
                 new Type[]{Type.INT},
                 Const.INVOKESTATIC));
-        appendedInstructions.append(factory.createPutStatic(cg.getClassName(),
+        il_append.append(factory.createPutStatic(cg.getClassName(),
                 LaunchProperties.EXECUTOR_SERVICE_NAME,
                 Type.getType(ExecutorService.class)));
-        InstructionList il = mg.getInstructionList();
-        appendedInstructions.append(il);
-        mg.setInstructionList(appendedInstructions);
 
+        InstructionList il = mg.getInstructionList();
+        il_append.append(il);
+        mg.setInstructionList(il_append);
+        updateMethodParametersScope(mg, cp);
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
 
     public static void addTaskPool(ClassGen cg, MethodGen mg) {
@@ -249,32 +247,40 @@ public class TransformUtils extends ByteCodeModifier {
                 .forEach(var -> var.setStart(startHandle));
     }
 
-//    ?? alone ArrayList()
-
     public static void addFutureResultsList(ClassGen cg, MethodGen mg) {
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionFactory factory = new InstructionFactory(cg, cp);
-        InstructionList appendedInstructions = new InstructionList();
-        appendedInstructions.append(factory.createNew(ObjectType.getInstance("java.util.ArrayList")));
-        appendedInstructions.append(new DUP());
-        appendedInstructions.append(factory.createInvoke("java.util.ArrayList",
+        InstructionList il_append = new InstructionList();
+
+
+        il_append.append(factory.createNew(ObjectType.getInstance("java.util.ArrayList")));
+        il_append.append(new DUP());
+        il_append.append(factory.createInvoke("java.util.ArrayList",
                 "<init>",
                 Type.VOID,
                 Type.NO_ARGS,
                 Const.INVOKESPECIAL));
-        appendedInstructions.append(InstructionFactory.createStore(Type.getType("Ljava/util/List;"), mg.getMaxLocals()));
-        mg.addLocalVariable(LaunchProperties.RESULTS_POOL_NAME,
+        il_append.append(InstructionFactory.createStore(Type.OBJECT, mg.getMaxLocals()));
+        LocalVariableGen lg = mg.addLocalVariable(LaunchProperties.RESULTS_POOL_NAME,
                 Type.getType("Ljava/util/List;"),
-                appendedInstructions.getEnd(),
+                il_append.getEnd(),
                 null);
+
+
+        int id = lg.getIndex();
+
+        il_append.append(factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
+        il_append.append(InstructionFactory.createLoad(Type.OBJECT, id));
+        il_append.append(factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[]{Type.OBJECT}, Const.INVOKEVIRTUAL));
+
+
         InstructionList currentList = mg.getInstructionList();
-        appendedInstructions.append(currentList);
-        mg.setInstructionList(appendedInstructions);
+        il_append.append(currentList);
+        mg.setInstructionList(il_append);
         updateMethodParametersScope(mg, cp);
         mg.setMaxStack();
         mg.setMaxLocals();
-        cg.removeMethod(mg.getMethod());
-        cg.addMethod(mg.getMethod());
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
 
     }
 
@@ -284,7 +290,7 @@ public class TransformUtils extends ByteCodeModifier {
 //    then must care about it and make changes in code,
 //    pass arguments to method in right type (not int, but maybe object/array)
 
-    public static void copyLoopToMethod(ClassGen classGen, MethodGen methodGen) {
+    public static void copyLoopToSubTaskMethod(ClassGen classGen, MethodGen methodGen) {
 
         InstructionList subTaskInstructionList = getSubtaskInstructions(methodGen);
 
@@ -415,7 +421,7 @@ public class TransformUtils extends ByteCodeModifier {
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
 
-    public static void emptyMethodLoop(ClassGen cg, MethodGen mg) {
+    public static void removeBodyForLoopInSelectedMethod(ClassGen cg, MethodGen mg) {
         InstructionHandle[] forLoop = LoopUtils.getForLoop(mg);
         LoopUtils.emptyMethodLoop(mg, forLoop);
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
@@ -444,5 +450,101 @@ public class TransformUtils extends ByteCodeModifier {
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
 
+    public static void insertNewInstruciton(ClassGen cg, MethodGen mg, int option) throws Exception, IllegalStateException {
 
+        ConstantPoolGen cp = cg.getConstantPool();
+
+        InstructionFactory factory = new InstructionFactory(cg, cp);
+
+        InstructionList il_new = new InstructionList();
+        InstructionList il_old = mg.getInstructionList();
+
+        Instruction i_current;
+
+        InstructionHandle handle;
+        InstructionHandle[] handles = il_old.getInstructionHandles();
+
+
+        InstructionHandle TRY_START = il_new.append(handles[0].getInstruction());
+
+//TODO: GET BODY FROM METHOD AND PUT INTO TRY CATCH BLOCK
+        for (int i = 1; i < handles.length - 1; i++) {
+
+            handle = handles[i];
+            i_current = handle.getInstruction();
+
+//            System.out.println("opcode: " + i_current.getOpcode() + "\tname: " + i_current.getName());
+
+            if (i_current.getOpcode() == Const.RETURN) {
+                System.out.println(i_current.getOpcode() + " appears in " + mg.getName());
+            } else il_new.append(i_current);
+
+        }
+//        System.out.println("last instruction: " + handles[handles.length - 1].getInstruction().getOpcode());
+
+
+        switch (option) {
+
+            case 1: //CODE INJECTION - instruction jcm.multiply
+                injectJcmMultiply(mg, cp, factory, il_new);
+                break;
+            case 2: //CODE INJECTION - printArray
+                injectPrintArrName(cg, mg, factory, il_new);
+                break;
+            case 3: //CODE INJECTION - get id luckyNumber
+                injectPrintVarName(mg, cp, factory, il_new);
+                break;
+            case 4: //CODE INJECTION - instruction jcm.multiply(A,B)
+                injectJcmMultiplyAB(cg, mg, cp, factory, il_new);
+                break;
+            default:
+                System.out.println("wrong option!");
+                break;
+        }
+
+        addBlockCatch(TRY_START, il_new, factory, mg);
+
+        il_new.append(new RETURN());
+        mg.setInstructionList(il_new);
+        mg.stripAttributes(true);
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
+        il_new.dispose();//what's this for?
+
+    }
+
+    private static void addBlockTry(InstructionHandle[] handles, InstructionList il) {
+        InstructionHandle _handle;
+        Instruction _i_current;
+
+        for (int i = 1, handlesLength = handles.length; i < handlesLength; i++) {
+            _handle = handles[i];
+            _i_current = _handle.getInstruction();
+
+//            System.out.println("opcode: " + _i_current.getOpcode() + "\tname: " + _i_current.getName());
+//            if (_i_current.getOpcode() == Const.RETURN)
+//                System.out.println(_i_current.getOpcode() + " appears in " + _mg.getName());
+//            else
+            il.append(_i_current);
+        }
+    }
+
+    private static void addBlockCatch(InstructionHandle TRY_START, InstructionList il, InstructionFactory factory, MethodGen mg) {
+        BranchInstruction GOTO = InstructionFactory.createBranchInstruction(Const.GOTO, null);
+        InstructionHandle TRY_END = il.append(GOTO);
+
+        InstructionHandle CATCH_START = il.append(InstructionFactory.createStore(Type.OBJECT, 0));
+        il.append(factory.createFieldAccess("java.lang.System", "err",
+                new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
+        il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+        il.append(factory.createInvoke("java.lang.Exception", "getMessage",
+                Type.STRING, Type.NO_ARGS, Const.INVOKEVIRTUAL));
+        il.append(factory.createInvoke("java.io.Printstream", "println",
+                Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
+
+        InstructionHandle CATCH_END = il.append(InstructionFactory.createReturn(Type.VOID));
+        GOTO.setTarget(CATCH_END);
+        mg.addExceptionHandler(TRY_START, TRY_END, CATCH_START, new ObjectType("java.lang.Exception"));
+    }
 }

@@ -63,10 +63,10 @@ public class ByteCodeModifier {
 
         _mg = new MethodGen(Const.ACC_STATIC | Const.ACC_PUBLIC,
                 Type.VOID, new Type[]{new ArrayType(Type.STRING, 1)},
-                new String[]{"argv"}, LaunchProperties.CLASS_METHOD, "HelloWorld", _il_new, _cp);
+                new String[]{"argv"}, LaunchProperties.CLASS_METHOD, LaunchProperties.CLASS_NAME, _il_new, _cp);
     }
 
-    private void prepareSelectedMethod() {
+    public void prepareSelectedMethod() {
         _transformedMethod = getSelectedMethod();
         _mg = new MethodGen(_transformedMethod, _modifiedClass.getClassName(), _modifiedClass.getConstantPool());
         _il_old = _mg.getInstructionList();
@@ -105,41 +105,6 @@ public class ByteCodeModifier {
         System.out.println("Go to file:" + center(PATH_TO_OUTPUT_FILE, 69, ' '));
     }
 
-    public void transformations(int OPTION) {
-        try {
-
-            InstructionHandle[] handles = _il_old.getInstructionHandles();
-            InstructionHandle TRY_START = _il_new.append(handles[0].getInstruction());
-
-            addBlockTry(handles);
-
-            switch (OPTION) {
-
-                case 1:
-                    TransformUtils.injectJcmMultiplyAB(this);
-                    break;
-                case 2: //CODE INJECTION - printArray
-                    TransformUtils.injectPrintArrName(this, true);
-                    break;
-                case 3: //CODE INJECTION - get id luckyNumber
-                    TransformUtils.injectPrintVarName(this);
-                    break;
-                case 4: //CODE INJECTION - instruction jcm.multiply(A,B)
-                    TransformUtils.injectJcmMultiply(this);
-                    break;
-                default:
-                    System.out.println("wrong option!");
-                    break;
-            }
-
-            addBlockCatch(TRY_START);
-
-        } catch (Exception e) {
-            System.err.println(LaunchProperties.ERR_MESSAGE + e.getClass() + "\n\t" + e.getMessage());
-        }
-
-    }
-
     public void updateMethodBeforeSave() {
         _il_new.append(new RETURN());
         _mg.setInstructionList(_il_new);
@@ -148,40 +113,6 @@ public class ByteCodeModifier {
         _mg.setMaxLocals();
         _modifiedClass.replaceMethod(_mg.getMethod(), _mg.getMethod());
         _il_new.dispose();
-    }
-
-    private void addBlockTry(InstructionHandle[] handles) {
-        InstructionHandle _handle;
-        Instruction _i_current;
-
-        for (int i = 1, handlesLength = handles.length; i < handlesLength; i++) {
-            _handle = handles[i];
-            _i_current = _handle.getInstruction();
-
-//            System.out.println("opcode: " + _i_current.getOpcode() + "\tname: " + _i_current.getName());
-//            if (_i_current.getOpcode() == Const.RETURN)
-//                System.out.println(_i_current.getOpcode() + " appears in " + _mg.getName());
-//            else
-            _il_new.append(_i_current);
-        }
-    }
-
-    private void addBlockCatch(InstructionHandle TRY_START) {
-        BranchInstruction GOTO = InstructionFactory.createBranchInstruction(Const.GOTO, null);
-        InstructionHandle TRY_END = _il_new.append(GOTO);
-
-        InstructionHandle CATCH_START = _il_new.append(InstructionFactory.createStore(Type.OBJECT, 0));
-        _il_new.append(_factory.createFieldAccess("java.lang.System", "err",
-                new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
-        _il_new.append(InstructionFactory.createLoad(Type.OBJECT, 0));
-        _il_new.append(_factory.createInvoke("java.lang.Exception", "getMessage",
-                Type.STRING, Type.NO_ARGS, Const.INVOKEVIRTUAL));
-        _il_new.append(_factory.createInvoke("java.io.Printstream", "println",
-                Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
-
-        InstructionHandle CATCH_END = _il_new.append(InstructionFactory.createReturn(Type.VOID));
-        GOTO.setTarget(CATCH_END);
-        _mg.addExceptionHandler(TRY_START, TRY_END, CATCH_START, new ObjectType("java.lang.Exception"));
     }
 
     public void setFieldsArray() {
@@ -211,28 +142,24 @@ public class ByteCodeModifier {
         _mg = new MethodGen(_transformedMethod, _modifiedClass.getClassName(), _modifiedClass.getConstantPool());
     }
 
-    public void modifyBytecode(String classPath, String className, short dataSize) throws IOException, TargetLostException {
+    public void modifyBytecode(String classPath, String className, short N) throws IOException, TargetLostException {
         JavaClass analyzedClass = new ClassParser(classPath + className + LaunchProperties.CLASS_SUFFIX).parse();
         ClassGen modifiedClass = getModifiedClass(className, analyzedClass);
         copyFields(analyzedClass, modifiedClass);
         copyMethods(analyzedClass, modifiedClass);
 
         Method transformedMethod = getSelectedMethod0(modifiedClass);
-        System.out.println(transformedMethod.getName());
         MethodGen methodGen = new MethodGen(transformedMethod, modifiedClass.getClassName(), modifiedClass.getConstantPool());
 
-        TransformUtils.addThreadPool(modifiedClass);
-        TransformUtils.addExecutorServiceInit(modifiedClass, methodGen);
+        TransformUtils.addThreadPoolExecutorService(modifiedClass);
+        TransformUtils.initExecutorService(modifiedClass, methodGen);
         TransformUtils.addTaskPool(modifiedClass, methodGen);
         TransformUtils.addFutureResultsList(modifiedClass, methodGen);
-        TransformUtils.copyLoopToMethod(modifiedClass, methodGen);
+        TransformUtils.copyLoopToSubTaskMethod(modifiedClass, methodGen);
         TransformUtils.changeLoopLimitToNumberOfThreads(modifiedClass, methodGen);
-        TransformUtils.emptyMethodLoop(modifiedClass, methodGen);
-        TransformUtils.setNewLoopBody(modifiedClass, methodGen, dataSize);
+        TransformUtils.removeBodyForLoopInSelectedMethod(modifiedClass, methodGen);
+        TransformUtils.setNewLoopBody(modifiedClass, methodGen, N);
         AnonymousClassUtils.addCallableCall(modifiedClass, classPath);
-
-        analyzedClass = new ClassParser(classPath + "/" + className + LaunchProperties.CLASS_SUFFIX).parse();
-        modifiedClass = new ClassGen(analyzedClass);
 
         System.out.println("GOTO: " + classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX);
         modifiedClass.getJavaClass().dump(classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX);

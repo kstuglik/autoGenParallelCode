@@ -59,7 +59,7 @@ public class LoopUtils {
         }
     }
 
-    static void broadenCompareCondition(InstructionHandle[] loopih) {
+    public static void broadenCompareCondition(InstructionHandle[] loopih) {
         List<InstructionHandle> handles = Arrays.stream(loopih)
                 .filter(BranchHandle.class::isInstance)
                 .filter(handle -> !(handle.getInstruction() instanceof GOTO))
@@ -92,7 +92,7 @@ public class LoopUtils {
                 .toArray(InstructionHandle[]::new);
     }
 
-    static void emptyMethodLoop(MethodGen mg, InstructionHandle[] forLoop) {
+    public static void emptyMethodLoop(MethodGen mg, InstructionHandle[] forLoop) {
         InstructionList modifiedInstructionList = new InstructionList();
 
         appendInstructionsUntilLoopStart(modifiedInstructionList, mg.getInstructionList().getInstructionHandles(), forLoop[0]);

@@ -5,7 +5,7 @@ import pl.edu.agh.transformations.LaunchProperties;
 
 import java.util.Arrays;
 
-class InstructionUtils {
+public class InstructionUtils {
 
     static InstructionHandle findByInstruction(Instruction i, InstructionHandle[] ih) {
         return Arrays.stream(ih)
@@ -14,7 +14,7 @@ class InstructionUtils {
                 .orElseThrow(() -> new IllegalStateException("No matching instruction found for instruction handle."));
     }
 
-    static InstructionList getStartInitInstructions(ClassGen cg, MethodGen mg, short dataSize) {
+    public static InstructionList getStartInitInstructions(ClassGen cg, MethodGen mg, short dataSize) {
         InstructionList il = new InstructionList();
         int loopIteratorIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         int startVarIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.START_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
@@ -28,7 +28,7 @@ class InstructionUtils {
         return il;
     }
 
-    static InstructionList getEndInitInstructions(ClassGen cg, MethodGen mg, short dataSize) {
+    public static InstructionList getEndInitInstructions(ClassGen cg, MethodGen mg, short dataSize) {
         InstructionList il = new InstructionList();
         int loopIteratorIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         int endVarIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();

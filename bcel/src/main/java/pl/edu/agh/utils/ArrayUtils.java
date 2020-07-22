@@ -7,9 +7,9 @@ import java.util.stream.IntStream;
 
 public class ArrayUtils {
 
-    public static float[] createFARRAY1D(int N) {
+    public static float[] createFARRAY1D(int N, int range) {
         float[] arr = new float[N];
-        Random random = new Random(1);
+        Random random = new Random(range);
         for (int i = 0; i < N; i++) {
             arr[i] = random.nextFloat();
         }
@@ -46,10 +46,7 @@ public class ArrayUtils {
         return temp;
     }
 
-    public static void writeFARRAY1D(int size, String filePath) throws IOException {
-        float[] A = createFARRAY1D(size);/*        System.out.println(Arrays.toString(A));*/
-        System.out.println(filePath);
-
+    public static void writeFARRAY1D(float[] A, String filePath) throws IOException {
         File file = new File(filePath);
         if (file.exists()) {
             System.out.println("File already exists");
