@@ -3,5 +3,8 @@ dontinline,*.*_avgt_jmhStub
 dontinline,*.*_sample_jmhStub
 dontinline,*.*_ss_jmhStub
 dontinline,*.*_thrpt_jmhStub
+inline,histogram/BenchmarkHistogram.JCudaHistogramBenchmark
+inline,histogram/BenchmarkHistogram.ParallelHistogramBenchmark
+inline,histogram/BenchmarkHistogram.SerialHistogramBenchmark
 inline,nbody/NbodyBenchmark.parallelNbodyBenchmark
 inline,nbody/NbodyBenchmark.serialNbodyBenchmark
