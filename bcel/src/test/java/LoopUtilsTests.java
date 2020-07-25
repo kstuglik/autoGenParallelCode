@@ -17,13 +17,11 @@ import static org.junit.Assert.assertTrue;
 
 public class LoopUtilsTests {
 
-    static ByteCodeModifier bcm;
-
     //    TO SET IT UP WITH MY WISHES
     private static final int EXPECTED_LOOP_VARIABLE_INDEX = 1;//2;
     private static final int EXPECTED_LOOP_START_CONDITION_INDEX = 99;
     private static final int EXPECTED_LOOP_END_CONDITION_INDEX = 9999;
-
+    static ByteCodeModifier bcm;
 
     @BeforeClass
     public static void init() throws IOException {

@@ -15,7 +15,7 @@ public class IntegrationTest {
     @BeforeClass
     public static void init() {
         LaunchProperties.CLASS_DIR = "target/classes/nbody/";
-        LaunchProperties.MODIFICATION_SUFFIX = "_itest1";
+        LaunchProperties.MODIFICATION_SUFFIX = "_itest";
         LaunchProperties.CLASS_NAME = "SerialNbody";
         LaunchProperties.CLASS_METHOD = "moveBodies";
         bcm = new ByteCodeModifier();
@@ -38,15 +38,15 @@ public class IntegrationTest {
 
     }
 
-    //    NBODY
-    @Test
-    public void test() throws IOException, TargetLostException {
-        bcm.prepareToModify();
-
 //TODO:
-//  Problem with generic type in BCEL
-//  is not possiible generate directly instruction like: List<Callable<Integer>> tasks = new ArrayList<>();
-//  we should use trick with initialize this object with use external method (in progress)
+//  var55.add(() -> subTask(start,finalEnd));
+//        BEFORE: GOTO: target/classes/nbody/SerialNbody.class
+//        AFTER: GOTO: target/classes/nbody/SerialNbody_itest12.class
+//        CHANGES: methods: moveBodies and subTask
+
+    @Test
+    public void test() throws Exception {
+        bcm.prepareToModify();
 
         bcm.modifyBytecode(LaunchProperties.CLASS_DIR, LaunchProperties.CLASS_NAME, (short) 1000);
 
