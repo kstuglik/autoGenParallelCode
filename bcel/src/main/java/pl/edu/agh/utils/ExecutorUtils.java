@@ -14,7 +14,7 @@ public class ExecutorUtils {
         InstructionHandle[] forLoop = LoopUtils.getForLoop(mg);
         InstructionHandle lastLoopHandle = forLoop[forLoop.length - 1];
         int executorIndex = ConstantPoolUtils.getFieldIndex(cg, LaunchProperties.EXECUTOR_SERVICE_NAME);
-        int tasksListIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.TASK_POOL_NAME, mg.getLocalVariableTable(cp)).getIndex();
+        int tasksListIndex = 0;// LocalVariableUtils.findLocalVariableByName(LaunchProperties.TASK_POOL_NAME, mg.getLocalVariableTable(cp)).getIndex();
         InstructionList invokeInstructions = new InstructionList();
         invokeInstructions.append(new GETSTATIC(executorIndex));
         invokeInstructions.append(new ALOAD(tasksListIndex));

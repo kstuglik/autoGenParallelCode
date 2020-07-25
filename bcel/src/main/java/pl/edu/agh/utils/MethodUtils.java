@@ -1,12 +1,16 @@
 package pl.edu.agh.utils;
 
-import org.apache.bcel.classfile.*;
+import org.apache.bcel.classfile.ConstantCP;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
-import org.apache.bcel.generic.FieldOrMethod;
 
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Predicate;
+
+import static pl.edu.agh.utils.LoopUtils.getGoto;
+import static pl.edu.agh.utils.LoopUtils.getInstructionsBetweenPositions;
 
 
 public class MethodUtils {
@@ -64,6 +68,30 @@ public class MethodUtils {
         } else {
             System.err.println("Method: " + methodName + " not found!");
             return -1;
+        }
+    }
+
+    //        getBodyFromMethodToNewInstructionList
+    //
+    //        CONCEPTION: COPY ALL INSTRUCTION FROM SELECTED METHOD
+    //        AND NEXT ADD NEW INSTRUCTIONS ON THE END
+
+    public static void getBodyFromMethodToNewInstructionList(
+            MethodGen mg, InstructionList il, InstructionList il_old) {
+
+        int GOTO_ID = getGoto(il_old.getInstructionHandles()).getPosition();
+
+        InstructionHandle[] handles = getInstructionsBetweenPositions(
+                mg.getInstructionList().getInstructionHandles(), 0, GOTO_ID);
+
+        InstructionHandle instr;
+        for (InstructionHandle handle : handles) {
+            instr = handle;
+//            System.out.println(instr.getInstruction().copy());
+            if (instr instanceof BranchHandle) {
+                BranchHandle branch = (BranchHandle) instr;
+                il.append((BranchInstruction) branch.getInstruction().copy());
+            } else il.append(instr.getInstruction().copy());
         }
     }
 }

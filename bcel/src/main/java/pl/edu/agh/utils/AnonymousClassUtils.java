@@ -17,12 +17,12 @@ public class AnonymousClassUtils {
         InnerClassData innerClassData = addAnonymousClassConstants(classGen);
         redumpClassGen(classGen, classPath);
 
-        JavaClass analyzedClass = new ClassParser(classPath + classGen.getClassName() + ".class").parse();
+        JavaClass analyzedClass = new ClassParser(classPath + classGen.getClassName() + LaunchProperties.CLASS_SUFFIX).parse();
         classGen = new ClassGen(analyzedClass);
 
         addInnerClassAttribute(analyzedClass, classGen, innerClassData, classPath);
 
-        analyzedClass = new ClassParser(classPath + classGen.getClassName() + ".class").parse();
+        analyzedClass = new ClassParser(classPath + classGen.getClassName() + LaunchProperties.CLASS_SUFFIX).parse();
         classGen = new ClassGen(analyzedClass);
 //        MethodGen methodGen = new MethodGen(MethodUtils.findMethodByNameOrThrow(classGen, "main").getMethod(), classGen.getClassName(), classGen.getConstantPool());
         MethodGen methodGen = new MethodGen(MethodUtils.findMethodByNameOrThrow(classGen, "moveBodies").getMethod(), classGen.getClassName(), classGen.getConstantPool());
@@ -36,7 +36,7 @@ public class AnonymousClassUtils {
         ConstantPoolGen constantPool = classGen.getConstantPool();
         LocalVariableTable localVariableTable = methodGen.getLocalVariableTable(constantPool);
         InstructionFactory instructionFactory = new InstructionFactory(classGen, constantPool);
-        int tasksListIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.TASK_POOL_NAME, localVariableTable).getIndex();
+        int tasksListIndex = 0;//LocalVariableUtils.findLocalVariableByName(LaunchProperties.TASK_POOL_NAME, localVariableTable).getIndex();
         int startIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.START_INDEX_VARIABLE_NAME, localVariableTable).getIndex();
         int endIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_INDEX_VARIABLE_NAME, localVariableTable).getIndex();
 
@@ -67,7 +67,7 @@ public class AnonymousClassUtils {
                 new Type[]{Type.getType("Ljava/util/Collection;")},
                 Const.INVOKEINTERFACE));
         //STORE in partialResults
-        int resultsIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.RESULTS_POOL_NAME, localVariableTable).getIndex();
+        int resultsIndex = 0;//LocalVariableUtils.findLocalVariableByName(LaunchProperties.RESULTS_POOL_NAME, localVariableTable).getIndex();
         invokeInstructions.append(new ASTORE(resultsIndex));
 //        invokeInstructions.append(new POP());
 
@@ -103,7 +103,7 @@ public class AnonymousClassUtils {
     }
 
     private static void redumpClassGen(ClassGen classGen, String classPath) {
-        try (FileOutputStream outputStream = new FileOutputStream(classPath + classGen.getClassName() + ".class")) {
+        try (FileOutputStream outputStream = new FileOutputStream(classPath + "/" + classGen.getClassName() + ".class")) {
             classGen.getJavaClass().dump(outputStream);
         } catch (IOException exception) {
             throw new RuntimeException("Error during modified class save.", exception);
@@ -127,7 +127,7 @@ public class AnonymousClassUtils {
 
     private static void redumpJavaClass(JavaClass analyzedClass, ClassGen classGen, String classPath) {
         classGen = new ClassGen(analyzedClass);
-        try (FileOutputStream outputStream = new FileOutputStream(classPath + analyzedClass.getClassName() + ".class")) {//TODO double "_modified"
+        try (FileOutputStream outputStream = new FileOutputStream(classPath + "/" + analyzedClass.getClassName() + ".class")) {//TODO double "_modified"
             classGen.getJavaClass().dump(outputStream);
         } catch (IOException exception) {
             throw new RuntimeException("Error during modified class save.", exception);
@@ -138,6 +138,28 @@ public class AnonymousClassUtils {
         InstructionHandle firstCallHandle = forLoop[forLoop.length - 5];
         InstructionHandle lastCallHandle = forLoop[forLoop.length - 3];
         allMethodInstructions.delete(firstCallHandle, lastCallHandle);
+    }
+
+    private void createListCallableInteger(InstructionFactory _factory,
+                                           ClassGen _cg,
+                                           MethodGen method,
+                                           InstructionList il) {
+
+        InstructionHandle ih_1 = il.append(_factory.createInvoke("util.pl.edu.agh.utils.Generico", "init",
+                new ObjectType("List<Callable<Integer>>"), Type.NO_ARGS, Const.INVOKESTATIC));
+
+        il.append(InstructionFactory.createStore(Type.OBJECT, 2));
+        InstructionHandle ih_2 = il.append(InstructionFactory.createLoad(Type.OBJECT, 2));
+        InstructionHandle ih_3 = il.append(InstructionFactory.createStore(Type.OBJECT, 1));
+
+
+        InstructionHandle ih_4 = il.append(_factory.createNew("java.util.concurrent.Callable"));
+
+        InstructionHandle ih_5 = il.append(InstructionFactory.createReturn(Type.VOID));
+        method.setMaxStack();
+        method.setMaxLocals();
+        _cg.addMethod(method.getMethod());
+        il.dispose();
     }
 
     public static class InnerClassData {

@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import static pl.edu.agh.utils.MethodUtils.getBodyFromMethodToNewInstructionList;
+
 public class TransformUtils {
 
     public static void addThreadPoolExecutorService(ClassGen _cg) {
@@ -46,20 +48,23 @@ public class TransformUtils {
                 _il_new,
                 _cp);
 
-        _mg.stripAttributes(true);
+//        _mg.stripAttributes(true);
         _mg.setMaxLocals();
         _mg.setMaxStack();
         _cg.replaceMethod(_mg.getMethod(), _mg.getMethod());
+        _il_new.dispose();
     }
 
 //  addClassFields_old- add thread fields in class
 
     public static void addClassFields_old(ClassGen cg, ConstantPoolGen cp) {
-        FieldGen threadCount = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC | Const.ACC_FINAL,
+        FieldGen threadCount = new FieldGen(
+                Const.ACC_PUBLIC | Const.ACC_STATIC | Const.ACC_FINAL,
                 Type.INT,
                 LaunchProperties.NUMBER_OF_THREADS_NAME,
                 cp);
-        FieldGen service = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
+        FieldGen service = new FieldGen(
+                Const.ACC_PUBLIC | Const.ACC_STATIC,
                 Type.getType(ExecutorService.class),
                 LaunchProperties.EXECUTOR_SERVICE_NAME,
                 cp);
@@ -167,22 +172,32 @@ public class TransformUtils {
         constant.setClassIndex(classNameIndex);
     }
 
-    public static void appendFieldsInstructions(InstructionList il, InstructionFactory factory, String className) {
-        il.append(factory.createInvoke("java.lang.Runtime", "getRuntime", Type.getType(Runtime.class), Type.NO_ARGS, Const.INVOKESTATIC));
-        il.append(factory.createInvoke("java.lang.Runtime", "availableProcessors", Type.INT, Type.NO_ARGS, Const.INVOKEVIRTUAL));
-        il.append(factory.createPutStatic(className, LaunchProperties.NUMBER_OF_THREADS_NAME, Type.INT));
-//        il.append(factory.createGetStatic(className,
+    private static void appendFieldsInstructions(InstructionList instructionList, InstructionFactory instructionFactory, String className) {
+        instructionList.append(instructionFactory.createInvoke("java.lang.Runtime",
+                "getRuntime",
+                Type.getType(Runtime.class),
+                Type.NO_ARGS,
+                Const.INVOKESTATIC));
+        instructionList.append(instructionFactory.createInvoke("java.lang.Runtime",
+                "availableProcessors",
+                Type.INT,
+                Type.NO_ARGS,
+                Const.INVOKEVIRTUAL));
+        instructionList.append(instructionFactory.createPutStatic(className,
+                LaunchProperties.NUMBER_OF_THREADS_NAME,
+                Type.INT));
+//        instructionList.append(instructionFactory.createGetStatic(className,
 //                                                                  Constants.NUMBER_OF_THREADS_CONSTANT_NAME,
 //                                                                  Type.INT));
-//        il.append(factory.createInvoke("java.util.concurrent.Executors",
+//        instructionList.append(instructionFactory.createInvoke("java.util.concurrent.Executors",
 //                                                               "newFixedThreadPool",
 //                                                               Type.getType(ExecutorService.class),
 //                                                               new Type[]{Type.INT},
 //                                                               Const.INVOKESTATIC));
-//        il.append(factory.createPutStatic(className,
+//        instructionList.append(instructionFactory.createPutStatic(className,
 //                                                                  Constants.EXECUTOR_SERVICE_CONSTANT_NAME,
 //                                                                  Type.getType(ExecutorService.class)));
-        il.append(new RETURN());
+        instructionList.append(InstructionFactory.createReturn(Type.VOID));
     }
 
     public static void initExecutorService(ClassGen cg, MethodGen mg) {
@@ -191,15 +206,18 @@ public class TransformUtils {
         InstructionFactory factory = new InstructionFactory(cg, cp);
         InstructionList il_append = new InstructionList();
 
-        il_append.append(factory.createGetStatic(cg.getClassName(),
+        il_append.append(factory.createGetStatic(
+                cg.getClassName(),
                 LaunchProperties.NUMBER_OF_THREADS_NAME,
                 Type.INT));
-        il_append.append(factory.createInvoke("java.util.concurrent.Executors",
+        il_append.append(factory.createInvoke(
+                "java.util.concurrent.Executors",
                 "newFixedThreadPool",
                 Type.getType(ExecutorService.class),
                 new Type[]{Type.INT},
                 Const.INVOKESTATIC));
-        il_append.append(factory.createPutStatic(cg.getClassName(),
+        il_append.append(factory.createPutStatic(
+                cg.getClassName(),
                 LaunchProperties.EXECUTOR_SERVICE_NAME,
                 Type.getType(ExecutorService.class)));
 
@@ -212,32 +230,74 @@ public class TransformUtils {
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
 
+    public static void addTryCatchServiceExecutor(ClassGen cg) {
+
+        ConstantPoolGen cp = cg.getConstantPool();
+        InstructionList il = new InstructionList();
+
+        MethodGen mg = new MethodGen(Const.ACC_STATIC | Const.ACC_PUBLIC,
+                Type.VOID, Type.NO_ARGS, null, "serviceCall", cg.getClassName(), il, cp);
+        InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
+
+        il.append(factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
+        il.append(new PUSH(cp, 10));
+        il.append(factory.createInvoke("java.io.PrintStream", "print", Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
+
+        InstructionHandle ih_22 = il.append(factory.createFieldAccess(cg.getClassName(), "SERVICE", new ObjectType("java.util.concurrent.ExecutorService"), Const.GETSTATIC));
+        InstructionHandle ih_35 = il.append(factory.createInvoke("java.util.concurrent.ExecutorService", "shutdown", Type.VOID, Type.NO_ARGS, Const.INVOKEINTERFACE));
+
+        InstructionHandle iha_22 = il.append(factory.createFieldAccess(cg.getClassName(),
+                "SERVICE", new ObjectType("java.util.concurrent.ExecutorService"), Const.GETSTATIC));
+        InstructionHandle iha_35 = il.append(factory.createInvoke("java.util.concurrent.ExecutorService",
+                "invokeAll", Type.VOID, Type.NO_ARGS, Const.INVOKEINTERFACE));
+
+        InstructionHandle ih_40;
+
+        BranchInstruction goto_40 = factory.createBranchInstruction(Const.GOTO, null);
+
+        ih_40 = il.append(goto_40);
+        InstructionHandle ih_43 = il.append(factory.createStore(Type.OBJECT, 1));
+        InstructionHandle ih_44 = il.append(factory.createLoad(Type.OBJECT, 1));
+        il.append(factory.createInvoke("java.lang.Exception", "printStackTrace",
+                Type.VOID, Type.NO_ARGS, Const.INVOKEVIRTUAL));
+        InstructionHandle ih_48 = il.append(factory.createReturn(Type.VOID));
+
+        goto_40.setTarget(ih_48);
+        mg.addExceptionHandler(ih_22, iha_35, ih_43, new ObjectType("java.lang.Exception"));
+
+        il.append(new RETURN());
+        mg.setInstructionList(il);
+
+        mg.setMaxStack();
+        mg.setMaxLocals();
+
+        cg.addMethod(mg.getMethod());
+        il.dispose();
+    }
+
     public static void addTaskPool(ClassGen cg, MethodGen mg) {
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionFactory factory = new InstructionFactory(cg, cp);
-        InstructionList il_append = new InstructionList();
+        InstructionList il = new InstructionList();
 
 
-        il_append.append(factory.createNew("java.util.ArrayList"));
-        il_append.append(InstructionConst.DUP);
-        il_append.append(factory.createInvoke("java.util.ArrayList", "<init>", Type.VOID, Type.NO_ARGS, Const.INVOKESPECIAL));
-        il_append.append(InstructionFactory.createStore(Type.getType("Ljava/util/List;"), mg.getMaxLocals()));
-        LocalVariableGen lg = mg.addLocalVariable(LaunchProperties.TASK_POOL_NAME, Type.getType("Ljava/util/List;"), null, null);
+        InstructionHandle ih_1 = il.append(factory.createInvoke("util.pl.edu.agh.utils.Generico", "init",
+                new ObjectType("List<Callable<Integer>>"), Type.NO_ARGS, Const.INVOKESTATIC));
 
-        int id = lg.getIndex();
 
-        il_append.append(factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
-        il_append.append(InstructionFactory.createLoad(Type.OBJECT, id));
-        il_append.append(factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[]{Type.OBJECT}, Const.INVOKEVIRTUAL));
+        il.append(InstructionFactory.createStore(Type.OBJECT, 55));
+        InstructionHandle ih_2 = il.append(InstructionFactory.createLoad(Type.OBJECT, 55));
+        InstructionHandle ih_3 = il.append(InstructionFactory.createStore(Type.OBJECT, 56));
 
 
         InstructionList currentList = mg.getInstructionList();
-        il_append.append(currentList);
-        mg.setInstructionList(il_append);
+        il.append(currentList);
+        mg.setInstructionList(il);
         updateMethodParametersScope(mg, cp);
         mg.setMaxStack();
         mg.setMaxLocals();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
+
     }
 
     public static void updateMethodParametersScope(MethodGen mg, ConstantPoolGen cp) {
@@ -250,33 +310,23 @@ public class TransformUtils {
     public static void addFutureResultsList(ClassGen cg, MethodGen mg) {
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionFactory factory = new InstructionFactory(cg, cp);
-        InstructionList il_append = new InstructionList();
+        InstructionList il = new InstructionList();
 
 
-        il_append.append(factory.createNew(ObjectType.getInstance("java.util.ArrayList")));
-        il_append.append(new DUP());
-        il_append.append(factory.createInvoke("java.util.ArrayList",
-                "<init>",
-                Type.VOID,
-                Type.NO_ARGS,
-                Const.INVOKESPECIAL));
-        il_append.append(InstructionFactory.createStore(Type.OBJECT, mg.getMaxLocals()));
-        LocalVariableGen lg = mg.addLocalVariable(LaunchProperties.RESULTS_POOL_NAME,
-                Type.getType("Ljava/util/List;"),
-                il_append.getEnd(),
-                null);
+        InstructionHandle ih_1 = il.append(factory.createInvoke("util.pl.edu.agh.utils.Generico", "init",
+                new ObjectType("List<Callable<Integer>>"), Type.NO_ARGS, Const.INVOKESTATIC));
 
 
-        int id = lg.getIndex();
+        il.append(InstructionFactory.createStore(Type.OBJECT, 2));
+        InstructionHandle ih_2 = il.append(InstructionFactory.createLoad(Type.OBJECT, 2));
+        InstructionHandle ih_3 = il.append(InstructionFactory.createStore(Type.OBJECT, 1));
 
-        il_append.append(factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
-        il_append.append(InstructionFactory.createLoad(Type.OBJECT, id));
-        il_append.append(factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[]{Type.OBJECT}, Const.INVOKEVIRTUAL));
 
+        InstructionHandle ih_4 = il.append(factory.createNew("java.util.concurrent.Callable"));
 
         InstructionList currentList = mg.getInstructionList();
-        il_append.append(currentList);
-        mg.setInstructionList(il_append);
+        il.append(currentList);
+        mg.setInstructionList(il);
         updateMethodParametersScope(mg, cp);
         mg.setMaxStack();
         mg.setMaxLocals();
@@ -295,7 +345,8 @@ public class TransformUtils {
         InstructionList subTaskInstructionList = getSubtaskInstructions(methodGen);
 
         subTaskInstructionList.append(new ICONST(1));
-        subTaskInstructionList.append(InstructionFactory.createReturn(Type.INT));//TODO - would be nicer to get it by param from analyzer
+        subTaskInstructionList.append(InstructionFactory.createReturn(Type.INT));
+        //TODO - would be nicer to get it by param from analyzer
 
         MethodGen subTaskMethod = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
                 Type.INT,//TODO - would be nicer to get it by param from analyzer
@@ -330,6 +381,7 @@ public class TransformUtils {
         subTaskMethod.setMaxStack();
         classGen.addMethod(subTaskMethod.getMethod());
         classGen.getConstantPool().addMethodref(subTaskMethod);
+
     }
 
     private static InstructionList getSubtaskInstructions(MethodGen mg) {
@@ -415,39 +467,70 @@ public class TransformUtils {
     }
 
     public static void changeLoopLimitToNumberOfThreads(ClassGen cg, MethodGen mg) {
+        InstructionList il = mg.getInstructionList();
         InstructionHandle[] forLoop = LoopUtils.getForLoop(mg);
         int numThreadsConstantIndex = ConstantPoolUtils.getFieldIndex(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
         forLoop[3].setInstruction(new GETSTATIC(numThreadsConstantIndex));
+
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
+
     }
 
     public static void removeBodyForLoopInSelectedMethod(ClassGen cg, MethodGen mg) {
         InstructionHandle[] forLoop = LoopUtils.getForLoop(mg);
         LoopUtils.emptyMethodLoop(mg, forLoop);
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
+
+        InstructionList currentList = mg.getInstructionList();
+
+        updateMethodParametersScope(mg, mg.getConstantPool());
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
 
     public static void setNewLoopBody(ClassGen cg, MethodGen mg, short dataSize) {
-        InstructionList allInstructionsList = mg.getInstructionList();
+        InstructionList il = mg.getInstructionList();
         InstructionHandle[] loopHandles = LoopUtils.getForLoop(mg);
         InstructionHandle firstLoopInstruction = loopHandles[0];
         InstructionHandle lastInstructionBeforeLoopBody = loopHandles[4];
         InstructionHandle lastLoopInstruction = loopHandles[loopHandles.length - 1];
+        InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
+
         mg.addLocalVariable(LaunchProperties.START_INDEX_VARIABLE_NAME,
                 Type.INT,
                 firstLoopInstruction,
                 lastLoopInstruction);
+
         mg.addLocalVariable(LaunchProperties.END_INDEX_VARIABLE_NAME,
                 Type.INT,
                 firstLoopInstruction,
                 lastLoopInstruction);
+
+        mg.addLocalVariable(LaunchProperties.FINAL_END_INDEX_VARIABLE_NAME,
+                Type.FLOAT,
+                firstLoopInstruction,
+                lastLoopInstruction);
+
+
         InstructionList startInitInstructions = InstructionUtils.getStartInitInstructions(cg, mg, dataSize);
         InstructionHandle endOfStartInit = startInitInstructions.getEnd();
         InstructionList endInitInstructions = InstructionUtils.getEndInitInstructions(cg, mg, dataSize);
-        allInstructionsList.append(lastInstructionBeforeLoopBody, startInitInstructions);
-        allInstructionsList.append(endOfStartInit, endInitInstructions);
+
+        InstructionHandle endOfStartInit2 = endInitInstructions.getEnd();
+        InstructionList finalEndInitInstruction = InstructionUtils.getEndInitInstructions2(cg, mg, dataSize);
+
+
+        il.append(lastInstructionBeforeLoopBody, startInitInstructions);
+        il.append(endOfStartInit, endInitInstructions);
+        il.append(endOfStartInit2, finalEndInitInstruction);
+
+
+        updateMethodParametersScope(mg, mg.getConstantPool());
         mg.setMaxStack();
+        mg.setMaxLocals();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
+
     }
 
     public static void insertNewInstruciton(ClassGen cg, MethodGen mg, int option) throws Exception, IllegalStateException {
@@ -468,6 +551,7 @@ public class TransformUtils {
         InstructionHandle TRY_START = il_new.append(handles[0].getInstruction());
 
 //TODO: GET BODY FROM METHOD AND PUT INTO TRY CATCH BLOCK
+
         for (int i = 1; i < handles.length - 1; i++) {
 
             handle = handles[i];
@@ -547,4 +631,68 @@ public class TransformUtils {
         GOTO.setTarget(CATCH_END);
         mg.addExceptionHandler(TRY_START, TRY_END, CATCH_START, new ObjectType("java.lang.Exception"));
     }
+
+    public static void addTryCatchService(ClassGen cg, MethodGen mg) {
+
+        InstructionList il = new InstructionList();
+        InstructionList il_old = mg.getInstructionList();
+
+//        System.out.println(il_old.getEnd().getPosition());
+
+        InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
+
+        //get instruction from method for append to end
+        getBodyFromMethodToNewInstructionList(mg, il, il_old);
+
+//      ****************************************************************************************************
+        InstructionHandle startTry = il.append(factory.createFieldAccess(
+                cg.getClassName(),
+                "SERVICE",
+                new ObjectType("java.util.concurrent.ExecutorService"),
+                Const.GETSTATIC));
+
+        il.append(factory.createInvoke(
+                "java.util.concurrent.ExecutorService",
+                "invokeAll",
+                Type.VOID, Type.NO_ARGS,
+                Const.INVOKEINTERFACE));
+
+        il.append(factory.createFieldAccess(
+                cg.getClassName(),
+                "SERVICE",
+                new ObjectType("java.util.concurrent.ExecutorService"),
+                Const.GETSTATIC));
+
+        InstructionHandle endTry = il.append(factory.createInvoke(
+                "java.util.concurrent.ExecutorService",
+                "shutdown",
+                Type.VOID, Type.NO_ARGS,
+                Const.INVOKEINTERFACE));
+
+        BranchInstruction gotoNext = factory.createBranchInstruction(Const.GOTO, null);
+        il.append(gotoNext);
+
+        InstructionHandle startCatch = il.append(factory.createStore(Type.OBJECT, mg.getMaxLocals()));
+
+        il.append(factory.createLoad(Type.OBJECT, mg.getMaxLocals()));
+        il.append(factory.createInvoke(
+                "java.lang.Exception",
+                "printStackTrace",
+                Type.VOID, Type.NO_ARGS,
+                Const.INVOKEVIRTUAL));
+
+        InstructionHandle returnId = il.append(factory.createReturn(Type.VOID));
+
+        gotoNext.setTarget(returnId);
+        mg.addExceptionHandler(startTry, endTry, startCatch, new ObjectType("java.lang.Exception"));
+//      ****************************************************************************************************
+
+        mg.setInstructionList(il);
+
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
+        il.dispose();
+    }
+
 }

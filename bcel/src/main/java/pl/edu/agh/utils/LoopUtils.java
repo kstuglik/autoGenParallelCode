@@ -13,7 +13,7 @@ public class LoopUtils {
     private static final int START_CONDITION_INSTRUCTION_INDEX = 0;
     private static final int END_CONDITION_INSTRUCTION_INDEX = 3;
 
-    public static InstructionHandle[] getForLoop(MethodGen mg) throws IllegalArgumentException{
+    public static InstructionHandle[] getForLoop(MethodGen mg) throws IllegalArgumentException {
         InstructionHandle ih = getGoto(mg.getInstructionList().getInstructionHandles());
         int startPosition = ((BranchHandle) ih).getTarget().getPrev().getPrev().getPosition();
         int endPosition = ih.getPosition();
@@ -27,7 +27,7 @@ public class LoopUtils {
                 .orElseThrow(() -> new IllegalArgumentException("Method passed to 'getForLoop' does not have for loop."));
     }
 
-    private static InstructionHandle[] getInstructionsBetweenPositions(InstructionHandle[] allih, int start, int end) {
+    public static InstructionHandle[] getInstructionsBetweenPositions(InstructionHandle[] allih, int start, int end) {
         return Arrays.stream(allih)
                 .filter(instr -> isBetweenPositions(instr, start, end))
                 .toArray(InstructionHandle[]::new);

@@ -18,6 +18,7 @@ public class ConstantPoolUtils {
                 .findAny()
                 .orElseThrow(() -> new IllegalStateException("Wrong state - constant " + constantName + " cannot be found."));
         for (int i = 1; i < cp.getConstantPool().length; i++) {
+//            System.out.println(cp.getConstantPool()[i]);
             if (Objects.equals(cp.getConstantPool()[i], numThreadsField)) {
                 return i;
             }

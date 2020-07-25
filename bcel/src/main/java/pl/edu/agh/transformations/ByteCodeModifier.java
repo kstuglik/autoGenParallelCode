@@ -6,7 +6,6 @@ import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.utils.AnonymousClassUtils;
 import pl.edu.agh.utils.MethodUtils;
 import pl.edu.agh.utils.TransformUtils;
 
@@ -142,27 +141,48 @@ public class ByteCodeModifier {
         _mg = new MethodGen(_transformedMethod, _modifiedClass.getClassName(), _modifiedClass.getConstantPool());
     }
 
-    public void modifyBytecode(String classPath, String className, short N) throws IOException, TargetLostException {
+    public void modifyBytecode(String classPath, String className, short N) throws Exception {
         JavaClass analyzedClass = new ClassParser(classPath + className + LaunchProperties.CLASS_SUFFIX).parse();
         ClassGen modifiedClass = getModifiedClass(className, analyzedClass);
         copyFields(analyzedClass, modifiedClass);
         copyMethods(analyzedClass, modifiedClass);
-
         Method transformedMethod = getSelectedMethod0(modifiedClass);
-        MethodGen methodGen = new MethodGen(transformedMethod, modifiedClass.getClassName(), modifiedClass.getConstantPool());
+        MethodGen mg = new MethodGen(transformedMethod, modifiedClass.getClassName(), modifiedClass.getConstantPool());
 
+
+        System.out.println("1)\til.lenght = " + mg.getInstructionList().getLength());
         TransformUtils.addThreadPoolExecutorService(modifiedClass);
-        TransformUtils.initExecutorService(modifiedClass, methodGen);
-        TransformUtils.addTaskPool(modifiedClass, methodGen);
-        TransformUtils.addFutureResultsList(modifiedClass, methodGen);
-        TransformUtils.copyLoopToSubTaskMethod(modifiedClass, methodGen);
-        TransformUtils.changeLoopLimitToNumberOfThreads(modifiedClass, methodGen);
-        TransformUtils.removeBodyForLoopInSelectedMethod(modifiedClass, methodGen);
-        TransformUtils.setNewLoopBody(modifiedClass, methodGen, N);
-        AnonymousClassUtils.addCallableCall(modifiedClass, classPath);
 
-        System.out.println("GOTO: " + classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX);
-        modifiedClass.getJavaClass().dump(classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX);
+        System.out.println("2)\til.lenght = " + mg.getInstructionList().getLength());
+        TransformUtils.initExecutorService(modifiedClass, mg);
+
+        System.out.println("3)\til.lenght = " + mg.getInstructionList().getLength());
+        TransformUtils.copyLoopToSubTaskMethod(modifiedClass, mg);
+
+        System.out.println("4)\til.lenght = " + mg.getInstructionList().getLength());
+        TransformUtils.changeLoopLimitToNumberOfThreads(modifiedClass, mg);
+
+        System.out.println("5)\til.lenght = " + mg.getInstructionList().getLength());
+        TransformUtils.addTaskPool(modifiedClass, mg);
+
+        System.out.println("6)\til.lenght = " + mg.getInstructionList().getLength());
+        TransformUtils.removeBodyForLoopInSelectedMethod(modifiedClass, mg);
+
+        System.out.println("7)\til.lenght = " + mg.getInstructionList().getLength());
+        TransformUtils.setNewLoopBody(modifiedClass, mg, N);
+
+        System.out.println("8)\til.lenght = " + mg.getInstructionList().getLength());
+        TransformUtils.addTryCatchService(modifiedClass, mg);
+
+        System.out.println("GOTO: " + classPath + className + LaunchProperties.MODIFICATION_SUFFIX + "12" + LaunchProperties.CLASS_SUFFIX);
+        modifiedClass.getJavaClass().dump(classPath + className + LaunchProperties.MODIFICATION_SUFFIX + "12" + LaunchProperties.CLASS_SUFFIX);
+    }
+
+    private void printLocalVariableName(MethodGen methodGen) {
+        LocalVariableGen[] _ltable = methodGen.getLocalVariables();
+        for (int i = 0; i < _ltable.length; i++) {
+            System.out.println(_ltable[i].getName());
+        }
     }
 
     private ClassGen getModifiedClass(String className, JavaClass analyzedClass) {
