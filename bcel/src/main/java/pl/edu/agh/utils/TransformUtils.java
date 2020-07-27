@@ -16,46 +16,46 @@ import static pl.edu.agh.utils.MethodUtils.getBodyFromMethodToNewInstructionList
 
 public class TransformUtils {
 
-    public static void addThreadPoolExecutorService(ClassGen _cg) {
+    public static void addThreadPoolExecutorService(ClassGen cg) {
 
-        Optional<MethodGen> classInitMethod = MethodUtils.findMethodByName(_cg, Const.STATIC_INITIALIZER_NAME);
-        ConstantPoolGen _cp = _cg.getConstantPool();
-        addClassFields_old(_cg, _cp);
-        InstructionList _il_new = new InstructionList();
+        Optional<MethodGen> classInitMethod = MethodUtils.findMethodByName(cg, Const.STATIC_INITIALIZER_NAME);
+        ConstantPoolGen cp = cg.getConstantPool();
+        addClassFields_old(cg, cp);
+        InstructionList il_new = new InstructionList();
 
         classInitMethod.ifPresent(init -> {
-            _il_new.append(init.getInstructionList());
+            il_new.append(init.getInstructionList());
             try {
-                _il_new.delete(_il_new.getEnd());
+                il_new.delete(il_new.getEnd());
             } catch (TargetLostException e) {
                 e.printStackTrace();
             }
-            retargetStaticPuts(_cg, _il_new);
+            retargetStaticPuts(cg, il_new);
         });
 
-        InstructionFactory _factory = new InstructionFactory(_cg, _cp);
+        InstructionFactory _factory = new InstructionFactory(cg, cp);
 
-        String className = _cg.getClassName();
+        String className = cg.getClassName();
 
-        appendFieldsInstructions(_il_new, _factory, className);
+        appendFieldsInstructions(il_new, _factory, className);
 
-        MethodGen _mg = new MethodGen(Const.ACC_STATIC,
+        MethodGen mg = new MethodGen(Const.ACC_STATIC,
                 Type.VOID,
                 Type.NO_ARGS,
                 new String[0],
                 Const.STATIC_INITIALIZER_NAME,
                 className,
-                _il_new,
-                _cp);
+                il_new,
+                cp);
 
 //        _mg.stripAttributes(true);
-        _mg.setMaxLocals();
-        _mg.setMaxStack();
-        _cg.replaceMethod(_mg.getMethod(), _mg.getMethod());
-        _il_new.dispose();
+        mg.setMaxLocals();
+        mg.setMaxStack();
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
+        il_new.dispose();
     }
 
-//  addClassFields_old- add thread fields in class
+//  addClassFields_old - add thread fields in class
 
     public static void addClassFields_old(ClassGen cg, ConstantPoolGen cp) {
         FieldGen threadCount = new FieldGen(
@@ -281,13 +281,14 @@ public class TransformUtils {
         InstructionList il = new InstructionList();
 
 
-        InstructionHandle ih_1 = il.append(factory.createInvoke("util.pl.edu.agh.utils.Generico", "init",
-                new ObjectType("List<Callable<Integer>>"), Type.NO_ARGS, Const.INVOKESTATIC));
-
+        il.append(factory.createInvoke(
+                "util.pl.edu.agh.utils.Generico", "init",
+                new ObjectType("List<Callable<Integer>>"),
+                Type.NO_ARGS, Const.INVOKESTATIC));
 
         il.append(InstructionFactory.createStore(Type.OBJECT, 55));
-        InstructionHandle ih_2 = il.append(InstructionFactory.createLoad(Type.OBJECT, 55));
-        InstructionHandle ih_3 = il.append(InstructionFactory.createStore(Type.OBJECT, 56));
+        il.append(InstructionFactory.createLoad(Type.OBJECT, 55));
+        il.append(InstructionFactory.createStore(Type.OBJECT, 56));
 
 
         InstructionList currentList = mg.getInstructionList();
@@ -297,7 +298,6 @@ public class TransformUtils {
         mg.setMaxStack();
         mg.setMaxLocals();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
-
     }
 
     public static void updateMethodParametersScope(MethodGen mg, ConstantPoolGen cp) {
@@ -459,11 +459,8 @@ public class TransformUtils {
     private static void adjustInstructionTarget(InstructionHandle instruction, InstructionHandle returnHandle, InstructionHandle loopBeginning) {
         short opCode = instruction.getInstruction().getOpcode();
         BranchHandle branchHandle = (BranchHandle) instruction;
-        if (opCode == Const.GOTO) {
-            branchHandle.setTarget(loopBeginning);
-        } else {
-            branchHandle.setTarget(returnHandle);
-        }
+        if (opCode == Const.GOTO) branchHandle.setTarget(loopBeginning);
+        else branchHandle.setTarget(returnHandle);
     }
 
     public static void changeLoopLimitToNumberOfThreads(ClassGen cg, MethodGen mg) {
@@ -473,16 +470,12 @@ public class TransformUtils {
         forLoop[3].setInstruction(new GETSTATIC(numThreadsConstantIndex));
 
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
-
     }
 
     public static void removeBodyForLoopInSelectedMethod(ClassGen cg, MethodGen mg) {
         InstructionHandle[] forLoop = LoopUtils.getForLoop(mg);
         LoopUtils.emptyMethodLoop(mg, forLoop);
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
-
-        InstructionList currentList = mg.getInstructionList();
-
         updateMethodParametersScope(mg, mg.getConstantPool());
         mg.setMaxStack();
         mg.setMaxLocals();
@@ -493,9 +486,7 @@ public class TransformUtils {
         InstructionList il = mg.getInstructionList();
         InstructionHandle[] loopHandles = LoopUtils.getForLoop(mg);
         InstructionHandle firstLoopInstruction = loopHandles[0];
-        InstructionHandle lastInstructionBeforeLoopBody = loopHandles[4];
         InstructionHandle lastLoopInstruction = loopHandles[loopHandles.length - 1];
-        InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
 
         mg.addLocalVariable(LaunchProperties.START_INDEX_VARIABLE_NAME,
                 Type.INT,
@@ -503,28 +494,34 @@ public class TransformUtils {
                 lastLoopInstruction);
 
         mg.addLocalVariable(LaunchProperties.END_INDEX_VARIABLE_NAME,
-                Type.INT,
-                firstLoopInstruction,
-                lastLoopInstruction);
-
-        mg.addLocalVariable(LaunchProperties.FINAL_END_INDEX_VARIABLE_NAME,
                 Type.FLOAT,
                 firstLoopInstruction,
                 lastLoopInstruction);
 
-
-        InstructionList startInitInstructions = InstructionUtils.getStartInitInstructions(cg, mg, dataSize);
-        InstructionHandle endOfStartInit = startInitInstructions.getEnd();
-        InstructionList endInitInstructions = InstructionUtils.getEndInitInstructions(cg, mg, dataSize);
-
-        InstructionHandle endOfStartInit2 = endInitInstructions.getEnd();
-        InstructionList finalEndInitInstruction = InstructionUtils.getEndInitInstructions2(cg, mg, dataSize);
+        mg.addLocalVariable(LaunchProperties.END_FINAL_INDEX_VARIABLE_NAME,
+                Type.INT,
+                firstLoopInstruction,
+                lastLoopInstruction);
 
 
-        il.append(lastInstructionBeforeLoopBody, startInitInstructions);
-        il.append(endOfStartInit, endInitInstructions);
-        il.append(endOfStartInit2, finalEndInitInstruction);
+        InstructionHandle startVarStart = loopHandles[4];
+        InstructionList endVarStart = InstructionUtils.getStartInitInstructions(cg, mg, dataSize);
+        InstructionHandle startVarEnd = endVarStart.getEnd();
 
+        InstructionList endVarEnd = InstructionUtils.getEndInitInstructions(cg, mg, dataSize);
+        InstructionHandle startVarFinalEnd = endVarEnd.getEnd();
+
+        InstructionList endVarFinalEnd = InstructionUtils.getFinalEndInitInstructions(cg, mg);
+        InstructionHandle startListCallable = endVarEnd.getEnd();
+
+        InstructionList endListCallable = InstructionUtils.getListCallableInstructions(cg, mg);
+
+
+        il.append(startVarStart, endVarStart);
+        il.append(startVarEnd, endVarEnd);
+
+        il.append(startListCallable, endListCallable);
+        il.append(startVarFinalEnd, endVarFinalEnd);
 
         updateMethodParametersScope(mg, mg.getConstantPool());
         mg.setMaxStack();

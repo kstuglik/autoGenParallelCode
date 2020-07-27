@@ -1,10 +1,9 @@
 package pl.edu.agh.utils;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 
 public class Generico {
-    public static ArrayList<Callable<Integer>> init() {
+    public static ArrayList init() {
         return new ArrayList();
     }
 

@@ -52,17 +52,33 @@ public class InstructionUtils {
         return il;
     }
 
-    public static InstructionList getEndInitInstructions2(ClassGen cg, MethodGen mg, short dataSize) {
+    public static InstructionList getFinalEndInitInstructions(ClassGen cg, MethodGen mg) {
         InstructionList il = new InstructionList();
         int endVarIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int endVarIndex2 = LocalVariableUtils.findLocalVariableByName(LaunchProperties.FINAL_END_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int startVarIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.START_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-
+        int endVarIndex2 = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_FINAL_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
 
         il.append(new ILOAD(endVarIndex));
-        il.append(new I2F());
+        il.append(new F2I());
         il.append(new ISTORE(endVarIndex2));
 
+        return il;
+    }
+
+    public static InstructionList getListCallableInstructions(ClassGen cg, MethodGen mg) {
+        InstructionList il = new InstructionList();
+        InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
+
+        il.append(InstructionFactory.createLoad(Type.OBJECT, LaunchProperties.TASK_POOL_ID));
+        il.append(factory.createNew(new ObjectType("Callable<Integer>() {" +
+                "public Integer call() {" +
+                "return " + LaunchProperties.SUBTASK_METHOD_NAME + "(" +
+                LaunchProperties.START_INDEX_VARIABLE_NAME + "," + LaunchProperties.END_FINAL_INDEX_VARIABLE_NAME +
+                ");}}"
+        )));
+
+       il.append(factory.createInvoke("java.util.List",
+                "add", Type.BOOLEAN, new Type[]{Type.OBJECT}, Const.INVOKEINTERFACE));
+//    il.append(new POP());
 
         return il;
     }
@@ -70,7 +86,7 @@ public class InstructionUtils {
     public static InstructionList getTaskAdd(ClassGen cg, MethodGen mg, short dataSize) {
         InstructionList il = new InstructionList();
         int endVarIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int endVarIndex2 = LocalVariableUtils.findLocalVariableByName(LaunchProperties.FINAL_END_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int endVarIndex2 = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_FINAL_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         int startVarIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.START_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
 
         InstructionFactory _factory = new InstructionFactory(cg, mg.getConstantPool());

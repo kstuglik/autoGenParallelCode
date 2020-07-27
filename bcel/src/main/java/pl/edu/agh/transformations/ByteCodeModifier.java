@@ -9,10 +9,8 @@ import org.apache.bcel.generic.*;
 import pl.edu.agh.utils.MethodUtils;
 import pl.edu.agh.utils.TransformUtils;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static pl.edu.agh.utils.New.center;
 
@@ -94,10 +92,9 @@ public class ByteCodeModifier {
         String CLASS_NAME = _modifiedClass.getClassName();
         CLASS_NAME = CLASS_NAME.substring(CLASS_NAME.lastIndexOf('.') + 1);
 
-        String PATH_TO_OUTPUT_FILE =
-                LaunchProperties.CLASS_DIR + CLASS_NAME +
-                        LaunchProperties.MODIFICATION_SUFFIX +
-                        LaunchProperties.CLASS_SUFFIX;
+        String PATH_TO_OUTPUT_FILE = LaunchProperties.CLASS_DIR + CLASS_NAME +
+                LaunchProperties.MODIFICATION_SUFFIX +
+                LaunchProperties.CLASS_SUFFIX;
 
         _modifiedClass.getJavaClass().dump(PATH_TO_OUTPUT_FILE);
         System.out.println(center(" DONE ", 80, '*'));
@@ -143,9 +140,10 @@ public class ByteCodeModifier {
 
     public void modifyBytecode(String classPath, String className, short N) throws Exception {
         JavaClass analyzedClass = new ClassParser(classPath + className + LaunchProperties.CLASS_SUFFIX).parse();
-        ClassGen modifiedClass = getModifiedClass(className, analyzedClass);
-        copyFields(analyzedClass, modifiedClass);
-        copyMethods(analyzedClass, modifiedClass);
+        ClassGen modifiedClass = new ClassGen(analyzedClass);
+        modifiedClass.setClassName(
+                LaunchProperties.CLASS_NAME +
+                        LaunchProperties.MODIFICATION_SUFFIX);
         Method transformedMethod = getSelectedMethod0(modifiedClass);
         MethodGen mg = new MethodGen(transformedMethod, modifiedClass.getClassName(), modifiedClass.getConstantPool());
 
@@ -174,45 +172,14 @@ public class ByteCodeModifier {
         System.out.println("8)\til.lenght = " + mg.getInstructionList().getLength());
         TransformUtils.addTryCatchService(modifiedClass, mg);
 
-        System.out.println("GOTO: " + classPath + className + LaunchProperties.MODIFICATION_SUFFIX + "12" + LaunchProperties.CLASS_SUFFIX);
-        modifiedClass.getJavaClass().dump(classPath + className + LaunchProperties.MODIFICATION_SUFFIX + "12" + LaunchProperties.CLASS_SUFFIX);
+        System.out.println("GOTO: " + classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX);
+        modifiedClass.getJavaClass().dump(classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX);
     }
 
     private void printLocalVariableName(MethodGen methodGen) {
         LocalVariableGen[] _ltable = methodGen.getLocalVariables();
-        for (int i = 0; i < _ltable.length; i++) {
-            System.out.println(_ltable[i].getName());
-        }
-    }
-
-    private ClassGen getModifiedClass(String className, JavaClass analyzedClass) {
-        ClassGen oldClass = new ClassGen(analyzedClass);
-        return new ClassGen(analyzedClass.getPackageName() + className + LaunchProperties.MODIFICATION_SUFFIX,
-                Object.class.getName(),
-                className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.JAVA_SUFFIX,
-                Const.ACC_PUBLIC,
-                null,
-                oldClass.getConstantPool());
-    }
-
-    private void copyMethods(JavaClass oldClass, ClassGen newClass) {
-        Arrays.stream(oldClass.getMethods())
-                .forEach(newClass::addMethod);
-        Arrays.stream(newClass.getMethods())
-                .forEach(method -> MethodUtils.switchConstantRefsToNewClass(newClass, method));
-    }
-
-    private void copyFields(JavaClass oldClass, ClassGen newClass) {
-        Arrays.stream(oldClass.getFields())
-                .forEach(newClass::addField);
-    }
-
-    private void saveModifiedClass(String classPath, String className, ClassGen classGen) {
-        try (FileOutputStream outputStream = new FileOutputStream(classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX)) {
-            System.out.println("GOTO: " + classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX);
-            classGen.getJavaClass().dump(outputStream);
-        } catch (IOException exception) {
-            throw new RuntimeException("Error during modified class save.", exception);
+        for (LocalVariableGen localVariableGen : _ltable) {
+            System.out.println(localVariableGen.getName());
         }
     }
 
