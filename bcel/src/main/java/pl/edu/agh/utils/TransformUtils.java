@@ -282,7 +282,7 @@ public class TransformUtils {
 
 
         il.append(factory.createInvoke(
-                "util.pl.edu.agh.utils.Generico", "init",
+                "pl.edu.agh.utils.Generico", "init",
                 new ObjectType("List<Callable<Integer>>"),
                 Type.NO_ARGS, Const.INVOKESTATIC));
 
@@ -511,7 +511,7 @@ public class TransformUtils {
         InstructionList endVarEnd = InstructionUtils.getEndInitInstructions(cg, mg, dataSize);
         InstructionHandle startVarFinalEnd = endVarEnd.getEnd();
 
-        InstructionList endVarFinalEnd = InstructionUtils.getFinalEndInitInstructions(cg, mg);
+        InstructionList endVarFinalEnd = InstructionUtils.getEndFinalInitInstructions(cg, mg);
         InstructionHandle startListCallable = endVarEnd.getEnd();
 
         InstructionList endListCallable = InstructionUtils.getListCallableInstructions(cg, mg);
@@ -689,7 +689,7 @@ public class TransformUtils {
 //      ****************************************************************************************************
 
         mg.setInstructionList(il);
-
+        updateMethodParametersScope(mg, mg.getConstantPool());
         mg.setMaxStack();
         mg.setMaxLocals();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());

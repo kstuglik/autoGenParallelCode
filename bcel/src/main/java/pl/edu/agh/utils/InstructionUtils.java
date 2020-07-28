@@ -52,14 +52,32 @@ public class InstructionUtils {
         return il;
     }
 
-    public static InstructionList getFinalEndInitInstructions(ClassGen cg, MethodGen mg) {
+    public static InstructionList getEndFinalInitInstructions(ClassGen cg, MethodGen mg) {
         InstructionList il = new InstructionList();
-        int endVarIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int endVarIndex2 = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_FINAL_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
 
-        il.append(new ILOAD(endVarIndex));
+        int endVarIndex = LocalVariableUtils.findLocalVariableByName(
+                LaunchProperties.END_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int endFinalVarIndex = LocalVariableUtils.findLocalVariableByName(
+                LaunchProperties.END_FINAL_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int dataSizeIndex = LocalVariableUtils.findLocalVariableByName(
+                LaunchProperties.DATASIZE_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+
+        InstructionHandle ih_6 = il.append(InstructionFactory.createLoad(Type.INT, endVarIndex));
+        il.append(InstructionFactory.createLoad(Type.INT, dataSizeIndex));
+        il.append(new PUSH(mg.getConstantPool(), 1));
+        il.append(InstructionConst.ISUB);
+        BranchInstruction if_icmple_10 = InstructionFactory.createBranchInstruction(Const.IF_ICMPLE, null);
+        il.append(if_icmple_10);
+        InstructionHandle ih_13 = il.append(InstructionFactory.createLoad(Type.INT, dataSizeIndex));
+        il.append(new PUSH(mg.getConstantPool(), 1));
+        il.append(InstructionConst.ISUB);
+        il.append(InstructionFactory.createStore(Type.INT, endVarIndex));
+
+
+        InstructionHandle ih_15 = il.append(new ILOAD(endVarIndex));
         il.append(new F2I());
-        il.append(new ISTORE(endVarIndex2));
+        il.append(new ISTORE(endFinalVarIndex));
+        if_icmple_10.setTarget(ih_15);
 
         return il;
     }
@@ -76,7 +94,7 @@ public class InstructionUtils {
                 ");}}"
         )));
 
-       il.append(factory.createInvoke("java.util.List",
+        il.append(factory.createInvoke("java.util.List",
                 "add", Type.BOOLEAN, new Type[]{Type.OBJECT}, Const.INVOKEINTERFACE));
 //    il.append(new POP());
 

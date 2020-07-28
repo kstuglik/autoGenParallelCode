@@ -30,6 +30,7 @@ public class LaunchProperties {
     public static final String SUBTASK_METHOD_NAME = "subTask";
     public static final String LOOP_ITERATOR_NAME = "i";
     public static final String GOTO_INSTRUCTION_NAME = "goto";
+    public static final String DATASIZE_VARIABLE_NAME = "dataSize";
 
     public static final String ARRAY_1 = "var1";
     public static final String ARRAY_2 = "var2";
