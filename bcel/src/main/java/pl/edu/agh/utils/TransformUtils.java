@@ -648,11 +648,15 @@ public class TransformUtils {
                 new ObjectType("java.util.concurrent.ExecutorService"),
                 Const.GETSTATIC));
 
-        il.append(factory.createInvoke(
-                "java.util.concurrent.ExecutorService",
-                "invokeAll",
-                Type.VOID, Type.NO_ARGS,
-                Const.INVOKEINTERFACE));
+        il.append(factory.createLoad(Type.OBJECT, 55));
+        il.append(factory.createInvoke("java.util.concurrent.ExecutorService", "invokeAll", new ObjectType("java.util.List"), new Type[]{new ObjectType("java.util.Collection")}, Const.INVOKEINTERFACE));
+        il.append(InstructionConst.POP);
+
+//        il.append(factory.createInvoke(
+//                "java.util.concurrent.ExecutorService",
+//                "invokeAll",
+//                Type.VOID, Type.NO_ARGS,
+//                Const.INVOKEINTERFACE));
 
         il.append(factory.createFieldAccess(
                 cg.getClassName(),
