@@ -73,8 +73,8 @@ public class MethodUtils {
 
     //        getBodyFromMethodToNewInstructionList
     //
-    //        CONCEPTION: COPY ALL INSTRUCTION FROM SELECTED METHOD
-    //        AND NEXT ADD NEW INSTRUCTIONS ON THE END
+    //        CONCEPTION: COPY ALL INSTRUCTION FROM SELECTED METHOD (IL_OLD)
+    //        AND APPEND THIS INSTRUCTION TO IL
 
     public static void getBodyFromMethodToNewInstructionList(
             MethodGen mg, InstructionList il, InstructionList il_old) {

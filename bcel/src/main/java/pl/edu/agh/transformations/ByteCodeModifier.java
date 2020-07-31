@@ -11,6 +11,7 @@ import pl.edu.agh.utils.TransformUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static pl.edu.agh.utils.New.center;
 
@@ -47,7 +48,7 @@ public class ByteCodeModifier {
         _il_new = new InstructionList();
         _factory = new InstructionFactory(_modifiedClass, _cp);
 
-        prepareSelectedMethod();
+        getSelectedMethod0(_modifiedClass, LaunchProperties.CLASS_METHOD);
     }
 
     public void prepareToCreate() {
@@ -63,14 +64,14 @@ public class ByteCodeModifier {
                 new String[]{"argv"}, LaunchProperties.CLASS_METHOD, LaunchProperties.CLASS_NAME, _il_new, _cp);
     }
 
-    public void prepareSelectedMethod() {
-        _transformedMethod = getSelectedMethod();
-        _mg = new MethodGen(_transformedMethod, _modifiedClass.getClassName(), _modifiedClass.getConstantPool());
-        _il_old = _mg.getInstructionList();
-    }
+//    public void prepareSelectedMethod() {
+//        _transformedMethod = getSelectedMethod();
+//        _mg = new MethodGen(_transformedMethod, _modifiedClass.getClassName(), _modifiedClass.getConstantPool());
+//        _il_old = _mg.getInstructionList();
+//    }
 
-    public Method getSelectedMethod0(ClassGen cg) {
-        int methodPositionId = MethodUtils.GetMethodIndex(cg.getMethods(), LaunchProperties.CLASS_METHOD);
+    public Method getSelectedMethod0(ClassGen cg, String selectedMethod) {
+        int methodPositionId = MethodUtils.GetMethodIndex(cg.getMethods(), selectedMethod);
         return cg.getMethods()[methodPositionId];
     }
 
@@ -138,13 +139,19 @@ public class ByteCodeModifier {
         _mg = new MethodGen(_transformedMethod, _modifiedClass.getClassName(), _modifiedClass.getConstantPool());
     }
 
-    public void modifyBytecode(String classPath, String className, short N) throws Exception {
+    private void printLocalVariableName(MethodGen methodGen) {
+        LocalVariableGen[] _ltable = methodGen.getLocalVariables();
+        for (LocalVariableGen localVariableGen : _ltable) {
+            System.out.println(localVariableGen.getName());
+        }
+    }
+
+    public void modifyBytecodeToParallel(String classPath, String className, short N) throws Exception {
         JavaClass analyzedClass = new ClassParser(classPath + className + LaunchProperties.CLASS_SUFFIX).parse();
         ClassGen modifiedClass = new ClassGen(analyzedClass);
         modifiedClass.setClassName(
-                LaunchProperties.CLASS_NAME +
-                        LaunchProperties.MODIFICATION_SUFFIX);
-        Method transformedMethod = getSelectedMethod0(modifiedClass);
+                LaunchProperties.CLASS_NAME + LaunchProperties.MODIFICATION_SUFFIX);
+        Method transformedMethod = getSelectedMethod0(modifiedClass, LaunchProperties.CLASS_METHOD);
         MethodGen mg = new MethodGen(transformedMethod, modifiedClass.getClassName(), modifiedClass.getConstantPool());
 
 
@@ -176,11 +183,39 @@ public class ByteCodeModifier {
         modifiedClass.getJavaClass().dump(classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX);
     }
 
-    private void printLocalVariableName(MethodGen methodGen) {
-        LocalVariableGen[] _ltable = methodGen.getLocalVariables();
-        for (LocalVariableGen localVariableGen : _ltable) {
-            System.out.println(localVariableGen.getName());
-        }
+    public void modifyBytecodeToJCuda(String classPath, String className, short N) throws Exception {
+        JavaClass analyzedClass = new ClassParser(classPath + className + LaunchProperties.CLASS_SUFFIX).parse();
+        ClassGen modifiedClass = new ClassGen(analyzedClass);
+
+        modifiedClass.setClassName(LaunchProperties.CLASS_NAME + LaunchProperties.MODIFICATION_SUFFIX);
+
+        Method transformedMethod = getSelectedMethod0(modifiedClass, LaunchProperties.CLASS_METHOD);
+        MethodGen mg = new MethodGen(transformedMethod, modifiedClass.getClassName(), modifiedClass.getConstantPool());
+
+
+        System.out.println("1)\til.lenght = " + mg.getInstructionList().getLength());
+        TransformUtils.addFieldsForJcuda(modifiedClass);
+
+        System.out.println("2)\til.lenght = " + mg.getInstructionList().getLength());
+        TransformUtils.addMultiplyMethod(modifiedClass);
+
+        System.out.println("3)\til.lenght = " + mg.getInstructionList().getLength());
+        TransformUtils.addCallJCudaMultiply(modifiedClass, mg);
+
+        System.out.println("GOTO: " + classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX);
+        modifiedClass.getJavaClass().dump(classPath + className + LaunchProperties.MODIFICATION_SUFFIX + LaunchProperties.CLASS_SUFFIX);
+    }
+
+    private void copyMethods(JavaClass oldClass, ClassGen newClass) {
+        Arrays.stream(oldClass.getMethods())
+                .forEach(newClass::addMethod);
+        Arrays.stream(newClass.getMethods())
+                .forEach(method -> MethodUtils.switchConstantRefsToNewClass(newClass, method));
+    }
+
+    private void copyFields(JavaClass oldClass, ClassGen newClass) {
+        Arrays.stream(oldClass.getFields())
+                .forEach(newClass::addField);
     }
 
 }

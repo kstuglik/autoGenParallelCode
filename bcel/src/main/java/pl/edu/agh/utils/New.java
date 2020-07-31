@@ -107,37 +107,6 @@ public class New {
         return _id_object;
     }
 
-    public static void printlnArray(Integer id_Array, ByteCodeModifier bcm) {
-
-        bcm._il_new.append(bcm._factory.createFieldAccess(
-                "java.lang.System", "out", new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
-
-        bcm._il_new.append(new DUP2());
-        bcm._il_new.append(new DLOAD(id_Array));
-
-        bcm._il_new.append(bcm._factory.createInvoke(
-                "java.util.Arrays", "toString", Type.DOUBLE, new Type[]{Type.STRING}, Const.INVOKESTATIC));
-        bcm._il_new.append(bcm._factory.createInvoke(
-                "java.io.PrintStream", "print", Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
-
-    }
-
-    public static void printArray(Integer id, boolean isMultiDim, ByteCodeModifier bcm) {
-
-        bcm._il_new.append(bcm._factory.createFieldAccess(
-                "java.lang.System", "out", new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
-
-//        _il_new.append(new DUP2());
-        bcm._il_new.append(InstructionFactory.createLoad(Type.OBJECT, id));
-
-        bcm._il_new.append(bcm._factory.createInvoke(
-                "java.util.Arrays", isMultiDim ? "deepToString" : "toString", Type.FLOAT, new Type[]{Type.STRING}, Const.INVOKESTATIC));
-
-        bcm._il_new.append(bcm._factory.createInvoke(
-                "java.io.PrintStream", "println", Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
-
-    }
-
     public static String center(String s, int length, char c) {
         StringBuilder sb = new StringBuilder(length);
         sb.setLength((length - s.length()) / 2);
@@ -208,7 +177,7 @@ public class New {
                 "Go to file:\t" + PATH_TO_OUTPUT_FILE);
     }
 
-    public static int CreateArrayField(String name, MethodGen mg, InstructionList il, ConstantPoolGen cp, Type t, int N, int[] nn) {
+    public static int createArrayField(String name, MethodGen mg, InstructionList il, ConstantPoolGen cp, Type t, int N, int[] nn) {
 
         int index = cp.addArrayClass(new ArrayType(t, 1));
 
@@ -244,7 +213,7 @@ public class New {
         return id;
     }
 
-    public static int CreateObjectClass(String name, String ClassName, InstructionList il, InstructionFactory factory, MethodGen mg, int[] paramsID) {
+    public static int createObjectClass(String name, String ClassName, InstructionList il, InstructionFactory factory, MethodGen mg, int[] paramsID) {
 
         il.append(factory.createNew(ClassName));
         il.append(InstructionConst.DUP);
@@ -268,19 +237,19 @@ public class New {
         return object_id;
     }
 
-    public static void PrintArray(InstructionList il, MethodGen mg, InstructionFactory factory, Integer id_Array, boolean isMultiDim) {
+    public static void printArray(InstructionList il, MethodGen mg, InstructionFactory factory, Integer id_Array, boolean isMultiDim) {
 
         il.append(factory.createFieldAccess(
                 "java.lang.System", "out",
                 new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
 
-        il.append(isMultiDim == true ? new DUP() : new DUP2());
+        il.append(isMultiDim ? new DUP() : new DUP2());
 
         il.append(new DLOAD(id_Array));
 
         il.append(factory.createInvoke(
                 "java.util.Arrays",
-                isMultiDim == true ? "toString" : "deepToString",
+                isMultiDim ? "toString" : "deepToString",
                 Type.FLOAT, new Type[]{Type.STRING}, Const.INVOKESTATIC));
 
         il.append(factory.createInvoke(
@@ -292,7 +261,6 @@ public class New {
     public static int getLoacalVariableID(String fieldName, ConstantPoolGen cp, MethodGen mg) {
         return LocalVariableUtils.findLocalVariableByName(fieldName, mg.getLocalVariableTable(cp)).getIndex();
     }
-
 
 }
 

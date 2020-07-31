@@ -42,8 +42,7 @@ public class ArrayUtils {
     }
 
     public static int[] changeF2IARRAY(float[] data) {
-        int[] temp = IntStream.range(0, data.length).map(i -> (int) data[i]).toArray();
-        return temp;
+        return IntStream.range(0, data.length).map(i -> (int) data[i]).toArray();
     }
 
     public static void writeFARRAY1D(float[] A, String filePath) throws IOException {

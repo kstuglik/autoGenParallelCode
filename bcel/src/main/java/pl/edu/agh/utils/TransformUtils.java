@@ -1,7 +1,9 @@
 package pl.edu.agh.utils;
 
+import jcuda.Sizeof;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
 import pl.edu.agh.transformations.LaunchProperties;
 
@@ -12,9 +14,11 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import static pl.edu.agh.utils.LoopUtils.getInstructionsBetweenPositions;
 import static pl.edu.agh.utils.MethodUtils.getBodyFromMethodToNewInstructionList;
 
 public class TransformUtils {
+// TODO: MAKE ORDER METHODS IN CLASS
 
     public static void addThreadPoolExecutorService(ClassGen cg) {
 
@@ -37,7 +41,7 @@ public class TransformUtils {
 
         String className = cg.getClassName();
 
-        appendFieldsInstructions(il_new, _factory, className);
+        addFieldNumThreads(il_new, _factory, className);
 
         MethodGen mg = new MethodGen(Const.ACC_STATIC,
                 Type.VOID,
@@ -48,7 +52,7 @@ public class TransformUtils {
                 il_new,
                 cp);
 
-//        _mg.stripAttributes(true);
+
         mg.setMaxLocals();
         mg.setMaxStack();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
@@ -97,10 +101,10 @@ public class TransformUtils {
     private static void injectJcmMultiply(MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
         int id_A, id_B, jcm_ID, id;
 
-        id_A = New.CreateArrayField("AA", mg, il_new, cp, Type.INT, 2, new int[]{2, 2});
-        id_B = New.CreateArrayField("BB", mg, il_new, cp, Type.INT, 2, new int[]{2, 2});
+        id_A = New.createArrayField("AA", mg, il_new, cp, Type.INT, 2, new int[]{2, 2});
+        id_B = New.createArrayField("BB", mg, il_new, cp, Type.INT, 2, new int[]{2, 2});
 
-        jcm_ID = New.CreateObjectClass("jcm", "utils.JCudaMatrix", il_new, factory, mg, new int[]{id_A, id_B});
+        jcm_ID = New.createObjectClass("jcm", "utils.JCudaMatrix", il_new, factory, mg, new int[]{id_A, id_B});
         il_new.append(new ALOAD(jcm_ID));
 
         il_new.append(factory.createInvoke("utils.JCudaMatrix", "multiply", new ArrayType(Type.FLOAT, 1), new Type[]{}, Const.INVOKEVIRTUAL));
@@ -108,7 +112,7 @@ public class TransformUtils {
 
         id = lg.getIndex();
         il_new.append(new ASTORE(id));
-        New.PrintArray(il_new, mg, factory, id, false);
+        New.printArray(il_new, mg, factory, id, false);
     }
 
     private static void injectJcmMultiplyAB(ClassGen cg, MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
@@ -118,7 +122,7 @@ public class TransformUtils {
         id_B = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_2, mg.getLocalVariableTable(cp)).getIndex();
 
 
-        jcm_ID = New.CreateObjectClass("jcm", "utils.JCudaMatrix", il_new, factory, mg, new int[]{id_A, id_B});
+        jcm_ID = New.createObjectClass("jcm", "utils.JCudaMatrix", il_new, factory, mg, new int[]{id_A, id_B});
         il_new.append(new ALOAD(jcm_ID));
 
         il_new.append(factory.createInvoke("utils.JCudaMatrix", "multiply", new ArrayType(Type.FLOAT, 1), new Type[]{}, Const.INVOKEVIRTUAL));
@@ -126,12 +130,12 @@ public class TransformUtils {
 
         id = lg.getIndex();
         il_new.append(new ASTORE(id));
-        New.PrintArray(il_new, mg, factory, id, true);
+        New.printArray(il_new, mg, factory, id, true);
     }
 
     private static void injectPrintArrName(ClassGen cg, MethodGen mg, InstructionFactory factory, InstructionList il_new) {
         int id = ConstantPoolUtils.getFieldIndex(cg, "C");
-        New.PrintArray(il_new, mg, factory, id, false);
+        New.printArray(il_new, mg, factory, id, false);
     }
 
     private static void injectPrintVarName(MethodGen mg, ConstantPoolGen cp, InstructionFactory factory, InstructionList il_new) {
@@ -172,7 +176,7 @@ public class TransformUtils {
         constant.setClassIndex(classNameIndex);
     }
 
-    private static void appendFieldsInstructions(InstructionList instructionList, InstructionFactory instructionFactory, String className) {
+    private static void addFieldNumThreads(InstructionList instructionList, InstructionFactory instructionFactory, String className) {
         instructionList.append(instructionFactory.createInvoke("java.lang.Runtime",
                 "getRuntime",
                 Type.getType(Runtime.class),
@@ -253,14 +257,14 @@ public class TransformUtils {
 
         InstructionHandle ih_40;
 
-        BranchInstruction goto_40 = factory.createBranchInstruction(Const.GOTO, null);
+        BranchInstruction goto_40 = InstructionFactory.createBranchInstruction(Const.GOTO, null);
 
         ih_40 = il.append(goto_40);
-        InstructionHandle ih_43 = il.append(factory.createStore(Type.OBJECT, 1));
-        InstructionHandle ih_44 = il.append(factory.createLoad(Type.OBJECT, 1));
+        InstructionHandle ih_43 = il.append(InstructionFactory.createStore(Type.OBJECT, 1));
+        InstructionHandle ih_44 = il.append(InstructionFactory.createLoad(Type.OBJECT, 1));
         il.append(factory.createInvoke("java.lang.Exception", "printStackTrace",
                 Type.VOID, Type.NO_ARGS, Const.INVOKEVIRTUAL));
-        InstructionHandle ih_48 = il.append(factory.createReturn(Type.VOID));
+        InstructionHandle ih_48 = il.append(InstructionFactory.createReturn(Type.VOID));
 
         goto_40.setTarget(ih_48);
         mg.addExceptionHandler(ih_22, iha_35, ih_43, new ObjectType("java.lang.Exception"));
@@ -286,10 +290,12 @@ public class TransformUtils {
                 new ObjectType("List<Callable<Integer>>"),
                 Type.NO_ARGS, Const.INVOKESTATIC));
 
-        il.append(InstructionFactory.createStore(Type.OBJECT, 55));
-        il.append(InstructionFactory.createLoad(Type.OBJECT, 55));
-        il.append(InstructionFactory.createStore(Type.OBJECT, 56));
+        il.append(InstructionFactory.createStore(Type.OBJECT, LaunchProperties.TASK_POOL_ID));
+        il.append(InstructionFactory.createLoad(Type.OBJECT, LaunchProperties.TASK_POOL_ID));
+        il.append(InstructionFactory.createStore(Type.OBJECT, LaunchProperties.TASK_POOL_ID + 1));
 
+        cg.addInterface("java.util.ArrayList");
+        cg.addInterface("java.util.List");
 
         InstructionList currentList = mg.getInstructionList();
         il.append(currentList);
@@ -530,7 +536,7 @@ public class TransformUtils {
 
     }
 
-    public static void insertNewInstruciton(ClassGen cg, MethodGen mg, int option) throws Exception, IllegalStateException {
+    public static void insertNewInstruciton(ClassGen cg, MethodGen mg, int option) throws Exception {
 
         ConstantPoolGen cp = cg.getConstantPool();
 
@@ -648,7 +654,7 @@ public class TransformUtils {
                 new ObjectType("java.util.concurrent.ExecutorService"),
                 Const.GETSTATIC));
 
-        il.append(factory.createLoad(Type.OBJECT, 55));
+        il.append(InstructionFactory.createLoad(Type.OBJECT, 55));
         il.append(factory.createInvoke("java.util.concurrent.ExecutorService", "invokeAll", new ObjectType("java.util.List"), new Type[]{new ObjectType("java.util.Collection")}, Const.INVOKEINTERFACE));
         il.append(InstructionConst.POP);
 
@@ -670,19 +676,19 @@ public class TransformUtils {
                 Type.VOID, Type.NO_ARGS,
                 Const.INVOKEINTERFACE));
 
-        BranchInstruction gotoNext = factory.createBranchInstruction(Const.GOTO, null);
+        BranchInstruction gotoNext = InstructionFactory.createBranchInstruction(Const.GOTO, null);
         il.append(gotoNext);
 
-        InstructionHandle startCatch = il.append(factory.createStore(Type.OBJECT, mg.getMaxLocals()));
+        InstructionHandle startCatch = il.append(InstructionFactory.createStore(Type.OBJECT, mg.getMaxLocals()));
 
-        il.append(factory.createLoad(Type.OBJECT, mg.getMaxLocals()));
+        il.append(InstructionFactory.createLoad(Type.OBJECT, mg.getMaxLocals()));
         il.append(factory.createInvoke(
                 "java.lang.Exception",
                 "printStackTrace",
                 Type.VOID, Type.NO_ARGS,
                 Const.INVOKEVIRTUAL));
 
-        InstructionHandle returnId = il.append(factory.createReturn(Type.VOID));
+        InstructionHandle returnId = il.append(InstructionFactory.createReturn(Type.VOID));
 
         gotoNext.setTarget(returnId);
         mg.addExceptionHandler(startTry, endTry, startCatch, new ObjectType("java.lang.Exception"));
@@ -690,6 +696,461 @@ public class TransformUtils {
 
         mg.setInstructionList(il);
         updateMethodParametersScope(mg, mg.getConstantPool());
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
+        il.dispose();
+    }
+
+//    JCUDA PART
+
+    public static void addFieldsForJcuda(ClassGen cg) {
+
+        Optional<MethodGen> classInitMethod = MethodUtils.findMethodByName(cg, Const.STATIC_INITIALIZER_NAME);
+        ConstantPoolGen cp = cg.getConstantPool();
+        InstructionList il_new = new InstructionList();
+
+        classInitMethod.ifPresent(init -> {
+            il_new.append(init.getInstructionList());
+            try {
+                il_new.delete(il_new.getEnd());
+            } catch (TargetLostException e) {
+                e.printStackTrace();
+            }
+            retargetStaticPuts(cg, il_new);
+        });
+
+        MethodGen mg = new MethodGen(
+                Const.ACC_STATIC,
+                Type.VOID,
+                Type.NO_ARGS,
+                new String[0],
+                Const.STATIC_INITIALIZER_NAME,
+                cg.getClassName(),
+                il_new,
+                cp
+        );
+
+
+        int methodPositionId = MethodUtils.GetMethodIndex(cg.getMethods(), LaunchProperties.CLASS_METHOD);
+        Method transformMethod = cg.getMethods()[methodPositionId];
+
+        InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
+
+        createFields(cg, mg);
+        initFields(cg, il_new, factory, cp);
+
+        il_new.append(new RETURN());
+        updateMethodParametersScope(mg, cp);
+        mg.setMaxLocals();
+        mg.setMaxStack();
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
+        il_new.dispose();
+    }
+
+    private static void createFields(ClassGen cg, MethodGen mg) {
+        FieldGen field;
+        ConstantPoolGen cp = cg.getConstantPool();
+
+        field = new FieldGen(Const.ACC_STATIC, new ArrayType(Type.FLOAT, 1), "matrix_A", cp);
+        cg.addField(field.getField());
+
+        field = new FieldGen(Const.ACC_STATIC, new ArrayType(Type.FLOAT, 1), "matrix_B", cp);
+        cg.addField(field.getField());
+
+        field = new FieldGen(Const.ACC_STATIC, new ArrayType(Type.FLOAT, 1), "matrix_C", cp);
+        cg.addField(field.getField());
+
+        field = new FieldGen(Const.ACC_STATIC, Type.INT, "cols_A", cp);
+        cg.addField(field.getField());
+
+        field = new FieldGen(Const.ACC_STATIC, Type.INT, "rows_A", cp);
+        cg.addField(field.getField());
+
+        field = new FieldGen(Const.ACC_STATIC, Type.INT, "cols_B", cp);
+        cg.addField(field.getField());
+
+        field = new FieldGen(Const.ACC_STATIC, Type.INT, "rows_B", cp);
+        cg.addField(field.getField());
+
+        field = new FieldGen(Const.ACC_STATIC, new ObjectType("jcuda.Pointer"), "ptr_A", cp);
+        cg.addField(field.getField());
+
+        field = new FieldGen(Const.ACC_STATIC, new ObjectType("jcuda.Pointer"), "ptr_B", cp);
+        cg.addField(field.getField());
+
+        field = new FieldGen(Const.ACC_STATIC, new ObjectType("jcuda.Pointer"), "ptr_C", cp);
+        cg.addField(field.getField());
+
+        field = new FieldGen(Const.ACC_STATIC, Type.FLOAT, "alpha", cp);
+        cg.addField(field.getField());
+
+        field = new FieldGen(Const.ACC_STATIC, Type.FLOAT, "beta", cp);
+        cg.addField(field.getField());
+
+    }
+
+    private static void initFields(ClassGen cg, InstructionList il, InstructionFactory factory, ConstantPoolGen cp) {
+        InstructionHandle ih_0 = il.append(factory.createNew("jcuda.Pointer"));
+        il.append(InstructionConst.DUP);
+        il.append(factory.createInvoke("jcuda.Pointer", "<init>", Type.VOID, Type.NO_ARGS, Const.INVOKESPECIAL));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_A", new ObjectType("jcuda.Pointer"), Const.PUTSTATIC));
+        il.append(factory.createNew("jcuda.Pointer"));
+        il.append(InstructionConst.DUP);
+        il.append(factory.createInvoke("jcuda.Pointer", "<init>", Type.VOID, Type.NO_ARGS, Const.INVOKESPECIAL));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_B", new ObjectType("jcuda.Pointer"), Const.PUTSTATIC));
+        il.append(factory.createNew("jcuda.Pointer"));
+        il.append(InstructionConst.DUP);
+        il.append(factory.createInvoke("jcuda.Pointer", "<init>", Type.VOID, Type.NO_ARGS, Const.INVOKESPECIAL));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_C", new ObjectType("jcuda.Pointer"), Const.PUTSTATIC));
+        InstructionHandle ih_30 = il.append(new PUSH(cp, 1.0f));
+        il.append(factory.createFieldAccess(cg.getClassName(), "alpha", Type.FLOAT, Const.PUTSTATIC));
+        il.append(new PUSH(cp, 0.0f));
+        il.append(factory.createFieldAccess(cg.getClassName(), "beta", Type.FLOAT, Const.PUTSTATIC));
+    }
+
+    public static void addMultiplyMethod(ClassGen cg) {
+        InstructionList il = new InstructionList();
+        ConstantPoolGen cp = cg.getConstantPool();
+
+        MethodGen mg = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.VOID, Type.NO_ARGS, new String[]{}, "multiply", cg.getClassName(), il, cp);
+
+        InstructionFactory factory = new InstructionFactory(cg, cp);
+
+        InstructionHandle ih_0 = il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasInit", Type.INT, Type.NO_ARGS, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_4 = il.append(factory.createFieldAccess(cg.getClassName(), "cols_A", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.GETSTATIC));
+        il.append(InstructionConst.IMUL);
+        il.append(new PUSH(cp, Sizeof.FLOAT));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_A", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasAlloc", Type.INT, new Type[]{Type.INT, Type.INT, new ObjectType("jcuda.Pointer")}, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_19 = il.append(factory.createFieldAccess(cg.getClassName(), "cols_B", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_B", Type.INT, Const.GETSTATIC));
+        il.append(InstructionConst.IMUL);
+        il.append(new PUSH(cp, Sizeof.FLOAT));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_B", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasAlloc", Type.INT, new Type[]{Type.INT, Type.INT, new ObjectType("jcuda.Pointer")}, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_34 = il.append(factory.createFieldAccess(cg.getClassName(), "cols_B", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.GETSTATIC));
+        il.append(InstructionConst.IMUL);
+        il.append(new PUSH(cp, Sizeof.FLOAT));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_C", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasAlloc", Type.INT, new Type[]{Type.INT, Type.INT, new ObjectType("jcuda.Pointer")}, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_49 = il.append(factory.createFieldAccess(cg.getClassName(), "cols_A", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.GETSTATIC));
+        il.append(InstructionConst.IMUL);
+        il.append(new PUSH(cp, Sizeof.FLOAT));
+        il.append(factory.createFieldAccess(cg.getClassName(), "matrix_A", new ArrayType(Type.FLOAT, 1), Const.GETSTATIC));
+        il.append(factory.createInvoke("jcuda.Pointer", "to", new ObjectType("jcuda.Pointer"), new Type[]{new ArrayType(Type.FLOAT, 1)}, Const.INVOKESTATIC));
+        il.append(new PUSH(cp, 1));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_A", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(new PUSH(cp, 1));
+        il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasSetVector", Type.INT, new Type[]{Type.INT, Type.INT, new ObjectType("jcuda.Pointer"), Type.INT, new ObjectType("jcuda.Pointer"), Type.INT}, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_72 = il.append(factory.createFieldAccess(cg.getClassName(), "cols_B", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_B", Type.INT, Const.GETSTATIC));
+        il.append(InstructionConst.IMUL);
+        il.append(new PUSH(cp, Sizeof.FLOAT));
+        il.append(factory.createFieldAccess(cg.getClassName(), "matrix_B", new ArrayType(Type.FLOAT, 1), Const.GETSTATIC));
+        il.append(factory.createInvoke("jcuda.Pointer", "to", new ObjectType("jcuda.Pointer"), new Type[]{new ArrayType(Type.FLOAT, 1)}, Const.INVOKESTATIC));
+        il.append(new PUSH(cp, 1));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_B", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(new PUSH(cp, 1));
+        il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasSetVector", Type.INT, new Type[]{Type.INT, Type.INT, new ObjectType("jcuda.Pointer"), Type.INT, new ObjectType("jcuda.Pointer"), Type.INT}, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_95 = il.append(factory.createFieldAccess(cg.getClassName(), "cols_B", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.GETSTATIC));
+        il.append(InstructionConst.IMUL);
+        il.append(new PUSH(cp, Sizeof.FLOAT));
+        il.append(factory.createFieldAccess(cg.getClassName(), "matrix_C", new ArrayType(Type.FLOAT, 1), Const.GETSTATIC));
+        il.append(factory.createInvoke("jcuda.Pointer", "to", new ObjectType("jcuda.Pointer"), new Type[]{new ArrayType(Type.FLOAT, 1)}, Const.INVOKESTATIC));
+        il.append(new PUSH(cp, 1));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_C", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(new PUSH(cp, 1));
+        il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasSetVector", Type.INT, new Type[]{Type.INT, Type.INT, new ObjectType("jcuda.Pointer"), Type.INT, new ObjectType("jcuda.Pointer"), Type.INT}, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_118 = il.append(new PUSH(cp, 110));
+        il.append(new PUSH(cp, 110));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "cols_B", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "cols_A", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "alpha", Type.FLOAT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_A", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_B", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_B", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "beta", Type.FLOAT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_C", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.GETSTATIC));
+        il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasSgemm", Type.VOID, new Type[]{Type.CHAR, Type.CHAR, Type.INT, Type.INT, Type.INT, Type.FLOAT, new ObjectType("jcuda.Pointer"), Type.INT, new ObjectType("jcuda.Pointer"), Type.INT, Type.FLOAT, new ObjectType("jcuda.Pointer"), Type.INT}, Const.INVOKESTATIC));
+        InstructionHandle ih_158 = il.append(factory.createFieldAccess(cg.getClassName(), "cols_B", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.GETSTATIC));
+        il.append(InstructionConst.IMUL);
+        il.append(new PUSH(cp, Sizeof.FLOAT));
+        il.append(factory.createFieldAccess(cg.getClassName(), "ptr_C", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(new PUSH(cp, 1));
+        il.append(factory.createFieldAccess(cg.getClassName(), "matrix_C", new ArrayType(Type.FLOAT, 1), Const.GETSTATIC));
+        il.append(factory.createInvoke("jcuda.Pointer", "to", new ObjectType("jcuda.Pointer"), new Type[]{new ArrayType(Type.FLOAT, 1)}, Const.INVOKESTATIC));
+        il.append(new PUSH(cp, 1));
+        il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasGetVector", Type.INT, new Type[]{Type.INT, Type.INT, new ObjectType("jcuda.Pointer"), Type.INT, new ObjectType("jcuda.Pointer"), Type.INT}, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_181 = il.append(factory.createFieldAccess(cg.getClassName(), "ptr_A", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasFree", Type.INT, new Type[]{new ObjectType("jcuda.Pointer")}, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_188 = il.append(factory.createFieldAccess(cg.getClassName(), "ptr_B", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasFree", Type.INT, new Type[]{new ObjectType("jcuda.Pointer")}, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_195 = il.append(factory.createFieldAccess(cg.getClassName(), "ptr_C", new ObjectType("jcuda.Pointer"), Const.GETSTATIC));
+        il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasFree", Type.INT, new Type[]{new ObjectType("jcuda.Pointer")}, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_202 = il.append(factory.createInvoke("jcuda.jcublas.JCublas", "cublasShutdown", Type.INT, Type.NO_ARGS, Const.INVOKESTATIC));
+        il.append(InstructionConst.POP);
+        InstructionHandle ih_206 = il.append(InstructionFactory.createReturn(Type.VOID));
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.addMethod(mg.getMethod());
+//    il.dispose();
+    }
+
+    public static void addFlattenMethod(ClassGen cg) {
+        InstructionList il = new InstructionList();
+        ConstantPoolGen cp = cg.getConstantPool();
+
+        MethodGen mg = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, new ArrayType(Type.FLOAT, 1), new Type[]{new ArrayType(Type.INT, 2)}, new String[]{"arg0"}, "flattenIArray2Dto1D", cg.getClassName(), il, cp);
+        InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
+
+
+        InstructionHandle ih_0 = il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+        il.append(InstructionConst.ARRAYLENGTH);
+        il.append(InstructionFactory.createStore(Type.INT, 1));
+        InstructionHandle ih_3 = il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+        il.append(new PUSH(cp, 0));
+        il.append(InstructionConst.AALOAD);
+        il.append(InstructionConst.ARRAYLENGTH);
+        il.append(InstructionFactory.createStore(Type.INT, 2));
+        InstructionHandle ih_8 = il.append(InstructionFactory.createLoad(Type.INT, 1));
+        il.append(InstructionFactory.createLoad(Type.INT, 2));
+        il.append(InstructionConst.IMUL);
+        il.append(factory.createNewArray(Type.FLOAT, (short) 1));
+        il.append(InstructionFactory.createStore(Type.OBJECT, 3));
+        InstructionHandle ih_14 = il.append(new PUSH(cp, 0));
+        il.append(InstructionFactory.createStore(Type.INT, 4));
+        InstructionHandle ih_17 = il.append(InstructionFactory.createLoad(Type.INT, 4));
+        il.append(InstructionFactory.createLoad(Type.INT, 2));
+        BranchInstruction if_icmpge_20 = InstructionFactory.createBranchInstruction(Const.IF_ICMPGE, null);
+        il.append(if_icmpge_20);
+        InstructionHandle ih_23 = il.append(new PUSH(cp, 0));
+        il.append(InstructionFactory.createStore(Type.INT, 5));
+        InstructionHandle ih_26 = il.append(InstructionFactory.createLoad(Type.INT, 5));
+        il.append(InstructionFactory.createLoad(Type.INT, 1));
+        BranchInstruction if_icmpge_29 = InstructionFactory.createBranchInstruction(Const.IF_ICMPGE, null);
+        il.append(if_icmpge_29);
+        InstructionHandle ih_32 = il.append(InstructionFactory.createLoad(Type.OBJECT, 3));
+        il.append(InstructionFactory.createLoad(Type.INT, 4));
+        il.append(InstructionFactory.createLoad(Type.INT, 1));
+        il.append(InstructionConst.IMUL);
+        il.append(InstructionFactory.createLoad(Type.INT, 5));
+        il.append(InstructionConst.IADD);
+        il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+        il.append(InstructionFactory.createLoad(Type.INT, 5));
+        il.append(InstructionConst.AALOAD);
+        il.append(InstructionFactory.createLoad(Type.INT, 4));
+        il.append(InstructionConst.IALOAD);
+        il.append(InstructionConst.I2F);
+        il.append(InstructionConst.FASTORE);
+        InstructionHandle ih_49 = il.append(new IINC(5, 1));
+        BranchInstruction goto_52 = InstructionFactory.createBranchInstruction(Const.GOTO, ih_26);
+        il.append(goto_52);
+        InstructionHandle ih_55 = il.append(new IINC(4, 1));
+        BranchInstruction goto_58 = InstructionFactory.createBranchInstruction(Const.GOTO, ih_17);
+        il.append(goto_58);
+        InstructionHandle ih_61 = il.append(factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
+        il.append(InstructionFactory.createLoad(Type.OBJECT, 3));
+        il.append(factory.createInvoke("java.util.Arrays", "toString", Type.STRING, new Type[]{new ArrayType(Type.FLOAT, 1)}, Const.INVOKESTATIC));
+        il.append(factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
+        InstructionHandle ih_71 = il.append(InstructionFactory.createLoad(Type.OBJECT, 3));
+        il.append(InstructionFactory.createReturn(Type.OBJECT));
+        if_icmpge_20.setTarget(ih_61);
+        if_icmpge_29.setTarget(ih_55);
+
+        il.append(new RETURN());
+
+        mg.setMaxLocals();
+        mg.setMaxStack();
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
+        il.dispose();
+    }
+
+    private static void addMethodPrepareFieldsFromArrays2D(ClassGen cg) {
+        InstructionList il = new InstructionList();
+        ConstantPoolGen cp = cg.getConstantPool();
+
+        MethodGen mg = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.VOID, new Type[]{new ArrayType(Type.INT, 2), new ArrayType(Type.INT, 2)}, new String[]{"arg0", "arg1"}, "prepareFieldsFromArrays2D", cg.getClassName(), il, cp);
+        InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
+
+        InstructionHandle ih_0 = il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+        il.append(new PUSH(cp, 0));
+        il.append(InstructionConst.AALOAD);
+        il.append(InstructionConst.ARRAYLENGTH);
+        il.append(InstructionFactory.createLoad(Type.OBJECT, 1));
+        il.append(InstructionConst.ARRAYLENGTH);
+        BranchInstruction if_icmpeq_6 = InstructionFactory.createBranchInstruction(Const.IF_ICMPEQ, null);
+        il.append(if_icmpeq_6);
+        InstructionHandle ih_9 = il.append(factory.createNew("java.lang.RuntimeException"));
+        il.append(InstructionConst.DUP);
+        il.append(new PUSH(cp, "Cannot perform multiplication because dimensions are not equal."));
+        il.append(factory.createInvoke("java.lang.RuntimeException", "<init>", Type.VOID, new Type[]{Type.STRING}, Const.INVOKESPECIAL));
+        il.append(InstructionConst.ATHROW);
+        InstructionHandle ih_19 = il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+        il.append(factory.createInvoke(cg.getClassName(), "flattenIArray2Dto1D", new ArrayType(Type.FLOAT, 1), new Type[]{new ArrayType(Type.INT, 2)}, Const.INVOKESTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "matrix_A", new ArrayType(Type.FLOAT, 1), Const.PUTSTATIC));
+        InstructionHandle ih_26 = il.append(InstructionFactory.createLoad(Type.OBJECT, 1));
+        il.append(factory.createInvoke(cg.getClassName(), "flattenIArray2Dto1D", new ArrayType(Type.FLOAT, 1), new Type[]{new ArrayType(Type.INT, 2)}, Const.INVOKESTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "matrix_B", new ArrayType(Type.FLOAT, 1), Const.PUTSTATIC));
+        InstructionHandle ih_33 = il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+        il.append(new PUSH(cp, 0));
+        il.append(InstructionConst.AALOAD);
+        il.append(InstructionConst.ARRAYLENGTH);
+        il.append(factory.createFieldAccess(cg.getClassName(), "cols_A", Type.INT, Const.PUTSTATIC));
+        InstructionHandle ih_40 = il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+        il.append(InstructionConst.ARRAYLENGTH);
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.PUTSTATIC));
+        InstructionHandle ih_45 = il.append(InstructionFactory.createLoad(Type.OBJECT, 1));
+        il.append(new PUSH(cp, 0));
+        il.append(InstructionConst.AALOAD);
+        il.append(InstructionConst.ARRAYLENGTH);
+        il.append(factory.createFieldAccess(cg.getClassName(), "cols_B", Type.INT, Const.PUTSTATIC));
+        InstructionHandle ih_52 = il.append(InstructionFactory.createLoad(Type.OBJECT, 1));
+        il.append(InstructionConst.ARRAYLENGTH);
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_B", Type.INT, Const.PUTSTATIC));
+        InstructionHandle ih_57 = il.append(factory.createFieldAccess(cg.getClassName(), "cols_B", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.GETSTATIC));
+        il.append(InstructionConst.IMUL);
+        il.append(factory.createNewArray(Type.FLOAT, (short) 1));
+        il.append(factory.createFieldAccess(cg.getClassName(), "matrix_C", new ArrayType(Type.FLOAT, 1), Const.PUTSTATIC));
+        InstructionHandle ih_69 = il.append(InstructionFactory.createReturn(Type.VOID));
+        if_icmpeq_6.setTarget(ih_19);
+
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.addMethod(mg.getMethod());
+        il.dispose();
+    }
+
+    private static void addMethodPrepareFieldsFromArrays1D(ClassGen cg) {
+
+        InstructionList il = new InstructionList();
+        ConstantPoolGen cp = cg.getConstantPool();
+
+        MethodGen mg = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.VOID, new Type[]{new ArrayType(Type.FLOAT, 1), new ArrayType(Type.FLOAT, 1)}, new String[]{"arg0", "arg1"}, "prepareFieldFromArrays1D", cg.getClassName(), il, cp);
+        InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
+
+        InstructionHandle ih_0 = il.append(factory.createFieldAccess(cg.getClassName(), "cols_A", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_B", Type.INT, Const.GETSTATIC));
+        BranchInstruction if_icmpeq_6 = InstructionFactory.createBranchInstruction(Const.IF_ICMPEQ, null);
+        il.append(if_icmpeq_6);
+        InstructionHandle ih_9 = il.append(factory.createNew("java.lang.RuntimeException"));
+        il.append(InstructionConst.DUP);
+        il.append(new PUSH(cp, "Cannot perform multiplication because dimensions are not equal."));
+        il.append(factory.createInvoke("java.lang.RuntimeException", "<init>", Type.VOID, new Type[]{Type.STRING}, Const.INVOKESPECIAL));
+        il.append(InstructionConst.ATHROW);
+        InstructionHandle ih_19 = il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+        il.append(factory.createFieldAccess(cg.getClassName(), "matrix_A", new ArrayType(Type.FLOAT, 1), Const.PUTSTATIC));
+        InstructionHandle ih_23 = il.append(InstructionFactory.createLoad(Type.OBJECT, 1));
+        il.append(factory.createFieldAccess(cg.getClassName(), "matrix_B", new ArrayType(Type.FLOAT, 1), Const.PUTSTATIC));
+        InstructionHandle ih_27 = il.append(new PUSH(cp, 3));
+        il.append(factory.createFieldAccess(cg.getClassName(), "cols_A", Type.INT, Const.PUTSTATIC));
+        InstructionHandle ih_31 = il.append(new PUSH(cp, 3));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.PUTSTATIC));
+        InstructionHandle ih_35 = il.append(new PUSH(cp, 1));
+        il.append(factory.createFieldAccess(cg.getClassName(), "cols_B", Type.INT, Const.PUTSTATIC));
+        InstructionHandle ih_39 = il.append(new PUSH(cp, 3));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_B", Type.INT, Const.PUTSTATIC));
+        InstructionHandle ih_43 = il.append(factory.createFieldAccess(cg.getClassName(), "cols_B", Type.INT, Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "rows_A", Type.INT, Const.GETSTATIC));
+        il.append(InstructionConst.IMUL);
+        il.append(factory.createNewArray(Type.FLOAT, (short) 1));
+        il.append(factory.createFieldAccess(cg.getClassName(), "matrix_C", new ArrayType(Type.FLOAT, 1), Const.PUTSTATIC));
+        InstructionHandle ih_55 = il.append(InstructionFactory.createReturn(Type.VOID));
+        if_icmpeq_6.setTarget(ih_19);
+
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.addMethod(mg.getMethod());
+        il.dispose();
+    }
+
+    public static void addCallJCudaMultiply(ClassGen cg, MethodGen mg) throws Exception {
+
+        ConstantPoolGen cp = cg.getConstantPool();
+        InstructionList il = new InstructionList();
+        InstructionList il_old = mg.getInstructionList();
+
+//        System.out.println(il_old.getEnd().getPosition());
+
+        InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
+
+        //get instruction from method for append to end
+
+        Optional<InstructionHandle> i = Arrays.stream(il_old.getInstructionHandles())
+                .filter(handle -> "return".equals(handle.getInstruction().getName()))
+                .findFirst();
+
+        int GOTO_ID = i.get().getPosition() - 1;
+
+        InstructionHandle[] handles = getInstructionsBetweenPositions(
+                mg.getInstructionList().getInstructionHandles(), 0, GOTO_ID);
+
+        InstructionHandle instr;
+        for (InstructionHandle handle : handles) {
+            instr = handle;
+//            System.out.println(instr.getInstruction().copy());
+            if (instr instanceof BranchHandle) {
+                BranchHandle branch = (BranchHandle) instr;
+                il.append((BranchInstruction) branch.getInstruction().copy());
+            } else il.append(instr.getInstruction().copy());
+        }
+
+        int id_A, id_B;
+
+        id_A = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_1, mg.getLocalVariableTable(cp)).getIndex();
+        id_B = LocalVariableUtils.findLocalVariableByName(LaunchProperties.ARRAY_2, mg.getLocalVariableTable(cp)).getIndex();
+
+//        ************** verify the type of array: 1D or 2D or more
+//        YOU MUST KNOW THAT INFO ABOUT COLS AND ROWS MUST BE SET IN LAUNCHPROPERTIES
+
+        String signatureMyArray = LocalVariableUtils.getSignatureForLocalVariableByName(LaunchProperties.ARRAY_1, mg.getLocalVariableTable(cp));
+        long dimArray = signatureMyArray.chars().filter(ch -> ch == '[').count();
+
+        InstructionHandle ih_86 = il.append(InstructionFactory.createLoad(Type.OBJECT, id_A));
+        il.append(InstructionFactory.createLoad(Type.OBJECT, id_B));
+
+
+        if (dimArray == 1) {
+            il.append(factory.createInvoke(cg.getClassName(), "prepareFieldsFromArrays1D", Type.VOID, new Type[]{new ArrayType(Type.INT, 1), new ArrayType(Type.INT, 1)}, Const.INVOKESTATIC));
+            addMethodPrepareFieldsFromArrays1D(cg);
+        } else if (dimArray == 2) {
+            il.append(factory.createInvoke(cg.getClassName(), "prepareFieldsFromArrays2D", Type.VOID, new Type[]{new ArrayType(Type.INT, 2), new ArrayType(Type.INT, 2)}, Const.INVOKESTATIC));
+            addMethodPrepareFieldsFromArrays2D(cg);
+            addFlattenMethod(cg);
+        } else {
+            throw new IllegalArgumentException("ILLEGAL DIMENSION OF THE ARRAY WAS DETECTED!");
+        }
+
+
+        InstructionHandle ih_91 = il.append(factory.createInvoke(cg.getClassName(), "multiply", Type.VOID, Type.NO_ARGS, Const.INVOKESTATIC));
+
+        InstructionHandle ih_94 = il.append(factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
+        il.append(factory.createFieldAccess(cg.getClassName(), "matrix_C", new ArrayType(Type.FLOAT, 1), Const.GETSTATIC));
+        il.append(factory.createInvoke("java.util.Arrays", "toString", Type.STRING, new Type[]{new ArrayType(Type.FLOAT, 1)}, Const.INVOKESTATIC));
+        il.append(factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[]{Type.STRING}, Const.INVOKEVIRTUAL));
+
+//        mg.setClassName(cg.getClassName());
+        mg.setInstructionList(il);
         mg.setMaxStack();
         mg.setMaxLocals();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());

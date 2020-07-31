@@ -7,9 +7,7 @@ import jcuda.jcublas.JCublas;
 
 public class JCudaMatrix {
 
-    float[] matrix_A;
-    float[] matrix_B;
-    float[] matrix_C;
+    float[] matrix_A, matrix_B, matrix_C;
 
     int cols_A, rows_A;
     int cols_B, rows_B;
@@ -54,7 +52,6 @@ public class JCudaMatrix {
     }
 
     //In the future: ADD multiply by scalar
-
 
     public float[] multiply() {
         /* Initialize JCublas */
