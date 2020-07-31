@@ -5,8 +5,8 @@ import java.util.Arrays;
 public class Matrix2D {
     public static void main(String[] args) {
 
-        int[][] A = {{3,2,0},{0,4,1}, {2,0,1}};
-        int[][] B = {{4},{3},{1}};
+        int[][] A = {{3, 2, 0}, {0, 4, 1}, {2, 0, 1}};
+        int[][] B = {{4}, {3}, {1}};
         int rows_C, cols_C;
 
         if (A[0].length != B.length) {

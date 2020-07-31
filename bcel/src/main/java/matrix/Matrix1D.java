@@ -19,11 +19,11 @@ public class Matrix1D {
         int width = rowsA * colsB;
         int[] C = new int[width];
 
-        for(int i = 0; i < rowsA; ++i) {
-            for(int j = 0; j < colsB; ++j) {
+        for (int i = 0; i < rowsA; ++i) {
+            for (int j = 0; j < colsB; ++j) {
                 int id_c = i * colsB + j;
 
-                for(int k = 0; k < rowsB; ++k) {
+                for (int k = 0; k < rowsB; ++k) {
                     int id_a = k * rowsA + i;
                     int id_b = j * rowsB + k;
                     C[id_c] += A[id_a] * B[id_b];
