@@ -47,7 +47,7 @@ public class TransformUtilsTests {
         bcm.prepareToModify();
         bcm.extraMe();
 
-        TransformUtils.addTaskPool(bcm._modifiedClass, bcm._mg);
+        TransformUtils.addFieldTaskPool(bcm._modifiedClass, bcm._mg);
         ArrayList<String> variables = bcm.getLocalVariables();
 
 //      it was difficult to set name for generic list, so i use index position to get it
@@ -68,7 +68,7 @@ public class TransformUtilsTests {
         bcm.extraMe();
 
         int before = bcm.getMethodsArray().length;
-        TransformUtils.copyLoopToSubTaskMethod(bcm._modifiedClass, bcm._mg);
+        TransformUtils.copyLoopToSubTaskMethod(bcm._modifiedClass, bcm._mg, LaunchProperties.LOOP_ITERATOR_NAME);
 
         bcm.setMethodsArray();
         int after = bcm.getMethodsArray().length;

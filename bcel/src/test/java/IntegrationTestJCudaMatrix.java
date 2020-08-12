@@ -1,19 +1,11 @@
-import org.apache.bcel.classfile.LocalVariable;
-import org.apache.bcel.generic.Type;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import pl.edu.agh.transformations.ByteCodeModifier;
 import pl.edu.agh.transformations.LaunchProperties;
-import pl.edu.agh.utils.LocalVariableUtils;
-import pl.edu.agh.utils.New;
-import pl.edu.agh.utils.TransformUtils;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
-import static pl.edu.agh.utils.LocalVariableUtils.findLocalVariableByName;
-import static pl.edu.agh.utils.New.createFieldArray1D;
-import static pl.edu.agh.utils.New.createFieldArray2D;
+import static org.junit.Assert.assertEquals;
 
 public class IntegrationTestJCudaMatrix {
 
@@ -33,7 +25,7 @@ public class IntegrationTestJCudaMatrix {
 
         LaunchProperties.MODIFICATION_SUFFIX = "_ITEST";
 
-        bcm.modifyBytecodeToJCuda(LaunchProperties.CLASS_DIR, LaunchProperties.CLASS_NAME, (short) 1000);
+        bcm.modifySerialToJCudaMatrix(LaunchProperties.CLASS_DIR, LaunchProperties.CLASS_NAME, (short) 1000);
 
         Runtime runtime = Runtime.getRuntime();
         String command = System.getProperty("java.home") + "/bin/java -cp " +
@@ -49,6 +41,7 @@ public class IntegrationTestJCudaMatrix {
 
     }
 
+/*
     @Test
     public void createArraysAndChcekIDs() throws Exception {
 
@@ -74,27 +67,28 @@ public class IntegrationTestJCudaMatrix {
         assertSame(id_arrC, check_id_arrC);
 
     }
+*/
 
-//    @Test
-//    public void shouldAddJCudaMultiplyCall() throws Exception {
-//
-//        LaunchProperties.CLASS_DIR = "target/classes/matrix/";
-//        LaunchProperties.CLASS_NAME = "Multiply";
-//        LaunchProperties.CLASS_METHOD = "multiplyMatrix";
-//        LaunchProperties.MODIFICATION_SUFFIX = "_jcuda2";
-//
-//        ByteCodeModifier bcm = new ByteCodeModifier();
-//        bcm.prepareToModify();
-//
-//        TransformUtils.insertNewInstruciton(bcm._modifiedClass, bcm._mg, 4);
-//
-//        bcm.setLocalVariables();
-//        LocalVariable var = LocalVariableUtils.findLocalVariableByName("jcm", bcm._mg.getLocalVariableTable(bcm._cp));
-//
-//        assertTrue(bcm._lvgs[var.getIndex()].getType().toString().contains("JCudaMatrix"));
-//
-//        bcm.saveNewClassFile();
-//
-//    }
+  /*  @Test
+    public void shouldAddJCudaMultiplyCall() throws Exception {
+
+        LaunchProperties.CLASS_DIR = "target/classes/matrix/";
+        LaunchProperties.CLASS_NAME = "Multiply";
+        LaunchProperties.CLASS_METHOD = "multiplyMatrix";
+        LaunchProperties.MODIFICATION_SUFFIX = "_jcuda2";
+
+        ByteCodeModifier bcm = new ByteCodeModifier();
+        bcm.prepareToModify();
+
+        TransformUtils.insertNewInstruciton(bcm._modifiedClass, bcm._mg, 4);
+
+        bcm.setLocalVariables();
+        LocalVariable var = LocalVariableUtils.findLocalVariableByName("jcm", bcm._mg.getLocalVariableTable(bcm._cp));
+
+        assertTrue(bcm._lvgs[var.getIndex()].getType().toString().contains("JCudaMatrix"));
+
+        bcm.saveNewClassFile();
+
+    }*/
 
 }

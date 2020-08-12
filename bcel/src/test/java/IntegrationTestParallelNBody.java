@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-public class IntegrationTest {
+public class IntegrationTestParallelNBody {
 
     private static ByteCodeModifier bcm;
 
@@ -42,7 +42,7 @@ public class IntegrationTest {
 
         LaunchProperties.MODIFICATION_SUFFIX =  "_ITEST";
 
-        bcm.modifyBytecodeToParallel(LaunchProperties.CLASS_DIR, LaunchProperties.CLASS_NAME, (short) 1000);
+        bcm.modifySerialToParallelNBody(LaunchProperties.CLASS_DIR, LaunchProperties.CLASS_NAME, (short) 1000);
 
         Runtime runtime = Runtime.getRuntime();
         String command = System.getProperty("java.home") + "/bin/java -cp " +

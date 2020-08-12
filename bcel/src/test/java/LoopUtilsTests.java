@@ -39,8 +39,8 @@ public class LoopUtilsTests {
         List<InstructionHandle> forLoop = Arrays.asList(LoopUtils.getForLoop(bcm._mg));
 
         int id_start = 0, id_end = 0;
-        id_start = LoopUtils.getFirstInstructionPosition(forLoop);
-        id_end = LoopUtils.getLastInstructionPosition(forLoop);
+        id_start = forLoop.get(0).getPosition();
+        id_end = forLoop.get(forLoop.size()-1).getPosition();
 
         assertTrue(id_start != id_end);
     }
