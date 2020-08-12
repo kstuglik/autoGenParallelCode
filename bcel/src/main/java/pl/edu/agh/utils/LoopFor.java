@@ -3,22 +3,20 @@ package pl.edu.agh.utils;
 import org.apache.bcel.generic.InstructionHandle;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class LoopFOR {
+public class LoopFor {
 
     private final ArrayList<InstructionHandle> ifcompareHandler = new ArrayList<>();
     private InstructionHandle firstInstructionInFor;
     private InstructionHandle loopStartHandler;
     private InstructionHandle firstInstructionInLoop;
     private InstructionHandle gotoHandler;
-
     private InstructionHandle incrementHandler;
-    private int idIterator;
 
-    public void addIfcompareHandler(InstructionHandle ifcompareHandler) {
-        this.ifcompareHandler.add(ifcompareHandler);
-    }
+    private InstructionHandle[] handlesBeforeFor;
+    private InstructionHandle[] handlesAfterLoop;
+
+    private int idIterator;
 
     public void displayInfoAboutHandles() {
         System.out.println("\tfirstInstructionInFor:\t" + firstInstructionInFor + "\n" +
@@ -39,10 +37,6 @@ public class LoopFOR {
 
     public InstructionHandle getFirstInstructionInLoop() {
         return firstInstructionInLoop;
-    }
-
-    public void setFirstInstructionInLoop(InstructionHandle firstInstructionInLoop) {
-        this.firstInstructionInLoop = firstInstructionInLoop;
     }
 
     public InstructionHandle getGotoHandler() {
@@ -73,12 +67,25 @@ public class LoopFOR {
         this.incrementHandler = incrementHandler;
     }
 
+    public InstructionHandle getLastIfComparator() {
+        int count = ifcompareHandler.size();
+        return ifcompareHandler.get(count - 1);
+    }
+
     public InstructionHandle getLoopStartHandler() {
         return loopStartHandler;
     }
 
     public void setLoopStartHandler(InstructionHandle loopStartHandler) {
         this.loopStartHandler = loopStartHandler;
+    }
+
+    public void setFirstInLoopHandle(InstructionHandle firstInstructionInLoop) {
+        this.firstInstructionInLoop = firstInstructionInLoop;
+    }
+
+    public void setIfCompareHandle(InstructionHandle ifcompareHandler) {
+        this.ifcompareHandler.add(ifcompareHandler);
     }
 
 }
