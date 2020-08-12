@@ -38,15 +38,15 @@ public class CreatorExample2 {
         int id_A = New.createFieldArray1D("A", Type.INT, new int[]{1, 2, 3, 4, 5, 6}, bcm);
         int id_RowsA = New.createFieldLDC(Type.INT, "rowsA", 3, bcm);
         int id_ColsA = New.createFieldLDC(Type.INT, "colsA", 2, bcm);
-        New.printArray(id_A, false, bcm);
+        New.printArray(bcm._il_new,bcm._mg,bcm._factory,id_A,false);
         int id_B = New.createFieldArray1D("B", Type.INT, new int[]{1, 2, 1, 2, 1, 2}, bcm);
         int id_RowsB = New.createFieldLDC(Type.INT, "rowsB", 2, bcm);
         int id_ColsB = New.createFieldLDC(Type.INT, "colsB", 3, bcm);
-        New.printArray(id_B, false, bcm);
+        New.printArray(bcm._il_new,bcm._mg,bcm._factory,id_B,false);
 
 
         //int width = rowsA * colsB => order of operands: rowsA, colsB, width
-        int id_Width = New.createFieldLDC0(Type.INT, "width", bcm);
+        int id_Width = New.createFieldLDC0(Type.INT, "width", bcm._mg);
         New.createSimpleExpression(
                 new int[]{id_RowsA, id_ColsB, id_Width},
                 new String[]{"imul"}, bcm);
@@ -65,7 +65,7 @@ public class CreatorExample2 {
 
 //        2. loopStart2
         InstructionHandle loopStart2 = bcm._il_new.append(new ILOAD(id_I));
-        int id_c = New.createFieldLDC0(Type.INT, "id_c", bcm);
+        int id_c = New.createFieldLDC0(Type.INT, "id_c", bcm._mg);
         New.createSimpleExpression(
                 new int[]{id_I, id_ColsB, id_J, id_c},
                 new String[]{"imul", "iadd"}, bcm);
@@ -77,13 +77,13 @@ public class CreatorExample2 {
         InstructionHandle loopStart3 = bcm._il_new.append(new DLOAD(id_A));
 
 //        int id_a = k * rowsA + i;
-        int id_a = New.createFieldLDC0(Type.INT, "id_a", bcm);
+        int id_a = New.createFieldLDC0(Type.INT, "id_a", bcm._mg);
         New.createSimpleExpression(
                 new int[]{id_K, id_RowsA, id_I, id_a},
                 new String[]{"imul", "iadd"}, bcm);
 
 //        int id_b = j * rowsB + k;
-        int id_b = New.createFieldLDC0(Type.INT, "id_b", bcm);
+        int id_b = New.createFieldLDC0(Type.INT, "id_b", bcm._mg);
         New.createSimpleExpression(
                 new int[]{id_J, id_RowsB, id_K, id_b},
                 new String[]{"imul", "iadd"}, bcm);
@@ -116,7 +116,7 @@ public class CreatorExample2 {
         //1.Compare: for(int i = 0; i < rowsA; ++i)
         New.initCompareForLoop(loopStart, id_I, id_RowsA, bcm);
 
-        New.printArray(id_C, false, bcm);
+        New.printArray(bcm._il_new,bcm._mg,bcm._factory,id_C,false);
 
         bcm.updateMethodBeforeSave();
         bcm.saveNewClassFile();
