@@ -11,8 +11,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
-import static pl.edu.agh.utils.LoopUtils.getIhsBetweenFromTo;
-import static pl.edu.agh.utils.MethodUtils.getBodyFromMethodToNewInstructionList;
 
 public class TransformUtils {
 // TODO: MAKE ORDER METHODS IN CLASS
@@ -71,7 +69,7 @@ public class TransformUtils {
 
         int GOTO_ID = i.get().getPosition() - 1;
 
-        InstructionHandle[] handles = getIhsBetweenFromTo(
+        InstructionHandle[] handles = LoopUtils.getIhsBetweenFromTo(
                 mg.getInstructionList().getInstructionHandles(), 0, GOTO_ID);
 
         InstructionHandle instr;
@@ -599,7 +597,7 @@ public class TransformUtils {
 
         //get instruction from method for append to end
 //        -1 is default arg val
-        getBodyFromMethodToNewInstructionList(mg, il, il_old);
+        MethodUtils.getBodyFromMethodToNewInstructionList(mg, il, il_old);
 
 //      ****************************************************************************************************
         InstructionHandle startTry = il.append(factory.createFieldAccess(
