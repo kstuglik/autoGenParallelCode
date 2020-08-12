@@ -7,6 +7,10 @@ import java.util.stream.IntStream;
 
 public class ArrayUtils {
 
+    public static int[] changeF2IARRAY(float[] data) {
+        return IntStream.range(0, data.length).map(i -> (int) data[i]).toArray();
+    }
+
     public static float[] createFARRAY1D(int N, int range) {
         float[] arr = new float[N];
         Random random = new Random(range);
@@ -41,8 +45,12 @@ public class ArrayUtils {
         return result;
     }
 
-    public static int[] changeF2IARRAY(float[] data) {
-        return IntStream.range(0, data.length).map(i -> (int) data[i]).toArray();
+    public static float[] readFARRAY1D(String fileName) throws IOException {
+        DataInputStream dataInputStream = new DataInputStream(new FileInputStream(fileName));
+        int size = dataInputStream.available() / (Float.SIZE / 8);
+        float[] A = new float[size];
+        for (int i = 0; i < size; i++) A[i] = dataInputStream.readFloat();
+        return A;
     }
 
     public static void writeFARRAY1D(float[] A, String filePath) throws IOException {
@@ -60,14 +68,6 @@ public class ArrayUtils {
         for (float v : A) dos.writeFloat(v);
 
         dos.close();
-    }
-
-    public static float[] readFARRAY1D(String fileName) throws IOException {
-        DataInputStream dataInputStream = new DataInputStream(new FileInputStream(fileName));
-        int size = dataInputStream.available() / (Float.SIZE / 8);
-        float[] A = new float[size];
-        for (int i = 0; i < size; i++) A[i] = dataInputStream.readFloat();
-        return A;
     }
 
 }

@@ -5,6 +5,7 @@ import org.apache.bcel.generic.*;
 import pl.edu.agh.transformations.LaunchProperties;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class InstructionUtils {
 
@@ -15,52 +16,15 @@ public class InstructionUtils {
                 .orElseThrow(() -> new IllegalStateException("No matching instruction found for instruction handle."));
     }
 
-    public static InstructionList getStartInitInstructions(ClassGen cg, MethodGen mg, short dataSize) {
-        InstructionList il = new InstructionList();
-        int loopIteratorIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int startVarIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.START_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int numThreadsFieldIndex = ConstantPoolUtils.getFieldIndex(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
-
-        il.append(new ILOAD(loopIteratorIndex));
-        il.append(new SIPUSH(dataSize));//TODO would be nice to get rid of short
-        il.append(new GETSTATIC(numThreadsFieldIndex));
-        il.append(new IDIV());
-        il.append(new IMUL());
-        il.append(new ISTORE(startVarIndex));
-
-        return il;
-    }
-
-    public static InstructionList getEndInitInstructions(ClassGen cg, MethodGen mg, short dataSize) {
-        InstructionList il = new InstructionList();
-        int loopIteratorIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int endVarIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int numThreadsFieldIndex = ConstantPoolUtils.getFieldIndex(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
-
-        il.append(new ILOAD(loopIteratorIndex));
-        il.append(new ICONST(1));
-        il.append(new IADD());
-        il.append(new SIPUSH(dataSize));//TODO would be nice to get rid of short
-        il.append(new GETSTATIC(numThreadsFieldIndex));
-        il.append(new IDIV());
-        il.append(new IMUL());
-        il.append(new ICONST(1));
-        il.append(new ISUB());
-        il.append(new ISTORE(endVarIndex));
-
-
-        return il;
-    }
-
     public static InstructionList getEndFinalInitInstructions(ClassGen cg, MethodGen mg) {
         InstructionList il = new InstructionList();
 
-        int endVarIndex = LocalVariableUtils.findLocalVariableByName(
-                LaunchProperties.END_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int endFinalVarIndex = LocalVariableUtils.findLocalVariableByName(
-                LaunchProperties.END_FINAL_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int dataSizeIndex = LocalVariableUtils.findLocalVariableByName(
-                LaunchProperties.DATASIZE_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int endVarIndex = LocalVariableUtils.getLVarByName(
+                LaunchProperties.END_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int endFinalVarIndex = LocalVariableUtils.getLVarByName(
+                LaunchProperties.END_FINAL_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int dataSizeIndex = LocalVariableUtils.getLVarByName(
+                LaunchProperties.DATASIZE_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
 
         InstructionHandle ih_6 = il.append(InstructionFactory.createLoad(Type.INT, endVarIndex));
         il.append(InstructionFactory.createLoad(Type.INT, dataSizeIndex));
@@ -82,6 +46,34 @@ public class InstructionUtils {
         return il;
     }
 
+    public static InstructionList getEndInitInstructions(ClassGen cg, MethodGen mg, short dataSize) {
+        InstructionList il = new InstructionList();
+        int loopIteratorIndex = LocalVariableUtils.getLVarByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int endVarIndex = LocalVariableUtils.getLVarByName(LaunchProperties.END_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int numThreadsFieldIndex = ConstantPoolUtils.getFieldIndex(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
+
+        il.append(new ILOAD(loopIteratorIndex));
+        il.append(new ICONST(1));
+        il.append(new IADD());
+        il.append(new SIPUSH(dataSize));//TODO would be nice to get rid of short
+        il.append(new GETSTATIC(numThreadsFieldIndex));
+        il.append(new IDIV());
+        il.append(new IMUL());
+        il.append(new ICONST(1));
+        il.append(new ISUB());
+        il.append(new ISTORE(endVarIndex));
+
+
+        return il;
+    }
+
+    public static HashMap<Integer, Integer> getHashmapPositionId(InstructionHandle[] ihy) {
+        HashMap<Integer, Integer> hashmapInstructionPositionId = new HashMap<>();
+        for (int i = 0; i < ihy.length; i++)
+            hashmapInstructionPositionId.put(ihy[i].getPosition(), i);
+        return hashmapInstructionPositionId;
+    }
+
     public static InstructionList getListCallableInstructions(ClassGen cg, MethodGen mg) {
         InstructionList il = new InstructionList();
         InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
@@ -90,7 +82,7 @@ public class InstructionUtils {
         il.append(factory.createNew(new ObjectType("Callable<Integer>() {" +
                 "public Integer call() {" +
                 "return " + LaunchProperties.SUBTASK_METHOD_NAME + "(" +
-                LaunchProperties.START_INDEX_VARIABLE_NAME + "," + LaunchProperties.END_FINAL_INDEX_VARIABLE_NAME +
+                LaunchProperties.START_INDEX_VAR_NAME + "," + LaunchProperties.END_FINAL_INDEX_VAR_NAME +
                 ");}}"
         )));
 
@@ -101,11 +93,27 @@ public class InstructionUtils {
         return il;
     }
 
+    public static InstructionList getStartInitInstructions(ClassGen cg, MethodGen mg, short dataSize) {
+        InstructionList il = new InstructionList();
+        int loopIteratorIndex = LocalVariableUtils.getLVarByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int startVarIndex = LocalVariableUtils.getLVarByName(LaunchProperties.START_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int numThreadsFieldIndex = ConstantPoolUtils.getFieldIndex(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
+
+        il.append(new ILOAD(loopIteratorIndex));
+        il.append(new SIPUSH(dataSize));//TODO would be nice to get rid of short
+        il.append(new GETSTATIC(numThreadsFieldIndex));
+        il.append(new IDIV());
+        il.append(new IMUL());
+        il.append(new ISTORE(startVarIndex));
+
+        return il;
+    }
+
     public static InstructionList getTaskAdd(ClassGen cg, MethodGen mg, short dataSize) {
         InstructionList il = new InstructionList();
-        int endVarIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int endVarIndex2 = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_FINAL_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int startVarIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.START_INDEX_VARIABLE_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int endVarIndex = LocalVariableUtils.getLVarByName(LaunchProperties.END_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int endVarIndex2 = LocalVariableUtils.getLVarByName(LaunchProperties.END_FINAL_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int startVarIndex = LocalVariableUtils.getLVarByName(LaunchProperties.START_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
 
         InstructionFactory _factory = new InstructionFactory(cg, mg.getConstantPool());
 //        InstructionHandle ih_69 = il.append(_factory.createLoad(Type.OBJECT, 0));
@@ -118,7 +126,5 @@ public class InstructionUtils {
 
         return il;
     }
-
-
 }
 

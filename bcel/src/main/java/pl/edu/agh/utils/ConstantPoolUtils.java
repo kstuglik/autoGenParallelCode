@@ -9,6 +9,11 @@ import java.util.Objects;
 
 public class ConstantPoolUtils {
 
+    private static String getConstantName(ConstantPool cp, ConstantCP constant) {
+        ConstantNameAndType constantNameAndType = (ConstantNameAndType) cp.getConstantPool()[constant.getNameAndTypeIndex()];
+        return constantNameAndType.getName(cp);
+    }
+
     public static int getFieldIndex(ClassGen cg, String constantName) {
         ConstantPool cp = cg.getConstantPool().getConstantPool();
         ConstantFieldref numThreadsField = Arrays.stream(cp.getConstantPool())
@@ -26,9 +31,11 @@ public class ConstantPoolUtils {
         return -1;
     }
 
-    private static String getConstantName(ConstantPool cp, ConstantCP constant) {
-        ConstantNameAndType constantNameAndType = (ConstantNameAndType) cp.getConstantPool()[constant.getNameAndTypeIndex()];
-        return constantNameAndType.getName(cp);
+    static int getInnerClassNameIndex(ClassGen cg, String innerClassName) {
+//        ConstantPool cp = cg.getConstantPool().getConstantPool();
+//        Arrays.stream(cp.getConstantPool())
+//                .filter()
+        return 0;
     }
 
     static int getSubTaskMethodIndexInConstants(ClassGen cg) {
@@ -45,12 +52,5 @@ public class ConstantPoolUtils {
             }
         }
         return -1;
-    }
-
-    static int getInnerClassNameIndex(ClassGen cg, String innerClassName) {
-//        ConstantPool cp = cg.getConstantPool().getConstantPool();
-//        Arrays.stream(cp.getConstantPool())
-//                .filter()
-        return 0;
     }
 }

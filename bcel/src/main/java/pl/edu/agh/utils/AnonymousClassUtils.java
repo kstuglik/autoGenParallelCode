@@ -11,6 +11,16 @@ import java.util.Arrays;
 
 public class AnonymousClassUtils {
 
+    public static InnerClassData addAnonymousClassConstants(ClassGen classGen) {
+        ConstantPoolGen constantPool = classGen.getConstantPool();
+        String anonymousClassName = classGen.getClassName() + "$1";
+        InnerClassData innerClassData = new InnerClassData();
+        innerClassData.classIndex = constantPool.addClass(anonymousClassName);
+        innerClassData.constructorIndex = constantPool.addMethodref(anonymousClassName, Const.CONSTRUCTOR_NAME, "(II)V");
+        innerClassData.innerClassesNameIndex = constantPool.addUtf8("InnerClasses");
+        return innerClassData;
+    }
+
     public static void addCallableCall(ClassGen classGen, String classPath) throws IOException, TargetLostException {
         redumpClassGen(classGen, classPath);
 
@@ -37,8 +47,8 @@ public class AnonymousClassUtils {
         LocalVariableTable localVariableTable = methodGen.getLocalVariableTable(constantPool);
         InstructionFactory instructionFactory = new InstructionFactory(classGen, constantPool);
         int tasksListIndex = 0;//LocalVariableUtils.findLocalVariableByName(LaunchProperties.TASK_POOL_NAME, localVariableTable).getIndex();
-        int startIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.START_INDEX_VARIABLE_NAME, localVariableTable).getIndex();
-        int endIndex = LocalVariableUtils.findLocalVariableByName(LaunchProperties.END_INDEX_VARIABLE_NAME, localVariableTable).getIndex();
+        int startIndex = LocalVariableUtils.getLVarByName(LaunchProperties.START_INDEX_VAR_NAME, localVariableTable).getIndex();
+        int endIndex = LocalVariableUtils.getLVarByName(LaunchProperties.END_INDEX_VAR_NAME, localVariableTable).getIndex();
 
         InstructionList addedInstructionsList = new InstructionList();
         addedInstructionsList.append(new ALOAD(tasksListIndex));
@@ -92,24 +102,6 @@ public class AnonymousClassUtils {
         redumpClassGen(classGen, classPath);
     }
 
-    public static InnerClassData addAnonymousClassConstants(ClassGen classGen) {
-        ConstantPoolGen constantPool = classGen.getConstantPool();
-        String anonymousClassName = classGen.getClassName() + "$1";
-        InnerClassData innerClassData = new InnerClassData();
-        innerClassData.classIndex = constantPool.addClass(anonymousClassName);
-        innerClassData.constructorIndex = constantPool.addMethodref(anonymousClassName, Const.CONSTRUCTOR_NAME, "(II)V");
-        innerClassData.innerClassesNameIndex = constantPool.addUtf8("InnerClasses");
-        return innerClassData;
-    }
-
-    private static void redumpClassGen(ClassGen classGen, String classPath) {
-        try (FileOutputStream outputStream = new FileOutputStream(classPath + "/" + classGen.getClassName() + ".class")) {
-            classGen.getJavaClass().dump(outputStream);
-        } catch (IOException exception) {
-            throw new RuntimeException("Error during modified class save.", exception);
-        }
-    }
-
     private static void addInnerClassAttribute(JavaClass analyzedClass, ClassGen classGen, InnerClassData innerClassData, String classPath) {
         Attribute[] oldAttributes = analyzedClass.getAttributes();
         Attribute[] newAttributes = Arrays.copyOf(oldAttributes, oldAttributes.length + 1);
@@ -123,6 +115,14 @@ public class AnonymousClassUtils {
 
         //LOL, can break methodgen in method on top of this class
         redumpJavaClass(analyzedClass, classGen, classPath);
+    }
+
+    private static void redumpClassGen(ClassGen classGen, String classPath) {
+        try (FileOutputStream outputStream = new FileOutputStream(classPath + "/" + classGen.getClassName() + ".class")) {
+            classGen.getJavaClass().dump(outputStream);
+        } catch (IOException exception) {
+            throw new RuntimeException("Error during modified class save.", exception);
+        }
     }
 
     private static void redumpJavaClass(JavaClass analyzedClass, ClassGen classGen, String classPath) {
