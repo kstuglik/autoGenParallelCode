@@ -15,7 +15,7 @@ import static pl.edu.agh.utils.LocalVariableUtils.findLocalVariableByName;
 import static pl.edu.agh.utils.New.createFieldArray1D;
 import static pl.edu.agh.utils.New.createFieldArray2D;
 
-public class IntegrationTestJCuda {
+public class IntegrationTestJCudaMatrix {
 
     private static ByteCodeModifier bcm;
 
