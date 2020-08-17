@@ -39,6 +39,7 @@ public class SerialMultiplier {
                 }
             }
         }
+        System.out.println("JESTEM TU 22434 :)");
         return matrixC;
     }
 

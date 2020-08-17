@@ -13,8 +13,11 @@ public class ParallelMultiplier {
     ExecutorService service;
     List<Callable<Integer>> tasks;
     int step;
-    private int[][] A, B, C;
-    private int resultRows, resultColumns;
+    private final int[][] A;
+    private final int[][] B;
+    private final int[][] C;
+    private final int resultRows;
+    private final int resultColumns;
 
     public ParallelMultiplier(int[][] pA, int[][] pB) {
         this.A = pA;
@@ -44,7 +47,7 @@ public class ParallelMultiplier {
 
     public void initializeExecutors() {
         step = A.length / NUM_THREADS;
-        if(step == 0)
+        if (step == 0)
             step = 1;
         service = Executors.newFixedThreadPool(NUM_THREADS);
         tasks = new LinkedList<>();
@@ -60,7 +63,7 @@ public class ParallelMultiplier {
         }
         try {
             service.invokeAll(tasks);
-                    service.shutdown();
+            service.shutdown();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
