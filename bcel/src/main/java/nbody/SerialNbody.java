@@ -3,17 +3,16 @@ package nbody;
 public class SerialNbody {
 
     private static final Body[] bodies = DataInitializer.initBodiesFromFile();
-    private static Body[] beginningState;
     private static final double dt = 0.001;
+    private static Body[] beginningState;
 
     public static Body[] getBodies() {
         return bodies;
     }
 
-    public static void simulate(int steps) {
-        for (int i = 0; i < steps; i++) {
-            moveBodies();
-        }
+    public static void main(String[] args) {
+        simulate(10);
+//        WriteObjectToFile(path, bodies);
     }
 
     private static void moveBodies() {
@@ -33,6 +32,14 @@ public class SerialNbody {
         }
     }
 
+    public static void simulate(int steps) {
+        for (int i = 0; i < steps; i++) {
+            moveBodies();
+        }
+    }
+
+//    private static final String path = "/src/main/java/mbuilder/nbody/bodies.dat";
+
     private static void updateState(Body body) {
         double netForceX = 0.0;
         double netForceY = 0.0;
@@ -50,16 +57,6 @@ public class SerialNbody {
         body.vy += body.ay * dt;
         body.x += body.vx * dt;
         body.y += body.vy * dt;
-    }
-
-//    private static final String path = "/src/main/java/mbuilder/nbody/bodies.dat";
-
-
-    public static void main(String[] args) {
-        for (int i = 0; i < 100; i++) {
-            System.out.println(bodies[i].mass);
-        }
-//        WriteObjectToFile(path, bodies);
     }
 //
 //    public static Body[] initBodiesFromFile() {

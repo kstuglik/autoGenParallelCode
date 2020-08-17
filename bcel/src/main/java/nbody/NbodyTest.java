@@ -4,10 +4,10 @@ public class NbodyTest {
 
     private static final int steps = 100;
 
-    public static void main(String[] args) {
-SerialNbody sn = new SerialNbody();
+    public static void main(String[] args) throws InterruptedException {
+        SerialNbody sn = new SerialNbody();
 
-        Body[] bodies = sn.getBodies();
+        Body[] bodies = SerialNbody.getBodies();
 //        Body[] bodies2 = ParallelNbody.getBodies();
 
         System.out.println(bodies[0].x + ", " + bodies[0].y);

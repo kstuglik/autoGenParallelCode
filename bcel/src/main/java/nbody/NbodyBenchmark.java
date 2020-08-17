@@ -9,13 +9,13 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 public class NbodyBenchmark {
 
-    private static final int steps = 10000;
+    private static final int steps = 100;
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(NbodyBenchmark.class.getSimpleName())
                 .threads(1)
-                .forks(5)
+                .forks(2)
                 .warmupIterations(3)
                 .mode(Mode.AverageTime)
                 .build();
@@ -24,12 +24,12 @@ public class NbodyBenchmark {
     }
 
     @Benchmark
-    public void serialNbodyBenchmark() {
-        SerialNbody.simulate(steps);
+    public void parallelNbodyBenchmark() throws InterruptedException {
+        ParallelNbody.simulate(steps);
     }
 
     @Benchmark
-    public void parallelNbodyBenchmark() {
-        ParallelNbody.simulate(steps);
+    public void serialNbodyBenchmark() {
+        SerialNbody.simulate(steps);
     }
 }

@@ -1,6 +1,6 @@
 package nbody;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -9,26 +9,35 @@ import java.util.concurrent.Executors;
 public class ParallelNbody {
 
     private static final Body[] bodies = DataInitializer.initBodiesFromFile();
-    private static Body[] beginningState;
-
     private static final double dt = 0.001;
     private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+    private static Body[] beginningState;
     private static ExecutorService SERVICE;
 
     public static Body[] getBodies() {
         return bodies;
     }
 
-    public static void simulate(int steps) {
-        for (int i = 0; i < steps; i++) {
-            moveBodies();
+    public static ArrayList init() {
+        return new ArrayList();
+    }
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 10; i++) {
+            System.out.println(bodies[i].x);
+        }
+        simulate(10);
+        System.out.println("*******************");
+        for (int i = 0; i < 10; i++) {
+            System.out.println(bodies[i].x);
         }
     }
 
     private static void moveBodies() {
         SERVICE = Executors.newFixedThreadPool(NUM_THREADS);
-        List<Callable<Integer>> tasks = new LinkedList<>();
+        List<Callable<Integer>> tasks = init();
         int dataSize = bodies.length;
+
         refreshBeginningState(dataSize);
         for (int i = 0; i < NUM_THREADS; i++) {
             int start = i * (dataSize / NUM_THREADS);
@@ -37,7 +46,11 @@ public class ParallelNbody {
                 stop = dataSize - 1;
             }
             int finalStop = stop;
-            tasks.add(() -> partialUpdate(start, finalStop));
+            tasks.add(new Callable<Integer>() {
+                public Integer call() {
+                    return partialUpdate(start, finalStop);
+                }
+            });
         }
         try {
             SERVICE.invokeAll(tasks);
@@ -47,6 +60,14 @@ public class ParallelNbody {
         SERVICE.shutdown();
     }
 
+    private static int partialUpdate(int start, int stop) {
+        for (int i = start; i <= stop; i++) {
+            Body body = bodies[i];
+            updateState(body);
+        }
+        return 0;
+    }
+
     private static void refreshBeginningState(int dataSize) {
         beginningState = new Body[dataSize];//we need deep copy
         for (int i = 0; i < dataSize; i++) {
@@ -54,12 +75,10 @@ public class ParallelNbody {
         }
     }
 
-    private static int partialUpdate(int start, int stop) {
-        for (int i = start; i <= stop; i++) {
-            Body body = bodies[i];
-            updateState(body);
+    public static void simulate(int steps) {
+        for (int i = 0; i < steps; i++) {
+            moveBodies();
         }
-        return 0;
     }
 
     private static void updateState(Body body) {
@@ -79,7 +98,4 @@ public class ParallelNbody {
         body.y += body.vy * dt;
     }
 
-    public static void main(String[] args) {
-
-    }
 }
