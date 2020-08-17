@@ -6,9 +6,7 @@ import org.apache.bcel.generic.MethodGen;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import pl.edu.agh.bcel.transformations.TransformUtils;
-import pl.edu.agh.bcel.transformations.utils.ByteCodeModifier;
-import pl.edu.agh.bcel.transformations.utils.LaunchProperties;
+import pl.edu.agh.bcel.utils.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,10 +34,10 @@ public class JCudaMatrixTest {
         MethodGen mg = new MethodGen(transformedMethod, cgTarget.getClassName(), cgTarget.getConstantPool());
 
         System.out.println("1)\til.lenght = " + mg.getInstructionList().getLength());
-        TransformUtils.addFieldsForJcuda(cgTarget);
+        ReadyFields.addFieldsForJcuda(cgTarget);
 
         System.out.println("2)\til.lenght = " + mg.getInstructionList().getLength());
-        TransformUtils.addMultiplyMethod(cgTarget);
+        ReadyMethods.addMultiplyMethod(cgTarget);
 
         System.out.println("3)\til.lenght = " + mg.getInstructionList().getLength());
         TransformUtils.addCallJCudaMultiply(cgTarget, mg);
