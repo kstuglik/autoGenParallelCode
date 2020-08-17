@@ -7,10 +7,7 @@ import org.apache.bcel.generic.TargetLostException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import pl.edu.agh.bcel.transformations.ReadyFieldsMethods;
-import pl.edu.agh.bcel.transformations.TransformUtils;
-import pl.edu.agh.bcel.transformations.utils.ByteCodeModifier;
-import pl.edu.agh.bcel.transformations.utils.LaunchProperties;
+import pl.edu.agh.bcel.utils.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -60,7 +57,7 @@ public class ParallelNBodyTest {
         TransformUtils.addThreadPoolExecutorService(cgTarget);
 
         System.out.println("2)\til.lenght = " + mg.getInstructionList().getLength());
-        TransformUtils.initFieldExecutorService(cgTarget, mg);
+        ReadyFields.initFieldExecutorService(cgTarget, mg);
 
         System.out.println("3)\til.lenght = " + mg.getInstructionList().getLength());
         TransformUtils.copyLoopToSubTaskMethod(cgTarget, mg, LaunchProperties.LOOP_ITERATOR_NAME);
@@ -69,7 +66,7 @@ public class ParallelNBodyTest {
         TransformUtils.changeLoopLimitToNumberOfThreads(cgTarget, mg);
 
         System.out.println("5)\til.lenght = " + mg.getInstructionList().getLength());
-        TransformUtils.addFieldTaskPool(cgTarget, mg);
+        ReadyFields.addFieldTaskPool(cgTarget, mg);
 
         System.out.println("6)\til.lenght = " + mg.getInstructionList().getLength());
         TransformUtils.removeBodyForLoopInSelectedMethod(cgTarget, mg);
@@ -81,7 +78,7 @@ public class ParallelNBodyTest {
         TransformUtils.addTryCatchService(cgTarget, mg);
 
         System.out.println("9)\til.lenght = " + mg.getInstructionList().getLength());
-        ReadyFieldsMethods.addMethodToInitTaskPool(cgTarget);
+        ReadyMethods.addMethodToInitTaskPool(cgTarget);
 
         System.out.println("GOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());
