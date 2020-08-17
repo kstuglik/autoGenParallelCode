@@ -6,11 +6,8 @@ import org.apache.bcel.generic.MethodGen;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import pl.edu.agh.bcel.transformations.utils.ByteCodeModifier;
-import pl.edu.agh.bcel.transformations.utils.LaunchProperties;
 import pl.edu.agh.bcel.transformations.LoopForTransform;
-import pl.edu.agh.bcel.transformations.ReadyFieldsMethods;
-import pl.edu.agh.bcel.transformations.TransformUtils;
+import pl.edu.agh.bcel.utils.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,11 +38,11 @@ public class ParallelMatrixTest {
         MethodGen mg = new MethodGen(transformedMethod, cgTarget.getClassName(), cgTarget.getConstantPool());
 
         TransformUtils.addThreadPoolExecutorService(cgTarget);
-        ReadyFieldsMethods.addMethodSetStepLVar(cgTarget);
-        ReadyFieldsMethods.addFieldStep(cgTarget, mg);
-        TransformUtils.addFieldTaskPool(cgTarget, mg);
-        TransformUtils.initFieldExecutorService(cgTarget, mg);
-        ReadyFieldsMethods.addMethodToInitTaskPool(cgTarget);
+        ReadyMethods.addMethodSetStepLVar(cgTarget);
+        ReadyFields.addFieldStep(cgTarget, mg);
+        ReadyFields.addFieldTaskPool(cgTarget, mg);
+        ReadyFields.initFieldExecutorService(cgTarget, mg);
+        ReadyMethods.addMethodToInitTaskPool(cgTarget);
         LoopForTransform.changeNestedLoopInMatrixMultiply(cgTarget, mg);
 
         System.out.println("GOTO: " + LaunchProperties.getPathToOutputFile());
