@@ -1,4 +1,4 @@
-package pl.edu.agh.bcel.transformations.useful;
+package pl.edu.agh.bcel.useful;
 
 //javap -verbose temp.class
 
@@ -7,7 +7,7 @@ import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.Code;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
-import pl.edu.agh.bcel.transformations.utils.LaunchProperties;
+import pl.edu.agh.bcel.utils.LaunchProperties;
 
 import java.io.IOException;
 

@@ -3,7 +3,8 @@ package pl.edu.agh.bcel.transformations;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.LocalVariable;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.bcel.transformations.utils.LaunchProperties;
+import pl.edu.agh.bcel.utils.LaunchProperties;
+import pl.edu.agh.bcel.utils.ReadyFields;
 
 import java.util.*;
 
@@ -524,7 +525,7 @@ public class LoopForTransform {
 //      >>>>>>>>>>>>>>>>>>>>>>      NEW INSTRUCTION INSIDE INNER LOOP BODY START HERE   >>>>>>>>>>>>>>>>>>>>>>
 
         il_new.append(factory.createPrintln("IT WORKS"));
-        ReadyFieldsMethods.changeBodyInnerLoopForMatrixMultiply(mg, il_new, factory);
+        ReadyFields.changeBodyInnerLoopForMatrixMultiply(mg, il_new, factory);
 
 //      <<<<<<<<<<<<<<<<<<<<<<      NEW INSTRUCTION INSIDE INNER LOOP BODY END HERE     <<<<<<<<<<<<<<<<<<<<<<
 

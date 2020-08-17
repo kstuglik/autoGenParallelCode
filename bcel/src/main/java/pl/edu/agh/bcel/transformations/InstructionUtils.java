@@ -2,7 +2,7 @@ package pl.edu.agh.bcel.transformations;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.bcel.transformations.utils.LaunchProperties;
+import pl.edu.agh.bcel.utils.LaunchProperties;
 
 import java.util.Arrays;
 import java.util.HashMap;

@@ -2,11 +2,20 @@ package pl.edu.agh.bcel.transformations;
 
 import org.apache.bcel.classfile.*;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.bcel.transformations.utils.LaunchProperties;
+import pl.edu.agh.bcel.utils.LaunchProperties;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Variables {
+
+    public static boolean checkIfFieldExist(Field[] fields, String fieldName) {
+
+        for (Field field : fields) {
+            if (field.getName().equals(fieldName)) return true;
+        }
+        return false;
+    }
 
     protected static void createLVarIfNoExisted(
             MethodGen mg, List<LocalVariable> listLVarToCreate, HashMap<Integer, Integer> hashmapLVarIdOldAndNew) {
@@ -156,19 +165,30 @@ public class Variables {
         return -1;
     }
 
+    private static List<Integer> getVariableIndexes(InstructionList il) {
+        //we will not consider 4th instruction which is for(...; I < VAR;...) because VAR will be replaced
+        InstructionHandle irrelevant = il.getInstructionHandles()[0].getNext().getNext().getNext();
+        return Arrays.stream(il.getInstructionHandles())
+                .filter(handle -> !handle.equals(irrelevant))
+                .filter(handle -> handle.getInstruction() instanceof LoadInstruction)
+                .map(handle -> (LoadInstruction) handle.getInstruction())
+                .map(LoadInstruction::getIndex)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public static List<LocalVariableGen> getVariablesToCopy(MethodGen mg, InstructionList il) {
+        List<Integer> variableIndexes = getVariableIndexes(il);
+        return Arrays.stream(mg.getLocalVariables())
+                .filter(variable -> variableIndexes.contains(variable.getIndex()))
+                .collect(Collectors.toList());
+    }
+
     public static HashMap<Integer, Integer> prepareLVarIfNoExistedAndReturnHashmap(MethodGen mgOld, MethodGen mgNew) {
         HashMap<Integer, Integer> hashmapIdOldAndNewLVar = Variables.getHashmapOldAndNewLVarId(mgOld, mgNew);
         List<LocalVariable> listLVarToCreate = Variables.getLVarListToCreate(mgOld, hashmapIdOldAndNewLVar);
         Variables.createLVarIfNoExisted(mgNew, listLVarToCreate, hashmapIdOldAndNewLVar);
         return hashmapIdOldAndNewLVar;
-    }
-
-    public static boolean checkIfFieldExist(Field[] fields, String fieldName) {
-
-        for (Field field : fields) {
-            if (field.getName().equals(fieldName)) return true;
-        }
-        return false;
     }
 
 }

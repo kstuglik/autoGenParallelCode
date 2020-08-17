@@ -1,4 +1,4 @@
-package pl.edu.agh.bcel.transformations.utils;
+package pl.edu.agh.bcel.utils;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ClassParser;

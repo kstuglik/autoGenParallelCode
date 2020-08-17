@@ -1,7 +1,7 @@
 package pl.edu.agh.bcel.transformations;
 
 import org.apache.bcel.generic.*;
-import pl.edu.agh.bcel.transformations.utils.LaunchProperties;
+import pl.edu.agh.bcel.utils.LaunchProperties;
 
 import java.util.ArrayList;
 import java.util.Arrays;

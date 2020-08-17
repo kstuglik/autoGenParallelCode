@@ -2,12 +2,12 @@
  *   Exampple of use, answer for the question about CLASS_NAME: Arrays
  */
 
-package pl.edu.agh.bcel.transformations.useful;
+package pl.edu.agh.bcel.useful;
 
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.util.BCELifier;
-import pl.edu.agh.bcel.transformations.utils.LaunchProperties;
+import pl.edu.agh.bcel.utils.LaunchProperties;
 
 import java.io.IOException;
 
