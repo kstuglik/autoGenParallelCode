@@ -7,9 +7,9 @@ import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.LoadInstruction;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import pl.edu.agh.bcel.transformations.utils.ByteCodeModifier;
-import pl.edu.agh.bcel.transformations.utils.LaunchProperties;
-import pl.edu.agh.bcel.transformations.LoopUtils;
+import pl.edu.agh.bcel.ByteCodeModifier;
+import pl.edu.agh.bcel.LaunchProperties;
+import pl.edu.agh.bcel.utils.LoopUtilsOld;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class LoopUtilsTest {
+public class LoopUtilsOldTest {
 
     //    TO SET IT UP WITH MY WISHES
     private static final int EXPECTED_LOOP_VARIABLE_INDEX = 1;//2;
@@ -39,10 +39,10 @@ public class LoopUtilsTest {
         bcm = new ByteCodeModifier();
         bcm.prepareToModify();
 
-        InstructionHandle[] loopInstructions = pl.edu.agh.bcel.transformations.LoopUtils.getForLoop(bcm._mg);
+        InstructionHandle[] loopInstructions = LoopUtilsOld.getForLoop(bcm._mg);
         assertTrue(loopInstructions[0].getInstruction() instanceof ConstantPushInstruction);
 
-        pl.edu.agh.bcel.transformations.LoopUtils.updateLoopStartCondition(loopInstructions, EXPECTED_LOOP_START_CONDITION_INDEX);
+        LoopUtilsOld.updateLoopStartCondition(loopInstructions, EXPECTED_LOOP_START_CONDITION_INDEX);
 
         assertTrue(loopInstructions[0].getInstruction() instanceof LoadInstruction);
 
@@ -59,7 +59,7 @@ public class LoopUtilsTest {
         bcm = new ByteCodeModifier();
         bcm.prepareToModify();
 
-        InstructionHandle[] loopInstructions = pl.edu.agh.bcel.transformations.LoopUtils.getForLoop(bcm._mg);
+        InstructionHandle[] loopInstructions = LoopUtilsOld.getForLoop(bcm._mg);
         assertTrue(loopInstructions[3].getInstruction() instanceof ConstantPushInstruction);
 
         System.out.println("loopInstructions:");
@@ -69,7 +69,7 @@ public class LoopUtilsTest {
 
         System.out.println("loopInstructions[3]: " + loopInstructions[3].getInstruction().getOpcode());
 
-        pl.edu.agh.bcel.transformations.LoopUtils.updateLoopEndCondition(loopInstructions, EXPECTED_LOOP_END_CONDITION_INDEX);
+        LoopUtilsOld.updateLoopEndCondition(loopInstructions, EXPECTED_LOOP_END_CONDITION_INDEX);
 
         System.out.println("loopInstructions:");
         for (InstructionHandle item : loopInstructions) {
@@ -92,7 +92,7 @@ public class LoopUtilsTest {
         bcm = new ByteCodeModifier();
         bcm.prepareToModify();
 
-        List<InstructionHandle> forLoop = Arrays.asList(pl.edu.agh.bcel.transformations.LoopUtils.getForLoop(bcm._mg));
+        List<InstructionHandle> forLoop = Arrays.asList(LoopUtilsOld.getForLoop(bcm._mg));
 
         int id_start = 0, id_end = 0;
         id_start = forLoop.get(0).getPosition();
@@ -107,8 +107,8 @@ public class LoopUtilsTest {
         bcm = new ByteCodeModifier();
         bcm.prepareToModify();
 
-        InstructionHandle[] loopInstructions = pl.edu.agh.bcel.transformations.LoopUtils.getForLoop(bcm._mg);
-        InstructionHandle[] emptyLoop = pl.edu.agh.bcel.transformations.LoopUtils.emptyLoop(loopInstructions);
+        InstructionHandle[] loopInstructions = LoopUtilsOld.getForLoop(bcm._mg);
+        InstructionHandle[] emptyLoop = LoopUtilsOld.emptyLoop(loopInstructions);
 
         assertTrue(loopInstructions.length != emptyLoop.length);
 
@@ -132,8 +132,8 @@ public class LoopUtilsTest {
         bcm = new ByteCodeModifier();
         bcm.prepareToModify();
 
-        InstructionHandle[] loopInstructions = pl.edu.agh.bcel.transformations.LoopUtils.getForLoop(bcm._mg);
-        int forLoopVariableIndex = pl.edu.agh.bcel.transformations.LoopUtils.getForLoopVariableIndex(loopInstructions);
+        InstructionHandle[] loopInstructions = LoopUtilsOld.getForLoop(bcm._mg);
+        int forLoopVariableIndex = LoopUtilsOld.getForLoopVariableIndex(loopInstructions);
 
         assertEquals(EXPECTED_LOOP_VARIABLE_INDEX, forLoopVariableIndex);
     }
@@ -144,7 +144,7 @@ public class LoopUtilsTest {
         bcm = new ByteCodeModifier();
         bcm.prepareToModify();
 
-        List<InstructionHandle> forLoop = Arrays.asList(pl.edu.agh.bcel.transformations.LoopUtils.getForLoop(bcm._mg));
+        List<InstructionHandle> forLoop = Arrays.asList(LoopUtilsOld.getForLoop(bcm._mg));
     }
 
     @Test
@@ -153,11 +153,11 @@ public class LoopUtilsTest {
         bcm = new ByteCodeModifier();
         bcm.prepareToModify();
 
-        InstructionHandle[] loopInstructions = pl.edu.agh.bcel.transformations.LoopUtils.getForLoop(bcm._mg);
-        int oldLoopVariableIndex = pl.edu.agh.bcel.transformations.LoopUtils.getForLoopVariableIndex(loopInstructions);
+        InstructionHandle[] loopInstructions = LoopUtilsOld.getForLoop(bcm._mg);
+        int oldLoopVariableIndex = LoopUtilsOld.getForLoopVariableIndex(loopInstructions);
         assertEquals(1, oldLoopVariableIndex);
-        pl.edu.agh.bcel.transformations.LoopUtils.updateLoopVariableIndex(loopInstructions, EXPECTED_LOOP_END_CONDITION_INDEX);
-        int newLoopVariableIndex = pl.edu.agh.bcel.transformations.LoopUtils.getForLoopVariableIndex(loopInstructions);
+        LoopUtilsOld.updateLoopVariableIndex(loopInstructions, EXPECTED_LOOP_END_CONDITION_INDEX);
+        int newLoopVariableIndex = LoopUtilsOld.getForLoopVariableIndex(loopInstructions);
         assertEquals(EXPECTED_LOOP_END_CONDITION_INDEX, newLoopVariableIndex);
     }
 

@@ -7,7 +7,7 @@ package pl.edu.agh.bcel.useful;
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.util.BCELifier;
-import pl.edu.agh.bcel.utils.LaunchProperties;
+import pl.edu.agh.bcel.LaunchProperties;
 
 import java.io.IOException;
 

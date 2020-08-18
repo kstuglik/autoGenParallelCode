@@ -1,11 +1,10 @@
-package pl.edu.agh.bcel.transformations;
+package pl.edu.agh.bcel.utils;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.bcel.utils.LaunchProperties;
+import pl.edu.agh.bcel.LaunchProperties;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
 public class InstructionUtils {
 
@@ -28,21 +27,21 @@ public class InstructionUtils {
         return il;
     }
 
-    static InstructionHandle findByInstruction(Instruction i, InstructionHandle[] ih) {
+    static InstructionHandle getInstructionFromHandles(Instruction i, InstructionHandle[] ih) {
         return Arrays.stream(ih)
                 .filter(handle -> handle.getInstruction().equals(i))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No matching instruction found for instruction handle."));
     }
 
-    public static InstructionList getEndFinalInitInstructions(ClassGen cg, MethodGen mg) {
+    public static InstructionList getInstructionsEndFinalInit(ClassGen cg, MethodGen mg) {
         InstructionList il = new InstructionList();
 
-        int endVarIndex = Variables.getLVarByName(
+        int endVarIndex = VariableUtils.getLVarByName(
                 LaunchProperties.END_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int endFinalVarIndex = Variables.getLVarByName(
+        int endFinalVarIndex = VariableUtils.getLVarByName(
                 LaunchProperties.END_FINAL_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int dataSizeIndex = Variables.getLVarByName(
+        int dataSizeIndex = VariableUtils.getLVarByName(
                 LaunchProperties.DATASIZE_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
 
         InstructionHandle ih_6 = il.append(InstructionFactory.createLoad(Type.INT, endVarIndex));
@@ -65,11 +64,11 @@ public class InstructionUtils {
         return il;
     }
 
-    public static InstructionList getEndInitInstructions(ClassGen cg, MethodGen mg, short dataSize) {
+    public static InstructionList getInstructionsEndInit(ClassGen cg, MethodGen mg, short dataSize) {
         InstructionList il = new InstructionList();
-        int loopIteratorIndex = Variables.getLVarByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int endVarIndex = Variables.getLVarByName(LaunchProperties.END_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int numThreadsFieldIndex = Variables.getFieldRefId(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
+        int loopIteratorIndex = VariableUtils.getLVarByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int endVarIndex = VariableUtils.getLVarByName(LaunchProperties.END_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int numThreadsFieldIndex = VariableUtils.getFieldRefId(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
 
         il.append(new ILOAD(loopIteratorIndex));
         il.append(new ICONST(1));
@@ -86,18 +85,11 @@ public class InstructionUtils {
         return il;
     }
 
-    public static HashMap<Integer, Integer> getHashmapPositionId(InstructionHandle[] ihy) {
-        HashMap<Integer, Integer> hashmapInstructionPositionId = new HashMap<>();
-        for (int i = 0; i < ihy.length; i++)
-            hashmapInstructionPositionId.put(ihy[i].getPosition(), i);
-        return hashmapInstructionPositionId;
-    }
-
-    public static InstructionList getStartInitInstructions(ClassGen cg, MethodGen mg, short dataSize) {
+    public static InstructionList getInstructionsStartInit(ClassGen cg, MethodGen mg, short dataSize) {
         InstructionList il = new InstructionList();
-        int loopIteratorIndex = Variables.getLVarByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int startVarIndex = Variables.getLVarByName(LaunchProperties.START_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int numThreadsFieldIndex = Variables.getFieldRefId(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
+        int loopIteratorIndex = VariableUtils.getLVarByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int startVarIndex = VariableUtils.getLVarByName(LaunchProperties.START_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int numThreadsFieldIndex = VariableUtils.getFieldRefId(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
 
         il.append(new ILOAD(loopIteratorIndex));
         il.append(new SIPUSH(dataSize));//TODO would be nice to get rid of short
@@ -109,22 +101,5 @@ public class InstructionUtils {
         return il;
     }
 
-    public static InstructionList getTaskAdd(ClassGen cg, MethodGen mg, short dataSize) {
-        InstructionList il = new InstructionList();
-        int endVarIndex = Variables.getLVarByName(LaunchProperties.END_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int endVarIndex2 = Variables.getLVarByName(LaunchProperties.END_FINAL_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int startVarIndex = Variables.getLVarByName(LaunchProperties.START_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-
-        InstructionFactory _factory = new InstructionFactory(cg, mg.getConstantPool());
-//        InstructionHandle ih_69 = il.append(_factory.createLoad(Type.OBJECT, 0));
-        il.append(new PUSH(mg.getConstantPool(), 10));
-        il.append(new PUSH(mg.getConstantPool(), 120));
-        il.append(_factory.createInvoke("subTask", "call", new ObjectType("java.util.concurrent.Callable"), new Type[]{Type.INT, Type.INT}, Const.INVOKEDYNAMIC));
-        il.append(_factory.createInvoke("java.util.List", "add", Type.BOOLEAN, new Type[]{Type.OBJECT}, Const.INVOKEINTERFACE));
-//        il.append(InstructionConst.POP);
-
-
-        return il;
-    }
 }
 

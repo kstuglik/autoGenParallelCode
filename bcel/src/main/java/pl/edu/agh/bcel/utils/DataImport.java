@@ -1,4 +1,4 @@
-package pl.edu.agh.bcel.transformations;
+package pl.edu.agh.bcel.utils;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

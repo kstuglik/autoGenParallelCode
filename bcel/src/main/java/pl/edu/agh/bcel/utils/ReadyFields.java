@@ -4,8 +4,7 @@ import org.apache.bcel.Const;
 import org.apache.bcel.classfile.LocalVariable;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.bcel.transformations.MethodUtils;
-import pl.edu.agh.bcel.transformations.Variables;
+import pl.edu.agh.bcel.LaunchProperties;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -133,8 +132,8 @@ public class ReadyFields {
 
     //    IMPORTANT: WE USE "STATIC" - CAN BE SET IN LAUNCHPROPERTIES - CALL-TASK
     public static void changeBodyInnerLoopForMatrixMultiply(MethodGen mg, InstructionList ilNEW, InstructionFactory factory) {
-        int idRowNum = Variables.getLVarIdByName("rowNum", mg);
-        int idColNum = Variables.getLVarIdByName("colNum", mg);
+        int idRowNum = VariableUtils.getLVarIdByName("rowNum", mg);
+        int idColNum = VariableUtils.getLVarIdByName("colNum", mg);
 
         LocalVariableGen finalColNum = mg.addLocalVariable(
                 "finalColNum", Type.INT, null, null);
@@ -151,12 +150,10 @@ public class ReadyFields {
         ilNEW.append(new F2I());
         ilNEW.append(new ISTORE(idFinalRowNum));
 
-        LocalVariable step = Variables.getLVarByName("step", mg.getLocalVariableTable(mg.getConstantPool()));
+        LocalVariable step = VariableUtils.getLVarByName("step", mg.getLocalVariableTable(mg.getConstantPool()));
 
         LocalVariableGen[] lvt = mg.getLocalVariables();
-        for (int i = 0; i < lvt.length; i++) {
-            System.out.println(lvt[i].getName());
-        }
+//        for (LocalVariableGen localVariableGen : lvt) System.out.println(localVariableGen.getName());
 
         ilNEW.append(InstructionFactory.createLoad(Type.OBJECT, LaunchProperties.TASK_POOL_ID));
         ilNEW.append(factory.createNew(new ObjectType("Callable<Integer>() {" +

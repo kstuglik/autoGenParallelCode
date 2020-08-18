@@ -1,31 +1,28 @@
-package pl.edu.agh.bcel.transformations;
+package pl.edu.agh.bcel.utils;
 
 import org.apache.bcel.classfile.*;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.bcel.utils.LaunchProperties;
+import pl.edu.agh.bcel.LaunchProperties;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Variables {
+public class VariableUtils {
 
     public static boolean checkIfFieldExist(Field[] fields, String fieldName) {
-
-        for (Field field : fields) {
-            if (field.getName().equals(fieldName)) return true;
-        }
+        for (Field field : fields) if (field.getName().equals(fieldName)) return true;
         return false;
     }
 
-    protected static void createLVarIfNoExisted(
+    protected static void createLVarFromList(
             MethodGen mg, List<LocalVariable> listLVarToCreate, HashMap<Integer, Integer> hashmapLVarIdOldAndNew) {
-        System.out.println("CREATE LOCAL VARIABLE IF NO EXISTED:");
+        System.out.println("---> CREATE LOCAL VARIABLE IF NO EXISTED <---");
         for (LocalVariable item : listLVarToCreate) {
             LocalVariableGen lg = mg.addLocalVariable(item.getName(), Type.getType(item.getSignature()), null, null);
             int oldVarId = item.getIndex();
             int newVarId = lg.getIndex();
             hashmapLVarIdOldAndNew.replace(oldVarId, newVarId);
-            System.out.println("var name:\t" + item.getName() + ", [ID]:\told = " + oldVarId + ", new = " + newVarId);
+            System.out.println("\t\tvariable name:\t" + item.getName() + ", [ID]:\told = " + oldVarId + ", new = " + newVarId);
         }
     }
 
@@ -64,18 +61,24 @@ public class Variables {
         return -1;
     }
 
+    public static HashMap<Integer, Integer> getHashmapLVarIndexesOldAndNew(MethodGen mgOld, MethodGen mgNew) {
+        HashMap<Integer, Integer> hashmapLVarIndexesOldAndNew = VariableUtils.getHashmapOldAndNewLVarId(mgOld, mgNew);
+
+        List<LocalVariable> listLVarToCreate = VariableUtils.getLVarListToCreate(mgOld, hashmapLVarIndexesOldAndNew);
+        VariableUtils.createLVarFromList(mgNew, listLVarToCreate, hashmapLVarIndexesOldAndNew);
+
+        return hashmapLVarIndexesOldAndNew;
+    }
+
     protected static HashMap<Integer, Integer> getHashmapOldAndNewLVarId(MethodGen mgOld, MethodGen mgNew) {
 
         HashMap<String, Integer> oldVariables = getHashmapStringIntegerLVar(mgOld);
         HashMap<String, Integer> newVariables = getHashmapStringIntegerLVar(mgNew);
         HashMap<Integer, Integer> hashmapOlNewLVarId = new HashMap<>();
 
-        System.out.println(String.format("\n%-20s", "NAME") + "INDEXES FROM LOCALVARIABLETABLE");
-
         for (String key : oldVariables.keySet()) {
             int idOld = oldVariables.getOrDefault(key, -1);
             int idNew = newVariables.getOrDefault(key, -1);
-            System.out.println(String.format("%-20s", key) + "[OLD: " + idOld + ", NEW: " + (idNew == -1 ? "-1 => NO EXIST" : idNew));
             hashmapOlNewLVarId.put(idOld, idNew);
         }
 
@@ -111,7 +114,8 @@ public class Variables {
         return -1;
     }
 
-    public static List<LocalVariable> getLVarListToCreate(MethodGen mgOld, HashMap<Integer, Integer> hashmapLVarIdOldAndNew) {
+    public static List<LocalVariable> getLVarListToCreate(
+            MethodGen mgOld, HashMap<Integer, Integer> hashmapLVarIdOldAndNew) {
 
         List<LocalVariable> listLVarToCreate = new ArrayList<>();
         LocalVariable[] lvs = mgOld.getLocalVariableTable(mgOld.getConstantPool()).getLocalVariableTable();
@@ -121,6 +125,7 @@ public class Variables {
             int idLVarInNewMethod = hashmapLVarIdOldAndNew.getOrDefault(item.getIndex(), -777);
             if (idLVarInNewMethod == -1) listLVarToCreate.add(item);
         }
+
         return listLVarToCreate;
     }
 
@@ -144,7 +149,16 @@ public class Variables {
         return mgNew.getLocalVariableTable(cp).getLocalVariableTable();
     }
 
-    public static String getSignatureForLocalVariableByName(String name, LocalVariableTable localVariableTable) {
+    public static String getSignatureForFieldsByName(String name, ClassGen cg) {
+        Field[] fields = cg.getFields();
+
+        return Arrays.stream(fields)
+                .filter(var -> var.getName().equals(name))
+                .findAny()
+                .orElseThrow(() -> new IllegalStateException("Field: " + name + " not found.")).getSignature();
+    }
+
+    public static String getSignatureVarByName(String name, LocalVariableTable localVariableTable) {
         return Arrays.stream(localVariableTable.getLocalVariableTable())
                 .filter(var -> var.getName().equals(name))
                 .findAny()
@@ -182,13 +196,6 @@ public class Variables {
         return Arrays.stream(mg.getLocalVariables())
                 .filter(variable -> variableIndexes.contains(variable.getIndex()))
                 .collect(Collectors.toList());
-    }
-
-    public static HashMap<Integer, Integer> prepareLVarIfNoExistedAndReturnHashmap(MethodGen mgOld, MethodGen mgNew) {
-        HashMap<Integer, Integer> hashmapIdOldAndNewLVar = Variables.getHashmapOldAndNewLVarId(mgOld, mgNew);
-        List<LocalVariable> listLVarToCreate = Variables.getLVarListToCreate(mgOld, hashmapIdOldAndNewLVar);
-        Variables.createLVarIfNoExisted(mgNew, listLVarToCreate, hashmapIdOldAndNewLVar);
-        return hashmapIdOldAndNewLVar;
     }
 
 }

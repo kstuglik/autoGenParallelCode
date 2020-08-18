@@ -1,4 +1,4 @@
-package pl.edu.agh.bcel.transformations;
+package pl.edu.agh.bcel.utils;
 
 import org.apache.bcel.classfile.ConstantCP;
 import org.apache.bcel.classfile.ConstantClass;
@@ -55,9 +55,9 @@ public class MethodUtils {
     public static void getBodyFromMethodToNewInstructionList(
             MethodGen mg, InstructionList il, InstructionList il_old) {
 
-        int GOTO_ID = LoopUtils.getGoto(il_old.getInstructionHandles()).getPosition();
+        int GOTO_ID = LoopUtilsOld.getGoto(il_old.getInstructionHandles()).getPosition();
 
-        InstructionHandle[] handles = LoopUtils.getIhsBetweenFromTo(
+        InstructionHandle[] handles = LoopUtilsOld.getIhsBetweenFromTo(
                 mg.getInstructionList().getInstructionHandles(), 0, GOTO_ID);
 
         InstructionHandle instr;

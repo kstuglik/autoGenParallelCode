@@ -7,7 +7,7 @@ import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.Code;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
-import pl.edu.agh.bcel.utils.LaunchProperties;
+import pl.edu.agh.bcel.LaunchProperties;
 
 import java.io.IOException;
 

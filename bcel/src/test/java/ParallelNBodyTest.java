@@ -7,6 +7,8 @@ import org.apache.bcel.generic.TargetLostException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import pl.edu.agh.bcel.ByteCodeModifier;
+import pl.edu.agh.bcel.LaunchProperties;
 import pl.edu.agh.bcel.utils.*;
 
 import java.io.BufferedReader;

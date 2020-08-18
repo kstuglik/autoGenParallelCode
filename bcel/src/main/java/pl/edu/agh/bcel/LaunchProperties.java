@@ -1,13 +1,10 @@
-package pl.edu.agh.bcel.utils;
-
-import org.apache.bcel.generic.ObjectType;
+package pl.edu.agh.bcel;
 
 public class LaunchProperties {
 
     public static final String CLASS_SUFFIX = ".class";
     public static final String JAVA_SUFFIX = ".java";
-    public static final ObjectType p_stream = new ObjectType("java.io.PrintStream");
-    public static final ObjectType i_stream = new ObjectType("java.io.InputStream");
+
     /*PARALLEL PARAMS*/
     public static final String NUMBER_OF_THREADS_NAME = "NUM_THREADS";
     public static final String EXECUTOR_SERVICE_NAME = "SERVICE";
@@ -48,6 +45,8 @@ public class LaunchProperties {
     public static String MATRIX_A_VAR_NAME = "matrixA";
     public static String MATRIX_B_VAR_NAME = "matrixB";
     public static String MATRIX_C_VAR_NAME = "matrixC";
+
+
 
     public static String getPathToIntputFile() {
         return CLASS_DIR + CLASS_NAME + CLASS_SUFFIX;

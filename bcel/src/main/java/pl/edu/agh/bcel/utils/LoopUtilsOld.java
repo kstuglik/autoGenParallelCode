@@ -1,7 +1,7 @@
-package pl.edu.agh.bcel.transformations;
+package pl.edu.agh.bcel.utils;
 
 import org.apache.bcel.generic.*;
-import pl.edu.agh.bcel.utils.LaunchProperties;
+import pl.edu.agh.bcel.LaunchProperties;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,15 +10,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class LoopUtils {
+public class LoopUtilsOld {
 
     //    TODO: IT BELOW MUST BE FIXED!
     private static final int START_CONDITION_INSTRUCTION_INDEX = 0;
     private static final int END_CONDITION_INSTRUCTION_INDEX = 3;
 
     private static void adjustLength(LocalVariableGen lg, InstructionHandle[] ih) {
-        InstructionHandle start = InstructionUtils.findByInstruction(lg.getStart().getInstruction(), ih);
-        InstructionHandle end = InstructionUtils.findByInstruction(lg.getEnd().getInstruction(), ih);
+        InstructionHandle start = InstructionUtils.getInstructionFromHandles(lg.getStart().getInstruction(), ih);
+        InstructionHandle end = InstructionUtils.getInstructionFromHandles(lg.getEnd().getInstruction(), ih);
         lg.setStart(start);
         lg.setEnd(end);
     }
@@ -87,10 +87,10 @@ public class LoopUtils {
         }
     }
 
-    public static void displayInfoAboutLoopInMethod(List<LoopFor> loopFors) {
+    public static void displayInfoAboutLoopInMethod(List<ForLoopItem> forLoopItems) {
         System.out.println("\nLOOPS IN METHOD");
-        for (int i = 0; i < loopFors.size(); i++) {
-            LoopFor item = loopFors.get(i);
+        for (int i = 0; i < forLoopItems.size(); i++) {
+            ForLoopItem item = forLoopItems.get(i);
             System.out.println("loop no:" + i);
             item.displayInfoAboutHandles();
         }
@@ -133,7 +133,7 @@ public class LoopUtils {
 
     static InstructionHandle getGoto(InstructionHandle[] ih) {
         return Arrays.stream(ih)
-                .filter(handle -> LaunchProperties.GOTO_INSTRUCTION_NAME.equals(handle.getInstruction().getName()))
+                .filter(handle -> "goto".equals(handle.getInstruction().getName()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Method passed to 'getForLoop' does not have for loop."));
     }
@@ -188,7 +188,7 @@ public class LoopUtils {
 
     private static void retargetEmptyLoopEndCondition(InstructionList il) {
         InstructionHandle[] ih = il.getInstructionHandles();
-        InstructionHandle gotoHandle = LoopUtils.getGoto(ih);
+        InstructionHandle gotoHandle = LoopUtilsOld.getGoto(ih);
         InstructionHandle firstHandleAfterLoop = gotoHandle.getNext();
         InstructionHandle lastLoopHandle = gotoHandle.getPrev().getPrev();
         if (lastLoopHandle instanceof BranchHandle) {

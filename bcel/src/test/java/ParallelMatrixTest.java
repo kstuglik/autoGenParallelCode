@@ -6,8 +6,12 @@ import org.apache.bcel.generic.MethodGen;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import pl.edu.agh.bcel.transformations.LoopForTransform;
-import pl.edu.agh.bcel.utils.*;
+import pl.edu.agh.bcel.ByteCodeModifier;
+import pl.edu.agh.bcel.LaunchProperties;
+import pl.edu.agh.bcel.utils.ForLoopUtils;
+import pl.edu.agh.bcel.utils.ReadyFields;
+import pl.edu.agh.bcel.utils.ReadyMethods;
+import pl.edu.agh.bcel.utils.TransformUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,7 +47,7 @@ public class ParallelMatrixTest {
         ReadyFields.addFieldTaskPool(cgTarget, mg);
         ReadyFields.initFieldExecutorService(cgTarget, mg);
         ReadyMethods.addMethodToInitTaskPool(cgTarget);
-        LoopForTransform.changeNestedLoopInMatrixMultiply(cgTarget, mg);
+        ForLoopUtils.parallelizeMethodWithNestedLoop(cgTarget, mg);
 
         System.out.println("GOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());

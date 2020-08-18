@@ -3,14 +3,12 @@ package pl.edu.agh.bcel.utils;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ConstantFieldref;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.bcel.transformations.InstructionUtils;
-import pl.edu.agh.bcel.transformations.LoopUtils;
-import pl.edu.agh.bcel.transformations.MethodUtils;
-import pl.edu.agh.bcel.transformations.Variables;
+import pl.edu.agh.bcel.LaunchProperties;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+
 
 
 public class TransformUtils {
@@ -29,7 +27,7 @@ public class TransformUtils {
 
         int GOTO_ID = i.get().getPosition() - 1;
 
-        InstructionHandle[] handles = LoopUtils.getIhsBetweenFromTo(
+        InstructionHandle[] handles = LoopUtilsOld.getIhsBetweenFromTo(
                 mg.getInstructionList().getInstructionHandles(), 0, GOTO_ID);
 
         InstructionHandle instr;
@@ -44,13 +42,14 @@ public class TransformUtils {
 
         int id_A, id_B;
 
-        id_A = Variables.getLVarByName(LaunchProperties.ARRAY_1, mg.getLocalVariableTable(cp)).getIndex();
-        id_B = Variables.getLVarByName(LaunchProperties.ARRAY_2, mg.getLocalVariableTable(cp)).getIndex();
+        id_A = VariableUtils.getLVarByName(LaunchProperties.ARRAY_1, mg.getLocalVariableTable(cp)).getIndex();
+        id_B = VariableUtils.getLVarByName(LaunchProperties.ARRAY_2, mg.getLocalVariableTable(cp)).getIndex();
 
 //        ************** verify the type of array: 1D or 2D or more
 //        YOU MUST KNOW THAT INFO ABOUT COLS AND ROWS MUST BE SET IN LAUNCHPROPERTIES
 
-        String signatureMyArray = Variables.getSignatureForLocalVariableByName(LaunchProperties.ARRAY_1, mg.getLocalVariableTable(cp));
+        String signatureMyArray = VariableUtils.getSignatureVarByName(LaunchProperties.ARRAY_1, mg.getLocalVariableTable(cp));
+
         long dimArray = signatureMyArray.chars().filter(ch -> ch == '[').count();
 
         InstructionHandle ih_86 = il.append(InstructionFactory.createLoad(Type.OBJECT, id_A));
@@ -288,8 +287,8 @@ public class TransformUtils {
 
     public static void changeLoopLimitToNumberOfThreads(ClassGen cg, MethodGen mg) {
         InstructionList il = mg.getInstructionList();
-        InstructionHandle[] forLoop = LoopUtils.getForLoop(mg);
-        int numThreadsConstantIndex = Variables.getFieldRefId(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
+        InstructionHandle[] forLoop = LoopUtilsOld.getForLoop(mg);
+        int numThreadsConstantIndex = VariableUtils.getFieldRefId(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
         forLoop[3].setInstruction(new GETSTATIC(numThreadsConstantIndex));
 
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
@@ -324,11 +323,11 @@ public class TransformUtils {
 
         transferLocalVariables(methodGen, subTaskMethod);
         updateBranchInstructions(subTaskInstructionList);
-        int newLoopIteratorVariableIndex = Variables.getLVarByName(iteratorName, subTaskMethod.getLocalVariableTable(classGen.getConstantPool())).getIndex();
-        LoopUtils.broadenCompareCondition(subTaskInstructionList.getInstructionHandles());
-        LoopUtils.updateLoopVariableIndex(subTaskInstructionList.getInstructionHandles(), newLoopIteratorVariableIndex);
-        LoopUtils.updateLoopStartCondition(subTaskInstructionList.getInstructionHandles(), startVariable.getIndex());
-        LoopUtils.updateLoopEndCondition(subTaskInstructionList.getInstructionHandles(), endVariable.getIndex());
+        int newLoopIteratorVariableIndex = VariableUtils.getLVarByName(iteratorName, subTaskMethod.getLocalVariableTable(classGen.getConstantPool())).getIndex();
+        LoopUtilsOld.broadenCompareCondition(subTaskInstructionList.getInstructionHandles());
+        LoopUtilsOld.updateLoopVariableIndex(subTaskInstructionList.getInstructionHandles(), newLoopIteratorVariableIndex);
+        LoopUtilsOld.updateLoopStartCondition(subTaskInstructionList.getInstructionHandles(), startVariable.getIndex());
+        LoopUtilsOld.updateLoopEndCondition(subTaskInstructionList.getInstructionHandles(), endVariable.getIndex());
 
         subTaskMethod.setArgumentNames(new String[]{LaunchProperties.START_INDEX_VAR_NAME, LaunchProperties.END_INDEX_VAR_NAME});
         subTaskMethod.setArgumentTypes(new Type[]{Type.INT, Type.INT});
@@ -363,7 +362,7 @@ public class TransformUtils {
     }
 
     protected static InstructionList getSubtaskInstructions(MethodGen mg) {
-        InstructionHandle[] loopInstructions = LoopUtils.getForLoop(mg);
+        InstructionHandle[] loopInstructions = LoopUtilsOld.getForLoop(mg);
         InstructionList il = new InstructionList();
         for (InstructionHandle instr : loopInstructions) {
             if (instr instanceof BranchHandle) {
@@ -377,8 +376,8 @@ public class TransformUtils {
     }
 
     public static void removeBodyForLoopInSelectedMethod(ClassGen cg, MethodGen mg) {
-        InstructionHandle[] forLoop = LoopUtils.getForLoop(mg);
-        LoopUtils.emptyMethodLoop(mg, forLoop);
+        InstructionHandle[] forLoop = LoopUtilsOld.getForLoop(mg);
+        LoopUtilsOld.emptyMethodLoop(mg, forLoop);
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
         updateMethodParametersScope(mg, mg.getConstantPool());
         mg.setMaxStack();
@@ -401,7 +400,7 @@ public class TransformUtils {
 
     public static void setNewLoopBody(ClassGen cg, MethodGen mg, short dataSize) {
         InstructionList il = mg.getInstructionList();
-        InstructionHandle[] loopHandles = LoopUtils.getForLoop(mg);
+        InstructionHandle[] loopHandles = LoopUtilsOld.getForLoop(mg);
         InstructionHandle firstLoopInstruction = loopHandles[0];
         InstructionHandle lastLoopInstruction = loopHandles[loopHandles.length - 1];
 
@@ -422,13 +421,13 @@ public class TransformUtils {
 
 
         InstructionHandle startVarStart = loopHandles[4];
-        InstructionList endVarStart = InstructionUtils.getStartInitInstructions(cg, mg, dataSize);
+        InstructionList endVarStart = InstructionUtils.getInstructionsStartInit(cg, mg, dataSize);
         InstructionHandle startVarEnd = endVarStart.getEnd();
 
-        InstructionList endVarEnd = InstructionUtils.getEndInitInstructions(cg, mg, dataSize);
+        InstructionList endVarEnd = InstructionUtils.getInstructionsEndInit(cg, mg, dataSize);
         InstructionHandle startVarFinalEnd = endVarEnd.getEnd();
 
-        InstructionList endVarFinalEnd = InstructionUtils.getEndFinalInitInstructions(cg, mg);
+        InstructionList endVarFinalEnd = InstructionUtils.getInstructionsEndFinalInit(cg, mg);
         InstructionHandle startListCallable = endVarEnd.getEnd();
 
         InstructionList endListCallable = InstructionUtils.addListCallableInstructions(cg, mg);
@@ -449,7 +448,7 @@ public class TransformUtils {
 
     public static void transferLocalVariables(MethodGen mg, MethodGen subTaskmg) {
         InstructionList il = subTaskmg.getInstructionList();
-        List<LocalVariableGen> variablesToCopy = Variables.getVariablesToCopy(mg, il);
+        List<LocalVariableGen> variablesToCopy = VariableUtils.getVariablesToCopy(mg, il);
         for (LocalVariableGen localVariableGen : variablesToCopy) {
 
             subTaskmg.addLocalVariable(localVariableGen.getName(),
@@ -459,7 +458,7 @@ public class TransformUtils {
         }
         Map<Integer, Integer> oldIndexesToNewIndexes = new HashMap<>();
         for (LocalVariableGen variable : variablesToCopy) {
-            oldIndexesToNewIndexes.putIfAbsent(variable.getIndex(), Variables.getLVarByName(variable.getName(), subTaskmg.getLocalVariableTable(mg.getConstantPool())).getIndex());
+            oldIndexesToNewIndexes.putIfAbsent(variable.getIndex(), VariableUtils.getLVarByName(variable.getName(), subTaskmg.getLocalVariableTable(mg.getConstantPool())).getIndex());
         }
         updateVariableInstructions(variablesToCopy, subTaskmg, oldIndexesToNewIndexes);
     }

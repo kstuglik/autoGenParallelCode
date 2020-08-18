@@ -11,9 +11,11 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
-import pl.edu.agh.bcel.transformations.LoopUtils;
+import pl.edu.agh.bcel.ByteCodeModifier;
+import pl.edu.agh.bcel.LaunchProperties;
+import pl.edu.agh.bcel.utils.LoopUtilsOld;
 import pl.edu.agh.bcel.utils.*;
-import pl.edu.agh.bcel.transformations.Variables;
+import pl.edu.agh.bcel.utils.VariableUtils;
 
 import java.io.IOException;
 
@@ -45,8 +47,8 @@ public class TransformUtilsTest {
         System.out.println("GOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());
 
-        Assert.assertTrue(Variables.checkIfFieldExist(fields, LaunchProperties.NUMBER_OF_THREADS_NAME));
-        Assert.assertTrue(Variables.checkIfFieldExist(fields, LaunchProperties.EXECUTOR_SERVICE_NAME));
+        Assert.assertTrue(VariableUtils.checkIfFieldExist(fields, LaunchProperties.NUMBER_OF_THREADS_NAME));
+        Assert.assertTrue(VariableUtils.checkIfFieldExist(fields, LaunchProperties.EXECUTOR_SERVICE_NAME));
 
     }
 
@@ -135,7 +137,7 @@ public class TransformUtilsTest {
         System.out.println("GOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());
 
-        InstructionHandle[] forLoop = LoopUtils.getForLoop(mg);
+        InstructionHandle[] forLoop = LoopUtilsOld.getForLoop(mg);
 //        WHY INDEX: 3?
         Assert.assertTrue(forLoop[3].getInstruction() instanceof GETSTATIC);
 
