@@ -20,13 +20,8 @@ import java.util.*;
 public class ForLoopUtils {
 
     static int CURR_ROW_ID = 0;
-    static String nameIteratorInForLoop = "r";
-    static String lvarNameToReplaceWithCurrRow = "rowNum";
 
-    public static void addHandleIncOrNextToHashmap(
-            HashMap<Integer, List<InstructionHandle>> hm, int key, InstructionHandle value) {
-        //Integer: coumber of loop in order occures, list of handles with INC or NEXT in order occures
-
+    public static void addHandleIncOrNext(HashMap<Integer, List<InstructionHandle>> hm, int key, InstructionHandle value) {
         if (hm.containsKey(key)) hm.get(key).add(value);
         else {
             List<InstructionHandle> list = new ArrayList<>();
@@ -35,92 +30,108 @@ public class ForLoopUtils {
         }
     }
 
-    public static void addSubTaskInNestedLoop(
-            ClassGen cg, MethodGen mgOld, ForLoopItem forLoopItem, HashMap<Integer, Integer> hashmapPositionId) {
+//    subtask moze i chyba nawet powinien byc wywolany po tym jak sie zrobi metode zrownoleglana
+//    tzn. z tamtego miejsca trzeba przekazac info typu: lista pętli, wskazanie petli ktore beda uzyte w subtask
+//    wtedy nie jeden element listy ale co najmniej 2
 
+    public static void addSubTaskInNestedLoop(ClassGen cg, MethodGen mgOld, int externalLoop, int internalLoop) {
+
+        InstructionList ilOld = mgOld.getInstructionList();
+        InstructionHandle[] ihy = ilOld.getInstructionHandles();
+
+        InstructionList ilNew = new InstructionList();
+        ConstantPoolGen cp = cg.getConstantPool();
+        InstructionFactory factory = new InstructionFactory(cg, cp);
+
+        HashMap<Integer, List<BranchHandle>> hashMapBHandleIF = new HashMap<>();
+        HashMap<Integer, List<InstructionHandle>> hashMapHandleIncOrNext = new HashMap<>();
+        HashMap<Integer, Integer> hashmapPositionId = ForLoopItem.getHashmapPositionId(ihy);
+        List<ForLoopItem> forLoopItemsList = getListLoopForItems(ihy, hashmapPositionId);
         List<InstructionHandle> handlesLoopStart = new ArrayList<>();
         List<BranchHandle> listBHandleGOTO = new ArrayList<>();
         List<BranchHandle> listBHandleIF = new ArrayList<>();
-        HashMap<Integer, List<BranchHandle>> hashMapBHandleIF = new HashMap<>();
-        HashMap<Integer, List<InstructionHandle>> hashMapHandleIncOrNext = new HashMap<>();
+
         //key - number of loop, keys: increment handles in loop
 
-        InstructionList il = new InstructionList();
-        ConstantPoolGen cp = cg.getConstantPool();
-        InstructionFactory factory = new InstructionFactory(cg, cp);
-        InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
-
-        MethodGen mgNew = new MethodGen(Const.ACC_PRIVATE | Const.ACC_STATIC,
-                Type.INT, new Type[]{Type.INT, Type.INT, Type.INT},
-                new String[]{
-                        LaunchProperties.ROW_NUM_VAR_NAME,
-                        LaunchProperties.COL_NUM_VAR_NAME,
-                        LaunchProperties.STEP_VAR_NAME
-                },
-                LaunchProperties.SUBTASK_METHOD_NAME,
-                cg.getClassName(), il, mgOld.getConstantPool());
+        MethodGen mgNew = new MethodGen(Const.ACC_PRIVATE | Const.ACC_STATIC, Type.INT, new Type[]{Type.INT, Type.INT, Type.INT}, new String[]{LaunchProperties.ROW_NUM_VAR_NAME, LaunchProperties.COL_NUM_VAR_NAME, LaunchProperties.STEP_VAR_NAME}, LaunchProperties.SUBTASK_METHOD_NAME, cg.getClassName(), ilNew, mgOld.getConstantPool());
 
         CURR_ROW_ID = mgNew.addLocalVariable(LaunchProperties.CURR_ROW_VAR_NAME, Type.INT, null, null).getIndex();
 
 //        REPLACEMENT ID: rowNUM (with id from old MethodGen) with currRow (with id in new MethodGen)
-        int idOldLVarToReplace = VariableUtils.getLVarIdByName(lvarNameToReplaceWithCurrRow, mgOld);
+        int idOldLVarToReplace = VariableUtils.getLVarIdByName("rowNum", mgOld);
         System.out.println("id variable to `change place` with currRow: " + idOldLVarToReplace);
 
-
-        HashMap<Integer, Integer> hashmapIdOldAndNewLVar =
-                VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
-
+        HashMap<Integer, Integer> hashmapIdOldAndNewLVar = VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
         replaceSpecificIndexes(idOldLVarToReplace, CURR_ROW_ID, hashmapIdOldAndNewLVar);
 
 //      STATIC PART OF CODE
 //      for(int currRow = rowNum;  currRow < rowNum + step && currRow < resultRows;  ++currRow)
+//        @PARAMS in METHOD have indexes: 0 - first, 1 - second, 2 - third
+//        first parameter is assigned as value to iterator
+        ilNew.append(InstructionFactory.createLoad(Type.INT, 0));
+        ilNew.append(InstructionFactory.createStore(Type.INT, CURR_ROW_ID));
 
-        il.append(InstructionFactory.createLoad(Type.INT, 0));
-        il.append(InstructionFactory.createStore(Type.INT, CURR_ROW_ID));
+        int aaaa = hashmapPositionId.get(forLoopItemsList.get(0).getHandleInsideLoop().getPosition());
+        int bbbb = hashmapPositionId.get(forLoopItemsList.get(0).getHandleIF().get(0).getPosition());
+        int ile = bbbb - aaaa;
 
-        InstructionHandle startExternalLoopHandle = il.append(InstructionFactory.createLoad(Type.INT, CURR_ROW_ID));
-        il.append(InstructionFactory.createLoad(Type.INT, 0));
-        il.append(InstructionFactory.createLoad(Type.INT, 2));
-        il.append(InstructionConst.IADD);
+        InstructionHandle startExternalLoopHandle = ilNew.append(
+                updateLVarIndexes(ihy[aaaa].getInstruction(), hashmapIdOldAndNewLVar, mgNew));
 
-        BranchHandle if_icmpge_1 = il.append(new IF_ICMPGE(null));
-        il.append(InstructionFactory.createLoad(Type.INT, CURR_ROW_ID));
-        il.append(factory.createFieldAccess(cg.getClassName(), "resultRows", Type.INT, Const.GETSTATIC));
+        System.out.println("ILE WYNOSI: " + ile);
 
-        BranchHandle if_icmpge_2 = il.append(new IF_ICMPGE(null));
+        //          ADD IF COMPARATOR
+        int lastIdIfInFor = 0;
+//        List<BranchHandle> tempIfBranchHandle = new ArrayList<>();
+//        for (int j = aaaa; j < bbbb; j++) {
+//            BranchHandle if_compare = getBranchHandleIF(il_new, ihy[j]);
+//            tempIfBranchHandle.add(if_compare);
+//            lastIdIfInFor = j;
+//        }
+//
+//        branchesIF.put(i, tempIfBranchHandle);
+//        InstructionHandle startExternalLoopHandle = ilNew.append(InstructionFactory.createLoad(Type.INT, CURR_ROW_ID));
+        ilNew.append(InstructionFactory.createLoad(Type.INT, 0));
+        ilNew.append(InstructionFactory.createLoad(Type.INT, 2));
+        ilNew.append(InstructionConst.IADD);
+        BranchHandle if_icmpge_1 = ilNew.append(new IF_ICMPGE(null));
 
-//        ******************** DYNAMIC PART OF "FOR LOOP" ********************* START
+        ilNew.append(InstructionFactory.createLoad(Type.INT, CURR_ROW_ID));
+        ilNew.append(factory.createFieldAccess(cg.getClassName(), "resultRows", Type.INT, Const.GETSTATIC));
+        BranchHandle if_icmpge_2 = ilNew.append(new IF_ICMPGE(null));
 
-        int idFirst = hashmapPositionId.get(forLoopItem.getHandleFirstInFor().getPosition());
-        int idLoopStart = hashmapPositionId.get(forLoopItem.getHandleStartLoop().getPosition());
-        int idIfComparator = hashmapPositionId.get(forLoopItem.getHandleCompares().get(0).getPosition());
-        int countIfInOneForLoop = forLoopItem.getHandleCompares().size();
+//        ******************** DYNAMIC PART OF INNER "FOR LOOP" ********************* START
+
+        int idFirst = hashmapPositionId.get(forLoopItemsList.get(2).getHandleFirstInFor().getPosition());
+        int idLoopStart = hashmapPositionId.get(forLoopItemsList.get(2).getHandleStartLoop().getPosition());
+        int idIfComparator = hashmapPositionId.get(forLoopItemsList.get(2).getHandleIF().get(0).getPosition());
+        int countIfInOneForLoop = forLoopItemsList.get(2).getHandleIF().size();
         int nextInstructionAfterIfStatement = idIfComparator + countIfInOneForLoop;
 
 //        ADD INSTRUCTION BETWEEN: FIRST ADN IF
         for (int j = idFirst; j < idIfComparator; j++) {
             if (j == idLoopStart) {
-                InstructionHandle ih = il.append(updateLVarIndexes(ihy[j].getInstruction(), hashmapIdOldAndNewLVar, mgNew));
+                InstructionHandle ih = ilNew.append(updateLVarIndexes(ihy[j].getInstruction(), hashmapIdOldAndNewLVar, mgNew));
                 handlesLoopStart.add(ih);
-            } else il.append(updateLVarIndexes(ihy[j].getInstruction(), hashmapIdOldAndNewLVar, mgNew));
+            } else ilNew.append(updateLVarIndexes(ihy[j].getInstruction(), hashmapIdOldAndNewLVar, mgNew));
         }
 
 //          ADD IF COMPARATOR
         for (int j = idIfComparator; j < (idIfComparator + countIfInOneForLoop); j++) {
-            BranchHandle if_compare = getBranchHandleIF(il, ihy[j]);
+            BranchHandle if_compare = getBranchHandleIF(ilNew, ihy[j]);
             listBHandleIF.add(if_compare);
         }
 
 //        put item on index: 0 because is only one, first loop (in the feature it can be change)
-        hashMapBHandleIF.put(0, listBHandleIF);
+        hashMapBHandleIF.put(1, listBHandleIF);
 
-        int positionIncrement = forLoopItem.getHandleINC().getPosition();
+        int positionIncrement = forLoopItemsList.get(2).getHandleINC().getPosition();
         int idIncrement = hashmapPositionId.get(positionIncrement);
 
 //      >>>>>>>>>>>>>>>>>>>>>>      NEW INSTRUCTION INSIDE INNER LOOP BODY START HERE   >>>>>>>>>>>>>>>>>>>>>>
-        il.append(factory.createPrintln("INSIDE LOOP :)"));
+        ilNew.append(factory.createPrintln("INSIDE LOOP :)"));
         for (int i = nextInstructionAfterIfStatement; i < idIncrement; i++) {
-            il.append(updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew));
+            ilNew.append(updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew));
         }
 //      <<<<<<<<<<<<<<<<<<<<<<      NEW INSTRUCTION INSIDE INNER LOOP BODY END HERE   <<<<<<<<<<<<<<<<<<<<<<
 
@@ -132,24 +143,24 @@ public class ForLoopUtils {
         int idNEW = hashmapIdOldAndNewLVar.getOrDefault(idOLD, -1);
         if (idNEW != -1) {
             int incrementValue = Integer.parseInt(string[string.length - 1]);
-            InstructionHandle ih = il.append(new IINC(idNEW, incrementValue));
-            addHandleIncOrNextToHashmap(hashMapHandleIncOrNext, 0, ih);
+            InstructionHandle ih = ilNew.append(new IINC(idNEW, incrementValue));
+            addHandleIncOrNext(hashMapHandleIncOrNext, 0, ih);
         } else {
-            InstructionHandle ih = il.append(ihy[idIncrement].getInstruction());
-            addHandleIncOrNextToHashmap(hashMapHandleIncOrNext, 0, ih);
+            InstructionHandle ih = ilNew.append(ihy[idIncrement].getInstruction());
+            addHandleIncOrNext(hashMapHandleIncOrNext, 0, ih);
         }
 
 //        il.append(ihy[idIncrement].getInstruction());
 
-        BranchHandle gotoHandler = il.append(new GOTO(handlesLoopStart.get(0)));
+        BranchHandle gotoHandler = ilNew.append(new GOTO(handlesLoopStart.get(0)));
         listBHandleGOTO.add(gotoHandler);
 
 //        ******************** STATIC PART OF "FOR LOOP" ********************* START
-        InstructionHandle incFirstLoop = il.append(new IINC(CURR_ROW_ID, 1));
+        InstructionHandle incFirstLoop = ilNew.append(new IINC(CURR_ROW_ID, 1));
         BranchInstruction goto_26 = InstructionFactory.createBranchInstruction(Const.GOTO, startExternalLoopHandle);
-        il.append(goto_26);
-        InstructionHandle returnHandler = il.append(new PUSH(cp, 0));
-        il.append(InstructionFactory.createReturn(Type.INT));
+        ilNew.append(goto_26);
+        InstructionHandle returnHandler = ilNew.append(new PUSH(cp, 0));
+        ilNew.append(InstructionFactory.createReturn(Type.INT));
         if_icmpge_1.setTarget(returnHandler);
         if_icmpge_2.setTarget(returnHandler);
 
@@ -157,7 +168,7 @@ public class ForLoopUtils {
 //           hashMapBHandleIF element consists of (indexOfLoopFor,List<BranchHandle>)
 
         for (Integer numberOfLoopFor : hashMapBHandleIF.keySet()) {
-            for (int i = 0; i < hashMapBHandleIF.get(0).size(); i++) {
+            for (int i = 0; i < hashMapBHandleIF.get(1).size(); i++) {
                 hashMapBHandleIF.get(numberOfLoopFor).get(i).setTarget(incFirstLoop);
             }
         }
@@ -166,12 +177,12 @@ public class ForLoopUtils {
 //            then it actually points to firstIncrement
 //        ******************** DYNAMIC PART OF "FOR LOOP" ********************* END
 
-        mgNew.setInstructionList(il);
+        mgNew.setInstructionList(ilNew);
         mgNew.setMaxLocals();
         mgNew.setMaxStack();
         cg.addMethod(mgNew.getMethod());
         cg.getConstantPool().addMethodref(mgNew);
-        il.dispose();
+        ilNew.dispose();
     }
 
     public static void displayIncrementOrNextHandles(HashMap<Integer, List<InstructionHandle>> incrementOrNextHandle) {
@@ -208,7 +219,7 @@ public class ForLoopUtils {
                     instr instanceof IFLE || instr instanceof IFLT ||
                     instr instanceof IFGE || instr instanceof IFGT ||
                     instr instanceof IFEQ || instr instanceof IFNE) {
-                item.setHandleCompares(ihy[i]);
+                item.addHandleIF(ihy[i]);
                 item.setHandleInsideLoop(ihy[i + 1]);
             }
         }
@@ -226,8 +237,8 @@ public class ForLoopUtils {
     private static void forLoopValidateAssignedIfStatement(List<ForLoopItem> forLoopItemsList) {
         Collections.reverse(forLoopItemsList);
         for (int i = 0; i < forLoopItemsList.size() - 1; i++) {// -1 because current "item" and next "item" are compared
-            ArrayList<InstructionHandle> externalLoop = forLoopItemsList.get(i).getHandleCompares();
-            ArrayList<InstructionHandle> innnerLoop = forLoopItemsList.get(i + 1).getHandleCompares();
+            ArrayList<InstructionHandle> externalLoop = forLoopItemsList.get(i).getHandleIF();
+            ArrayList<InstructionHandle> innnerLoop = forLoopItemsList.get(i + 1).getHandleIF();
             externalLoop.removeAll(innnerLoop);
         }
     }
@@ -294,41 +305,15 @@ public class ForLoopUtils {
         return allLoopsInMethod;
     }
 
-    public static void parallelizeMethodWithNestedLoop(ClassGen cg, MethodGen mgOld) {
+    public static InstructionList parallelizeMethodNestedLoop(ClassGen cg, MethodGen mgOld) {
 
         InstructionList ilOld = mgOld.getInstructionList();
         InstructionHandle[] ihy = ilOld.getInstructionHandles();
-
         HashMap<Integer, Integer> hashmapPositionId = ForLoopItem.getHashmapPositionId(ihy);
         List<ForLoopItem> forLoopItemsList = getListLoopForItems(ihy, hashmapPositionId);
 
-        LoopUtilsOld.displayInfoAboutLoopInMethod(forLoopItemsList);
-
-//        ADD METHOD:    SUB TASK
-        addSubTaskInNestedLoop(cg, mgOld, forLoopItemsList.get(2), hashmapPositionId);
-//        STATIC: 2 is third for-loop (to update if we want dynamically set amount for-loop to move)
-
-//        CHANGE SELECTED METHOD WITH NESTED LOOPS
-        InstructionList ilToAdd = parallelizeMethodWithNestedLoop(
-                forLoopItemsList, ihy, hashmapPositionId, cg, mgOld);
-
-        mgOld.setInstructionList(ilToAdd);
-        mgOld.setMaxLocals();
-        mgOld.setMaxStack();
-        cg.removeMethod(mgOld.getMethod());
-        cg.addMethod(mgOld.getMethod());
-        cg.getConstantPool().addMethodref(mgOld);
-        ilToAdd.dispose();
-    }
-
-    public static InstructionList parallelizeMethodWithNestedLoop(
-            List<ForLoopItem> forLoopItemsList,
-            InstructionHandle[] ihy,
-            HashMap<Integer, Integer> hashmapPositionId,
-            ClassGen cg, MethodGen mg) {
-
         InstructionList il_new = new InstructionList();
-        InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
+        InstructionFactory factory = new InstructionFactory(cg, mgOld.getConstantPool());
         InstructionHandle[] ihBeforeLoop = null;
         InstructionHandle[] ihAfterLoop = null;
         List<InstructionHandle> handlesLoopStart = new ArrayList<>();
@@ -348,8 +333,8 @@ public class ForLoopUtils {
 
             int idFirst = hashmapPositionId.get(forLoopItemsList.get(i).getHandleFirstInFor().getPosition());
             int idLoopStart = hashmapPositionId.get(forLoopItemsList.get(i).getHandleStartLoop().getPosition());
-            int idIfComparator = hashmapPositionId.get(forLoopItemsList.get(i).getHandleCompares().get(0).getPosition());
-            int countIfInOneForLoop = forLoopItemsList.get(i).getHandleCompares().size();
+            int idIfComparator = hashmapPositionId.get(forLoopItemsList.get(i).getHandleIF().get(0).getPosition());
+            int countIfInOneForLoop = forLoopItemsList.get(i).getHandleIF().size();
 
             //      set the instructions in BEFORE of the loop_0, if this is true
 
@@ -401,7 +386,7 @@ public class ForLoopUtils {
 //      >>>>>>>>>>>>>>>>>>>>>>      NEW INSTRUCTION INSIDE INNER LOOP BODY START HERE   >>>>>>>>>>>>>>>>>>>>>>
 
         il_new.append(factory.createPrintln("IT WORKS"));
-        ReadyFields.changeBodyInnerLoopForMatrixMultiply(mg, il_new, factory);
+        ReadyFields.changeBodyInnerLoopForMatrixMultiply(mgOld, il_new, factory);
 
 //      <<<<<<<<<<<<<<<<<<<<<<      NEW INSTRUCTION INSIDE INNER LOOP BODY END HERE     <<<<<<<<<<<<<<<<<<<<<<
 
@@ -410,7 +395,7 @@ public class ForLoopUtils {
         int positionIncrement = forLoopItemsList.get(selectedNumberOfLoops - 1).getHandleINC().getPosition();
         int idIncrement = hashmapPositionId.get(positionIncrement);
         InstructionHandle ih = il_new.append(ihy[idIncrement].getInstruction());
-        addHandleIncOrNextToHashmap(incrementOrNextHandle, selectedNumberOfLoops - 1, ih);//2 is index (last)inner loop in case with number of loops = 3
+        addHandleIncOrNext(incrementOrNextHandle, selectedNumberOfLoops - 1, ih);//2 is index (last)inner loop in case with number of loops = 3
         BranchHandle gotoHandler = il_new.append(new GOTO(handlesLoopStart.get(selectedNumberOfLoops - 1)));
         branchesGOTO.add(gotoHandler);
 
@@ -431,7 +416,7 @@ public class ForLoopUtils {
 
             if (numberIhAfterLoop > 0) {
                 ih = il_new.append(ihy[start].getInstruction());
-                addHandleIncOrNextToHashmap(incrementOrNextHandle, i, ih);
+                addHandleIncOrNext(incrementOrNextHandle, i, ih);
                 int k = 1;
                 System.out.println("loop: " + i + ") instrukcja nr: " + k++);
                 if (numberIhAfterLoop > 1) {
@@ -442,7 +427,7 @@ public class ForLoopUtils {
                 }
             }
             ih = il_new.append(ihy[end].getInstruction());
-            addHandleIncOrNextToHashmap(incrementOrNextHandle, i, ih);
+            addHandleIncOrNext(incrementOrNextHandle, i, ih);
             gotoHandler = il_new.append(new GOTO(handlesLoopStart.get(i)));
             branchesGOTO.add(gotoHandler);
         }
@@ -459,7 +444,7 @@ public class ForLoopUtils {
         int idNextInstr = hashmapPositionId.get(positionNextInstr);
 
         InstructionHandle returnHandler = il_new.append(factory.createFieldAccess(
-                cg.getClassName(), "SERVICE", 
+                cg.getClassName(), "SERVICE",
                 new ObjectType("java.util.concurrent.ExecutorService"),
                 Const.GETSTATIC));
 
@@ -498,15 +483,15 @@ public class ForLoopUtils {
         BranchInstruction gotoNext = InstructionFactory.createBranchInstruction(Const.GOTO, null);
         il_new.append(gotoNext);
 
-        InstructionHandle startCatch = il_new.append(InstructionFactory.createStore(Type.OBJECT, mg.getMaxLocals()));
+        InstructionHandle startCatch = il_new.append(InstructionFactory.createStore(Type.OBJECT, mgOld.getMaxLocals()));
 
-        il_new.append(InstructionFactory.createLoad(Type.OBJECT, mg.getMaxLocals()));
+        il_new.append(InstructionFactory.createLoad(Type.OBJECT, mgOld.getMaxLocals()));
         il_new.append(factory.createInvoke(
                 "java.lang.Exception", "printStackTrace", Type.VOID, Type.NO_ARGS, Const.INVOKEVIRTUAL));
 
         InstructionHandle returnId = il_new.append(ihy[idNextInstr].getInstruction());
         gotoNext.setTarget(returnId);
-        mg.addExceptionHandler(returnHandler, endTry, startCatch, new ObjectType("java.lang.Exception"));
+        mgOld.addExceptionHandler(returnHandler, endTry, startCatch, new ObjectType("java.lang.Exception"));
 
 
         //      set the instructions in AFTER the loop_0, if this is true
@@ -528,11 +513,32 @@ public class ForLoopUtils {
         return il_new;
     }
 
+    public static void parallelizeNestedLoop(ClassGen cg, MethodGen mgOld) {
+
+
+        InstructionList ilOld = mgOld.getInstructionList();
+
+//        ADD METHOD:    SUB TASK
+        addSubTaskInNestedLoop(cg, mgOld, 0, 2);
+//        STATIC: 2 is third for-loop (to update if we want dynamically set amount for-loop to move)
+
+//        CHANGE SELECTED METHOD WITH NESTED LOOPS
+        InstructionList ilToAdd = parallelizeMethodNestedLoop(cg, mgOld);
+
+        mgOld.setInstructionList(ilToAdd);
+        mgOld.setMaxLocals();
+        mgOld.setMaxStack();
+        cg.removeMethod(mgOld.getMethod());
+        cg.addMethod(mgOld.getMethod());
+        cg.getConstantPool().addMethodref(mgOld);
+        ilToAdd.dispose();
+    }
+
     public static void replaceSpecificIndexes(int idOLD, int idToReplace, HashMap<Integer, Integer> hashmapIdOldAndNewLVar) {
         hashmapIdOldAndNewLVar.replace(idOLD, idToReplace);
     }
 
-    private static Instruction updateLVarIndexes(Instruction instr, HashMap<Integer, Integer> hashmapIdOldAndNewLVar, MethodGen mgNEW) {
+    protected static Instruction updateLVarIndexes(Instruction instr, HashMap<Integer, Integer> hashmapIdOldAndNewLVar, MethodGen mgNEW) {
 
         Instruction replace = null;
 

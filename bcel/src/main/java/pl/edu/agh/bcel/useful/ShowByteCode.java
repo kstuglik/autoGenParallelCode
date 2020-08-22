@@ -18,8 +18,12 @@ public class ShowByteCode {
 //        LaunchProperties.CLASS_NAME = "SerialNbody_ITEST";
 //        LaunchProperties.CLASS_METHOD = "moveBodies";
 
-        LaunchProperties.CLASS_DIR = "target/classes/matrix/";
-        LaunchProperties.CLASS_NAME = "SerialMultiplier_ITEST";
+//        LaunchProperties.CLASS_DIR = "target/classes/matrix/";
+//        LaunchProperties.CLASS_NAME = "SerialMultiplier_ITEST";
+//        LaunchProperties.CLASS_METHOD = "multiply";
+
+        LaunchProperties.CLASS_DIR = "target/classes//";
+        LaunchProperties.CLASS_NAME = "temp";
         LaunchProperties.CLASS_METHOD = "multiply";
 
         JavaClass _analyzedClass = new ClassParser(LaunchProperties.getPathToIntputFile()).parse();

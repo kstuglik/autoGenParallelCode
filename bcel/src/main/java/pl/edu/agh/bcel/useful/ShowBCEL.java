@@ -15,9 +15,13 @@ public class ShowBCEL {
 
     public static void main(String[] args) throws IOException {
 
-        LaunchProperties.CLASS_DIR = "target/classes/matrix/";
-        LaunchProperties.CLASS_NAME = "SerialMultiplier_ITEST";
-        LaunchProperties.CLASS_METHOD = "multiply";
+        LaunchProperties.CLASS_DIR = "target/classes/";
+        LaunchProperties.CLASS_NAME = "temp";
+        LaunchProperties.CLASS_METHOD = "main";
+
+//        LaunchProperties.CLASS_DIR = "target/classes/matrix/";
+//        LaunchProperties.CLASS_NAME = "SerialMultiplier";
+//        LaunchProperties.CLASS_METHOD = "multiply";
 
 //        LaunchProperties.CLASS_DIR = "target/classes/nbody/";
 //        LaunchProperties.CLASS_NAME = "SerialNbody_T1";

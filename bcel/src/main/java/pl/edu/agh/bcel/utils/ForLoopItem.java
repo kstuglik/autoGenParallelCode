@@ -6,7 +6,7 @@ import java.util.*;
 
 public class ForLoopItem {
 
-    private final ArrayList<InstructionHandle> handleCompares = new ArrayList<>();
+    private final ArrayList<InstructionHandle> handleIF = new ArrayList<>();
     private InstructionHandle handleFirstInFor;
     private InstructionHandle handleStartLoop;
     private InstructionHandle handleInsideLoop;
@@ -16,7 +16,11 @@ public class ForLoopItem {
     private InstructionHandle[] handlesBeforeFor;
     private InstructionHandle[] handlesAfterLoop;
 
+    private final List<ForLoopItem> ifInsideLoop = new ArrayList<>();
+
     private int idIterator;
+
+    private HashMap<Integer, Integer> positionId = new HashMap<>();
 
     public static HashMap<Integer, Integer> getHashmapPositionId(InstructionHandle[] ihy) {
         HashMap<Integer, Integer> hashmapInstructionPositionId = new HashMap<>();
@@ -99,11 +103,19 @@ public class ForLoopItem {
 
         for (ForLoopItem item : allLoopsInMethod) setHandlerFirstInForAndStartLoop(item, ihy, hashmapPositionId);
 
-        for (ForLoopItem item : allLoopsInMethod) setHandlesComparesAndInsideLoop(item, ihy, hashmapPositionId);
+        for (ForLoopItem item : allLoopsInMethod) setHandlesIFAndInsideLoop(item, ihy, hashmapPositionId);
 
         verifyValidityAssignedIfToLoop(allLoopsInMethod);
 
         return allLoopsInMethod;
+    }
+
+    static void jesliIfNalezyDoLooopBodyToGoTamPrzenies(List<ForLoopItem> ifInsideLoop) {
+        for (int i = 0; i < ifInsideLoop.size(); i++) {
+            if (ifInsideLoop.get(i).getHandleIF().size() == 0) {
+                System.out.println("wykryto przypadek fałszywej pętli :) dla i = " + i);
+            }
+        }
     }
 
     private static void setHandlerFirstInForAndStartLoop(ForLoopItem item, InstructionHandle[] ihy, HashMap<Integer, Integer> hashmapPositionId) {
@@ -114,7 +126,7 @@ public class ForLoopItem {
         item.setHandleFirstInFor(ihy[idStartLoopArray].getPrev().getPrev());
     }
 
-    private static void setHandlesComparesAndInsideLoop(
+    private static void setHandlesIFAndInsideLoop(
             ForLoopItem item, InstructionHandle[] ihy, HashMap<Integer, Integer> hashmapPositionId) {
 
         int positionStart = item.getHandleStartLoop().getPosition();
@@ -123,8 +135,11 @@ public class ForLoopItem {
         int positionEnd = item.getHandleGOTO().getPosition();
         int idEnd = hashmapPositionId.get(positionEnd);
 
-        for (int i = idStart; i < idEnd; i++) {
+        int i;
+
+        for (i = idStart; i < idEnd; i++) {
             Instruction instr = ihy[i].getInstruction();
+
             if (instr instanceof IF_ICMPGE || instr instanceof IF_ICMPGT ||
                     instr instanceof IF_ICMPLE || instr instanceof IF_ICMPLT ||
                     instr instanceof IF_ICMPEQ || instr instanceof IF_ICMPNE ||
@@ -132,39 +147,42 @@ public class ForLoopItem {
                     instr instanceof IFLE || instr instanceof IFLT ||
                     instr instanceof IFGE || instr instanceof IFGT ||
                     instr instanceof IFEQ || instr instanceof IFNE) {
-                item.setHandleCompares(ihy[i]);
-                item.setHandleInsideLoop(ihy[i + 1]);
+                item.addHandleIF(ihy[i]);
+
             }
         }
+        item.setHandleInsideLoop(ihy[i + 1]);
     }
 
     private static void verifyValidityAssignedIfToLoop(List<ForLoopItem> allLoopsInMethod) {
         Collections.reverse(allLoopsInMethod);
         for (int i = 0; i < allLoopsInMethod.size() - 1; i++) {// -1 because compare
-            ArrayList<InstructionHandle> outsideLoop = allLoopsInMethod.get(i).getHandleCompares();
-            ArrayList<InstructionHandle> internalLoop = allLoopsInMethod.get(i + 1).getHandleCompares();
+            ArrayList<InstructionHandle> outsideLoop = allLoopsInMethod.get(i).getHandleIF();
+            ArrayList<InstructionHandle> internalLoop = allLoopsInMethod.get(i + 1).getHandleIF();
             outsideLoop.removeAll(internalLoop);
         }
+    }
+
+    public void addHandleIF(InstructionHandle ih) {
+        this.handleIF.add(ih);
     }
 
     public void displayInfoAboutHandles() {
         System.out.println("\tfirstInstructionInFor:\t" + handleFirstInFor + "\n" +
                 "\tloopStartHandler:\t" + handleStartLoop + "\n" +
-                "\tifcompareHandler:\t" + handleCompares + "\n" +
+                "\tifcompareHandler:\t" + handleIF + "\n" +
                 "\tfirstInstructionInLoop:\t" + handleInsideLoop + "\n" +
                 "\tincrementHandler:\t" + handleINC + "\n" +
                 "\tgotoHandler:\t" + handleGOTO);
-    }
-
-    public ArrayList<InstructionHandle> getHandleCompares() {
-        return handleCompares;
     }
 
     public InstructionHandle getHandleFirstInFor() {
         return handleFirstInFor;
     }
 
-    public void setHandleFirstInFor(InstructionHandle ih) { this.handleFirstInFor = ih; }
+    public void setHandleFirstInFor(InstructionHandle ih) {
+        this.handleFirstInFor = ih;
+    }
 
     public InstructionHandle getHandleGOTO() {
         return handleGOTO;
@@ -172,6 +190,10 @@ public class ForLoopItem {
 
     public void setHandleGOTO(InstructionHandle ih) {
         this.handleGOTO = ih;
+    }
+
+    public ArrayList<InstructionHandle> getHandleIF() {
+        return handleIF;
     }
 
     public InstructionHandle getHandleINC() {
@@ -184,6 +206,10 @@ public class ForLoopItem {
 
     public InstructionHandle getHandleInsideLoop() {
         return handleInsideLoop;
+    }
+
+    public void setHandleInsideLoop(InstructionHandle ih) {
+        this.handleInsideLoop = ih;
     }
 
     public InstructionHandle getHandleStartLoop() {
@@ -203,15 +229,15 @@ public class ForLoopItem {
     }
 
     public InstructionHandle getLastHandleCompares() {
-        int last = handleCompares.size() - 1;
-        return handleCompares.get(last);
+        int last = handleIF.size() - 1;
+        return handleIF.get(last);
     }
 
-    public void setHandleInsideLoop(InstructionHandle ih) {
-        this.handleInsideLoop = ih;
+    public HashMap<Integer, Integer> getPositionId() {
+        return positionId;
     }
 
-    public void setHandleCompares(InstructionHandle ih) {
-        this.handleCompares.add(ih);
+    public void setPositionId(HashMap<Integer, Integer> positionId) {
+        this.positionId = positionId;
     }
 }
