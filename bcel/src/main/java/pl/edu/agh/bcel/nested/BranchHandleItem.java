@@ -1,17 +1,24 @@
 package pl.edu.agh.bcel.nested;
 
-import org.apache.bcel.generic.InstructionHandle;
+import org.apache.bcel.generic.BranchHandle;
+
+import java.util.ArrayList;
 
 public class BranchHandleItem {
-    private int position;
-    private int idPosition;
-    private int positionToJump;
-    private int idPositionToJump;
-    private InstructionHandle instruction;
-    private String signature;
-    private int prevStore;
-    private int prevLoad;
+    private final ArrayList<ForLoopNEW> listOfPairedBlocksIfElse = new ArrayList<>();
 
+    private BranchHandle instruction;
+    private String signature;
+    private int position = -1;
+    private int idPosition = -1;
+    private int positionToJump = -1;
+    private int idPositionToJump = -1;
+    private int idPositionPrevStore = -1;
+    private int idPositionPrevLoad = -1;
+
+    public void addItemToListOfPairedBlocksIfElse(ForLoopNEW cfi) {
+        this.listOfPairedBlocksIfElse.add(cfi);
+    }
 
     public int getIdPosition() {
         return idPosition;
@@ -19,6 +26,22 @@ public class BranchHandleItem {
 
     public void setIdPosition(int idPosition) {
         this.idPosition = idPosition;
+    }
+
+    public int getIdPositionPrevLoad() {
+        return idPositionPrevLoad;
+    }
+
+    public void setIdPositionPrevLoad(int idPositionPrevLoad) {
+        this.idPositionPrevLoad = idPositionPrevLoad;
+    }
+
+    public int getIdPositionPrevStore() {
+        return idPositionPrevStore;
+    }
+
+    public void setIdPositionPrevStore(int idPositionPrevStore) {
+        this.idPositionPrevStore = idPositionPrevStore;
     }
 
     public int getIdPositionToJump() {
@@ -29,12 +52,16 @@ public class BranchHandleItem {
         this.idPositionToJump = idPositionToJump;
     }
 
-    public InstructionHandle getInstruction() {
+    public BranchHandle getInstruction() {
         return instruction;
     }
 
-    public void setInstruction(InstructionHandle instruction) {
+    public void setInstruction(BranchHandle instruction) {
         this.instruction = instruction;
+    }
+
+    public ArrayList<ForLoopNEW> getListOfPairedBlocksIfElse() {
+        return listOfPairedBlocksIfElse;
     }
 
     public int getPosition() {
@@ -51,22 +78,6 @@ public class BranchHandleItem {
 
     public void setPositionToJump(int positionToJump) {
         this.positionToJump = positionToJump;
-    }
-
-    public int getPrevLoad() {
-        return prevLoad;
-    }
-
-    public void setPrevLoad(int prevLoad) {
-        this.prevLoad = prevLoad;
-    }
-
-    public int getPrevStore() {
-        return prevStore;
-    }
-
-    public void setPrevStore(int prevStore) {
-        this.prevStore = prevStore;
     }
 
     public String getSignature() {
