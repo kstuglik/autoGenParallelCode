@@ -9,7 +9,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import pl.edu.agh.bcel.ByteCodeModifier;
 import pl.edu.agh.bcel.LaunchProperties;
-import pl.edu.agh.bcel.utils.*;
+import pl.edu.agh.bcel.NestedLoops.Structure;
+import pl.edu.agh.bcel.utils.ReadyFields;
+import pl.edu.agh.bcel.utils.ReadyMethods;
+import pl.edu.agh.bcel.utils.TransformUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -55,34 +58,19 @@ public class ParallelNBodyTest {
         Method transformedMethod = ByteCodeModifier.getSelectedMethod0(cgTarget, LaunchProperties.CLASS_METHOD);
         MethodGen mg = new MethodGen(transformedMethod, cgTarget.getClassName(), cgTarget.getConstantPool());
 
-        System.out.println("1)\til.lenght = " + mg.getInstructionList().getLength());
         TransformUtils.addThreadPoolExecutorService(cgTarget);
 
-        System.out.println("2)\til.lenght = " + mg.getInstructionList().getLength());
+        ReadyMethods.addMethodSetStep(cgTarget);
+        ReadyMethods.addMethodToInitTaskPool(cgTarget);
+        ReadyMethods.addMethodSetStop(cgTarget, mg);
+
+        ReadyFields.addFieldTaskPool(cgTarget, mg);
         ReadyFields.initFieldExecutorService(cgTarget, mg);
 
-        System.out.println("3)\til.lenght = " + mg.getInstructionList().getLength());
-        TransformUtils.copyLoopToSubTaskMethod(cgTarget, mg, LaunchProperties.LOOP_ITERATOR_NAME);
 
-        System.out.println("4)\til.lenght = " + mg.getInstructionList().getLength());
-        TransformUtils.changeLoopLimitToNumberOfThreads(cgTarget, mg);
+        Structure.caseNbody(cgTarget, mg);
 
-        System.out.println("5)\til.lenght = " + mg.getInstructionList().getLength());
-        ReadyFields.addFieldTaskPool(cgTarget, mg);
-
-        System.out.println("6)\til.lenght = " + mg.getInstructionList().getLength());
-        TransformUtils.removeBodyForLoopInSelectedMethod(cgTarget, mg);
-
-        System.out.println("7)\til.lenght = " + mg.getInstructionList().getLength());
-        TransformUtils.setNewLoopBody(cgTarget, mg, LaunchProperties.SIZE_OF_PROBLEM);
-
-        System.out.println("8)\til.lenght = " + mg.getInstructionList().getLength());
-        TransformUtils.addTryCatchService(cgTarget, mg);
-
-        System.out.println("9)\til.lenght = " + mg.getInstructionList().getLength());
-        ReadyMethods.addMethodToInitTaskPool(cgTarget);
-
-        System.out.println("GOTO: " + LaunchProperties.getPathToOutputFile());
+        System.out.println("\n\nGOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());
 
         try {

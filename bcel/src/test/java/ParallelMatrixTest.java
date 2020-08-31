@@ -7,8 +7,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import pl.edu.agh.bcel.ByteCodeModifier;
+import pl.edu.agh.bcel.NestedLoops.Structure;
 import pl.edu.agh.bcel.LaunchProperties;
-import pl.edu.agh.bcel.utils.ForLoopUtils;
 import pl.edu.agh.bcel.utils.ReadyFields;
 import pl.edu.agh.bcel.utils.ReadyMethods;
 import pl.edu.agh.bcel.utils.TransformUtils;
@@ -42,12 +42,17 @@ public class ParallelMatrixTest {
         MethodGen mg = new MethodGen(transformedMethod, cgTarget.getClassName(), cgTarget.getConstantPool());
 
         TransformUtils.addThreadPoolExecutorService(cgTarget);
-        ReadyMethods.addMethodSetStepLVar(cgTarget);
-        ReadyFields.addFieldStep(cgTarget, mg);
+
+        ReadyMethods.addMethodSetStep(cgTarget);
+        ReadyMethods.addMethodSetStop(cgTarget, mg);
+        ReadyMethods.addMethodToInitTaskPool(cgTarget);
+
+        ReadyFields.addFieldStep(cgTarget, mg); // step jest dla matrix
         ReadyFields.addFieldTaskPool(cgTarget, mg);
         ReadyFields.initFieldExecutorService(cgTarget, mg);
-        ReadyMethods.addMethodToInitTaskPool(cgTarget);
-        ForLoopUtils.parallelizeMethodWithNestedLoop(cgTarget, mg);
+
+        Structure.caseMatrix(cgTarget, mg);
+
 
         System.out.println("GOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());
