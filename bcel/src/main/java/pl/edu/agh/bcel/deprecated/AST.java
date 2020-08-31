@@ -3,10 +3,9 @@ package pl.edu.agh.bcel.nested;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.LocalVariable;
 import org.apache.bcel.generic.*;
-import pl.edu.agh.bcel.utils.ForLoopUtils;
-import pl.edu.agh.bcel.utils.VariableUtils;
+import pl.edu.agh.bcel.LaunchProperties;
+import pl.edu.agh.bcel.utils.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -71,8 +70,7 @@ public class AST {
 
     private static void aFillAListWithIfElseBlock(
             InstructionHandle[] ihy,
-            ArrayList<BranchHandleItem> singleBrancheIF,
-            ArrayList<BranchHandleItem> singleBrancheGOTO,
+            ArrayList<BranchHandleItem> singleBrancheIF, ArrayList<BranchHandleItem> singleBrancheGOTO,
             ArrayList<ForLoopNEW> listOfPairedBlocksIfElse) {
 
 //        petla zewnetrzna dotyczy tych if else ktore wystepuja samotnie i nie naleza do sekcji FOR petli
@@ -132,33 +130,122 @@ public class AST {
         return i + 1;
     }
 
-    public static void aReconstructSelectedMethod(
-            ClassGen cg, MethodGen mgOld,
-            ArrayList<ForLoopNEW> listAloneBlocksIfElse,
-            ArrayList<ForLoopNEW> listOfPairedBlocksFOR,
-            int odtad, int dotad) {
+    public static void aMoveSelectedForLoopIntoSubtask(
+            ClassGen cg, MethodGen mgOld, String nazwaSubtask, int firstFOR, int lastFOR) {
 
-        if (odtad == dotad) {
-            if (odtad == 0)
-                System.out.println("odtworze pierwszy FOR");
-            else
-                System.out.println("odtworze wybrany FOR");
-        } else if (dotad - odtad == listOfPairedBlocksFOR.size() - 1) {
-            System.out.println("odtworze wszystkie FOR");
-        } else {
-            System.out.println("odtworze kilka (nie wszystkie) FOR");
-        }
-
-
+        ArrayList<ForLoopNEW> listOfPairedBlocksFOR = new ArrayList<>();
+        ArrayList<ForLoopNEW> listOfPairedBlocksIfElse = new ArrayList<>();
+        ArrayList<ForLoopNEW> listAloneBlocksIfElse = new ArrayList<>();
+        InstructionList il = new InstructionList();
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionFactory factory = new InstructionFactory(cg, cg.getConstantPool());
-        InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
+
+
+        getLoopStructureIntoArrayLists(mgOld, listAloneBlocksIfElse, listOfPairedBlocksFOR, listOfPairedBlocksIfElse);
+
+        try {
+            int iloscPetli = listOfPairedBlocksFOR.size();
+            if (firstFOR > lastFOR || firstFOR < 0 || firstFOR > iloscPetli || lastFOR > iloscPetli) {
+                throw new Exception("\nWRONG PARAMS!\n" + "petli jest: " + iloscPetli +
+                        ", odtad min = 0, dotad max = " + (iloscPetli - 1));
+            } else {
+//        method with 2 params
+                MethodGen mgNew = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
+                        Type.INT, Type.NO_ARGS, new String[]{}, nazwaSubtask, null, il, cp);
+                LocalVariableGen startVariable = mgNew.addLocalVariable(LaunchProperties.START_INDEX_VAR_NAME, Type.INT, null, null);
+                LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.END_INDEX_VAR_NAME, Type.INT, null, null);
+
+                int ID_START = listOfPairedBlocksFOR.get(0).getIdInsideLoop();
+                int ID_STOP = listOfPairedBlocksFOR.get(0).getIdPositionINC();
+
+                InstructionList ilToAddInsideLoop = TransformUtils.setNewLoopBody(
+                        cg, mgOld, (short) 1000, ID_START, ID_STOP);
+
+//      *****************************************************************************************
+                InstructionList ilApend = aReconstructSelectedForLoopSlave(
+                        listOfPairedBlocksFOR, firstFOR, lastFOR, true, cg, mgOld, mgNew);
+//      *****************************************************************************************
+
+                il.append(ilApend);
+
+                mgOld.setInstructionList(il);
+                mgOld.setMaxLocals();
+                mgOld.setMaxStack();
+
+                cg.replaceMethod(mgOld.getMethod(), mgOld.getMethod());
+                il.dispose();
+//                mgNew.setArgumentNames(new String[]{
+//                        LaunchProperties.START_INDEX_VAR_NAME, LaunchProperties.END_INDEX_VAR_NAME});
+////                LoopUtilsOld.updateLoopStartCondition(il.getInstructionHandles(), startVariable.getIndex());
+////                LoopUtilsOld.updateLoopEndCondition(il.getInstructionHandles(), endVariable.getIndex());
+//                mgNew.setInstructionList(il);
+//                mgNew.setMaxLocals();
+//                mgNew.setMaxStack();
+//                cg.addMethod(mgNew.getMethod());
+
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+
+    }
+
+    public static void aMoveSelectedForLoopIntoSubtask1(ClassGen cg, MethodGen mgOld, String nazwaSubtask, int firstFOR, int lastFOR) {
+
+        ArrayList<ForLoopNEW> listOfPairedBlocksFOR = new ArrayList<>();
+        ArrayList<ForLoopNEW> listOfPairedBlocksIfElse = new ArrayList<>();
+        ArrayList<ForLoopNEW> listAloneBlocksIfElse = new ArrayList<>();
         InstructionList il = new InstructionList();
+        ConstantPoolGen cp = cg.getConstantPool();
+        InstructionFactory factory = new InstructionFactory(cg, cg.getConstantPool());
 
-        MethodGen mgNew = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.INT, Type.NO_ARGS,
-                new String[]{}, "testowo", null, il, cp);
+        getLoopStructureIntoArrayLists(mgOld, listAloneBlocksIfElse, listOfPairedBlocksFOR, listOfPairedBlocksIfElse);
 
-        reCreateVariables(mgOld, mgNew, cp, il);
+        try {
+            int iloscPetli = listOfPairedBlocksFOR.size();
+            if (firstFOR > lastFOR || firstFOR < 0 || firstFOR > iloscPetli || lastFOR > iloscPetli) {
+                throw new Exception("\nWRONG PARAMS!\n" + "petli jest: " + iloscPetli +
+                        ", odtad min = 0, dotad max = " + (iloscPetli - 1));
+            } else {
+//        method with 2 params
+                MethodGen mgNew = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.INT, Type.NO_ARGS, new String[]{}, nazwaSubtask, null, il, cp);
+                LocalVariableGen startVariable = mgNew.addLocalVariable(LaunchProperties.START_INDEX_VAR_NAME, Type.INT, null, null);
+                LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.END_INDEX_VAR_NAME, Type.INT, null, null);
+                mgNew.setArgumentNames(new String[]{LaunchProperties.START_INDEX_VAR_NAME, LaunchProperties.END_INDEX_VAR_NAME});
+                mgNew.setArgumentTypes(new Type[]{Type.INT, Type.INT});
+
+                int ID_START = listOfPairedBlocksFOR.get(0).getIdInsideLoop();
+                int ID_STOP = listOfPairedBlocksFOR.get(0).getIdPositionINC();
+
+
+//      *****************************************************************************************
+                InstructionList ilApend = aReconstructSelectedForLoopSlave(
+                        listOfPairedBlocksFOR, firstFOR, lastFOR, true,
+                        cg, mgOld, mgNew);
+//      *****************************************************************************************
+                il.append(ilApend);
+                il.append(factory.createPrintln("gogo"));
+
+
+//                LoopUtilsOld.updateLoopStartCondition(il.getInstructionHandles(), startVariable.getIndex());
+//                LoopUtilsOld.updateLoopEndCondition(il.getInstructionHandles(), endVariable.getIndex());
+
+                mgNew.setInstructionList(il);
+                mgNew.setMaxLocals();
+                mgNew.setMaxStack();
+                cg.addMethod(mgNew.getMethod());
+
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+
+    }
+
+    public static InstructionList aReconstructSelectedForLoopSlave(
+            ArrayList<ForLoopNEW> listOfPairedBlocksFOR,
+            int odtad, int dotad, boolean flaga,
+            ClassGen cg, MethodGen mgOld, MethodGen mgNew) {
 
 //      *****************************************************************************************
         HashMap<Integer, ArrayList<BranchHandle>> hashmapIFinFOR = new HashMap<>();
@@ -166,7 +253,17 @@ public class AST {
         HashMap<Integer, ArrayList<InstructionHandle>> hashmapNEXT = new HashMap<>();
         HashMap<Integer, ArrayList<InstructionHandle>> hashmapSTART = new HashMap<>();
 //      *****************************************************************************************
+        InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
+        InstructionFactory factory = new InstructionFactory(cg, cg.getConstantPool());
+        ConstantPoolGen cp = mgOld.getConstantPool();
+//      *****************************************************************************************
+        HashMap<Integer, Integer> hashmapIdOldAndNewLVar = VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
+//      *****************************************************************************************
 
+        System.out.println("odtad = " + odtad + ", dotad = " + dotad);
+//        int BEFORE = listOfPairedBlocksFOR.get(0).getIdPositionPrevStore();
+
+        InstructionList il = new InstructionList();
 
         for (int i = odtad; i <= dotad; i++) {
 
@@ -174,6 +271,7 @@ public class AST {
             ArrayList<Integer> ids = item.getIdsIFinFor();
             ArrayList<Integer> idsls = item.getIdsIFinForStartLoop();
 
+            System.out.println("ids[0] = " + ids.get(0) + ", " + ihy[ids.get(0)]);
             int ile = ids.size();
 
             ArrayList<BranchHandle> listaIFinFOR = new ArrayList<>();
@@ -182,37 +280,89 @@ public class AST {
 
 
 //        PART ONE: instrukcje z FORa
-            for (int j = item.getIdPositionPrevStore(); j <= ids.get(ile - 1); j++) {
-                if (idsls.contains(j)) listaSTART.add(il.append(ihy[j].getInstruction()));
-                else if (ids.contains(j)) listaIFinFOR.add(ForLoopUtils.getBranchHandleIF(il, ihy[j]));
-                else il.append(ihy[j].getInstruction());
+            int idOstatniegoIfaWPetli = item.getInstrIF().get(ile - 1).getIdPosition();
+//            tutaj bylo mniejsze lub rowne ale nie wiem skad ta "niedokladnosc"
+            for (int j = item.getIdPositionPrevStore(); j <= idOstatniegoIfaWPetli; j++) {
+                System.out.println("j = " + j + ", " + ihy[j].getInstruction().toString());
+                if (idsls.contains(j)) {
+                    System.out.println("doddano: loopstart: " + j);
+                    listaSTART.add(il.append(ihy[j].getInstruction()));
+                } else if (ids.contains(j)) {
+                    System.out.println("doddano: if: " + j);
+                    listaIFinFOR.add(ForLoopUtils.getBranchHandleIF(il, ihy[j]));
+                } else {
+                    System.out.println("doddano: inne: " + j);
+                    il.append(ihy[j].getInstruction());
+                }
             }
 
 
+            int inc = item.getIdPositionINC();
+            if (idOstatniegoIfaWPetli + 1 == inc) {
+                System.out.println("przypadek gdy INC jest ostatnim poleceniem w petli, tutaj next ==inc");
+            } else {
+                System.out.println("przypadek gdy INC NIE jest ostatnim poleceniem w petli, " +
+                        "\n\ttutaj next == to co po (chyba ze trzeba pomiedzy)");
+                for (int j = idOstatniegoIfaWPetli + 1; j < inc; j++) {
+                    System.out.println("dla j = " + j);
+                    il.append(ihy[j].getInstruction());
+                }
+            }
 //        PART TWO: dodane instrukcje/lub odtworzone
-            listaSTART.add(il.append(factory.createPrintln("Hello World from FOR-LOOP-" + i)));
-
+//*********************************************************************************
+            il.append(factory.createPrintln("ahoj z tym wszystkim"));
+//********************************************************************************
             hashmapIFinFOR.put(i, listaIFinFOR);
             hashmapGOTO.put(i, listaGOTO);
             hashmapSTART.put(i, listaSTART);
+
         }
 
         for (int a = dotad; a >= odtad; a--) {
+
             ForLoopNEW item = listOfPairedBlocksFOR.get(a);
             ArrayList<InstructionHandle> listaNEXT = new ArrayList<>();
-            int inc = item.getIdPositionINC();
-            listaNEXT.add(il.append(ihy[inc].getInstruction()));
-            hashmapNEXT.put(a, listaNEXT);
 
-            BranchInstruction gotobh = InstructionFactory.createBranchInstruction(Const.GOTO, hashmapSTART.get(a).get(0));
+//          *********************************************
+            int inc = item.getIdPositionINC();
+            InstructionHandle ih;
+            String[] string = ihy[inc].getInstruction().toString().split("\\W+|_");
+
+            int idOLD = -1;
+            try {
+                idOLD = Integer.parseInt(string[1]);
+            } catch (Exception e) {
+                System.err.println("to jest blad idOld, idOld = " + idOLD + ", ih[inc] = " + ihy[inc].getInstruction().getName());
+            }
+            System.out.println("(kiedy one sie zaktualizowaly bo to jest nowe a pisze ze stare... idold = " + idOLD);
+            if (idOLD != -1) {
+                int idNEW = hashmapIdOldAndNewLVar.getOrDefault(idOLD, -1);
+                int incrementValue = Integer.parseInt(string[3]);
+                System.out.println("idnew = " + idNEW);
+                if (idNEW != -1) {
+                    ih = il.append(new IINC(idNEW, incrementValue));
+                } else {
+                    ih = il.append(new IINC(idOLD, incrementValue));
+                }
+                listaNEXT.add(ih);
+                hashmapNEXT.put(a, listaNEXT);
+            } else {
+                System.out.println("TUTAJ?B");
+                ih = il.append(ihy[inc].getInstruction());
+                listaNEXT.add(ih);
+                hashmapNEXT.put(a, listaNEXT);
+            }
+            System.out.println("TUTAJ?");
+//          *************************************************
+
+            BranchInstruction gotobh = InstructionFactory.createBranchInstruction(
+                    Const.GOTO, hashmapSTART.get(a).get(0));
             il.append(gotobh);
             hashmapGOTO.get(a).add(gotobh);
         }
 
-
         InstructionHandle returnHandler = il.append(new PUSH(cp, 0));
         il.append(InstructionFactory.createReturn(Type.INT));
-
 
         for (int petlaNumer = odtad; petlaNumer <= dotad; petlaNumer++) {
 
@@ -233,18 +383,11 @@ public class AST {
 
         }
 
-//      *****************************************************************************************
-        mgNew.setInstructionList(il);
-        mgNew.setMaxLocals();
-        mgNew.setMaxStack();
-        cg.addMethod(mgNew.getMethod());
-        il.dispose();
-
+        return il;
     }
 
     private static ArrayList<ForLoopNEW> addBlocksIfElseTolistOfPairedBlocksFOR(
-            ArrayList<ForLoopNEW> listOfPairedBlocksFOR,
-            ArrayList<ForLoopNEW> listOfPairedBlocksIfElse) {
+            ArrayList<ForLoopNEW> listOfPairedBlocksFOR, ArrayList<ForLoopNEW> listOfPairedBlocksIfElse) {
 
         ArrayList<ForLoopNEW> listAloneBlocksIfElse = new ArrayList<>();
 
@@ -282,8 +425,7 @@ public class AST {
     }
 
     private static void assignBranchGOTOifExist(
-            ArrayList<ForLoopNEW> listAloneBlocksIfElse,
-            InstructionHandle[] ihy) {
+            ArrayList<ForLoopNEW> listAloneBlocksIfElse, InstructionHandle[] ihy) {
 
         for (int i = 0; i < listAloneBlocksIfElse.size(); i++) {
 
@@ -336,32 +478,26 @@ public class AST {
 
     public static int getIdFromHandlePosition(InstructionHandle[] ihy, int position) {
         for (int i = 0; i < ihy.length; i++) if (ihy[i].getPosition() == position) return i;
+        System.out.println("czy to tu?");
         return -1;
     }
 
-    public static int getPositionToJumpFromInstruction(InstructionHandle ih) {
-        String[] string = ih.toString().split("->");
-        return Integer.parseInt(string[1].replace(" ", ""));
-    }
-
-    public static void main(ClassGen cg, MethodGen mgOld) throws IOException {
-
-        InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
+    public static void getLoopStructureIntoArrayLists(MethodGen mg,
+                                                      ArrayList<ForLoopNEW> listAloneBlocksIfElse,
+                                                      ArrayList<ForLoopNEW> listOfPairedBlocksFOR,
+                                                      ArrayList<ForLoopNEW> listOfPairedBlocksIfElse) {
 
         ArrayList<BranchHandleItem> branches = new ArrayList<>();
         ArrayList<BranchHandleItem> singleBrancheGOTO = new ArrayList<>();
-        ArrayList<ForLoopNEW> listOfPairedBlocksFOR = new ArrayList<>();
-        ArrayList<ForLoopNEW> listOfPairedBlocksIfElse = new ArrayList<>();
         ArrayList<BranchHandleItem> singleBrancheIF;
-        ArrayList<ForLoopNEW> listAloneBlocksIfElse;
 
+        InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
         zCreateAListBranchHandleItems(ihy, branches);
         aFillAListCreateForItem(ihy, listOfPairedBlocksFOR, branches, singleBrancheGOTO);
 //        zDisplayAListCreateForItemsExtended(listOfPairedBlocksFOR, "PETLA", ihy);
 
         singleBrancheIF = zGetAListSingleInstructionsIF(branches, listOfPairedBlocksFOR);
         Collections.reverse(singleBrancheGOTO);
-
 
         aFillAListWithIfElseBlock(ihy, singleBrancheIF, singleBrancheGOTO, listOfPairedBlocksIfElse);
         assignBranchGOTOifExist(listOfPairedBlocksIfElse, ihy);
@@ -374,9 +510,13 @@ public class AST {
 
         assignBranchGOTOifExist(listAloneBlocksIfElse, ihy);
 
-        aReconstructSelectedMethod(cg, mgOld, listAloneBlocksIfElse, listOfPairedBlocksFOR, 0, 1);
-
     }
+
+    public static int getPositionToJumpFromInstruction(InstructionHandle ih) {
+        String[] string = ih.toString().split("->");
+        return Integer.parseInt(string[1].replace(" ", ""));
+    }
+
 
     public static void reCreateVariables(MethodGen mgOld, MethodGen mgNew, ConstantPoolGen cp, InstructionList il) {
         LocalVariable[] lvt = mgOld.getLocalVariableTable(cp).getLocalVariableTable();
@@ -385,119 +525,11 @@ public class AST {
         for (LocalVariable variable : lvt) {
             lista.add(
                     mgNew.addLocalVariable(
-                            variable.getName(), Type.getType(variable.getSignature()), il.getStart(), null));
-        }
-//      the value 0 is universal enough to fit almost all types of variables
-//        for (LocalVariableGen localVariableGen : lista) {
-//            il.append(new PUSH(cp, 0));
-//            localVariableGen.setStart(il.append(new ASTORE(localVariableGen.getIndex())));
-//        }
-    }
-
-    public static void zCreateAListBranchHandleItems(InstructionHandle[] ihy, ArrayList<BranchHandleItem> bhi) {
-
-        HashMap<Integer, Integer> hashmapPositionId = zGetHashmapPositionId(ihy);
-
-        for (InstructionHandle item : ihy) {
-            if (item.getInstruction() instanceof GOTO || item.toString().contains("if")) {
-                bhi.add(zCreateBranchHandleItem(ihy, item, hashmapPositionId));
-            }
+                            variable.getName(), Type.getType(
+                                    variable.getSignature()), il.getStart(), null));
         }
     }
 
-    public static BranchHandleItem zCreateBranchHandleItem(
-            InstructionHandle[] ihy, InstructionHandle ih, HashMap<Integer, Integer> hmPositionId) {
-
-        BranchHandleItem bhi = new BranchHandleItem();
-        int position = getPositionToJumpFromInstruction(ih);
-        bhi.setPositionToJump(position);
-        bhi.setIdPositionToJump(hmPositionId.get(position));
-        bhi.setPosition(ih.getPosition());
-        int idPosition = hmPositionId.get(ih.getPosition());
-        bhi.setIdPosition(idPosition);
-        bhi.setInstruction((BranchHandle) ih);
-        bhi.setSignature(ih.getInstruction().getName());
-
-        bhi.setIdPositionPrevStore(zGetFirstPrevIdBySignature(ihy, idPosition, "storeprev"));
-        bhi.setIdPositionPrevLoad(zGetFirstPrevIdBySignature(ihy, idPosition, "load"));
-
-        return bhi;
-    }
-
-    public static void zDisplayAListCreateForItemsExtended(
-            ArrayList<ForLoopNEW> cfi, String label, InstructionHandle[] ihy) {
-
-        for (int i = 0; i < cfi.size(); i++) {
-
-            ForLoopNEW item = cfi.get(i);
-
-            System.out.println(label + " nr: " + i);
-            System.out.println("liczba instrukcji IF w FOR: " + item.getInstrIF().size());
-
-            if (item.getInstrIF().size() > 0) {
-                for (int j = 0; j < item.getInstrIF().size(); j++) {
-                    System.out.println(item.getInstrIF().get(j).getInstruction());
-                }
-            }
-
-            int idFirstInFor = item.getIdPositionPrevStore();
-
-            int idStartLoop = item.getIdPositionStartLoop();
-
-            System.out.println("\n\tINSTRUKCJE INICJALIZACJI FOR");
-            for (int j = idFirstInFor; j < idStartLoop; j++) System.out.println("\t\t" + ihy[j]);
-
-            int countIFinFOR = item.getInstrIF().size();
-            int lastIFinFOR = item.getInstrIF().get(countIFinFOR - 1).getIdPosition();
-            System.out.println("\tINSTRUKCJE WARUNKOWE W FOR");
-            for (int j = idStartLoop; j <= lastIFinFOR; j++) System.out.println("\t\t" + ihy[j]);
-
-            System.out.println("\tPOZOSTAŁE INFORMACJE");
-
-            if (item.getIdPositionINC() != -1) System.out.println("\t\t" + ihy[item.getIdPositionINC()]);
-            if (item.getIdPositionGOTO() != -1) System.out.println("\t\t" + ihy[item.getIdPositionGOTO()]);
-
-            System.out.println("\n***********************************************************\n");
-        }
-
-    }
-
-    public static void zDisplayDetailsAboutBlockIfElseExtended(
-            ArrayList<ForLoopNEW> listOfPairedBlocksIfElse, String label, InstructionHandle[] ihy) {
-
-        for (int i = 0; i < listOfPairedBlocksIfElse.size(); i++) {
-
-            ForLoopNEW temp = listOfPairedBlocksIfElse.get(i);
-
-            System.out.print("\n" + label + " nr: " + i);
-
-            int idPositionIF = temp.getInstrIF().get(0).getIdPosition();
-            int positionInCode = temp.getInstrIF().get(0).getPosition();
-            System.out.print("\t(id IF: " + idPositionIF + ", position IF in code: " + positionInCode + ")\n\n");
-            System.out.println("\tINSTRUKCJE WARUNKU IF");
-//            int idFirstInstruction = aGetStartForBlockIf(ihy, idPositionIF);
-//            int idFirstInstruction = temp.getIdPositionPrevStore();
-            int startIF = temp.getIdPositionStartLoop();
-
-            for (int ii = startIF; ii < idPositionIF; ii++) System.out.println("\t\t" + ihy[ii]);
-
-            int jumpToElse = temp.getInstrIF().get(0).getIdPositionToJump();
-
-            System.out.println("\tINSTRUKCJE BLOKU IF:");
-            for (int j = idPositionIF; j < jumpToElse; j++) System.out.println("\t\t" + ihy[j]);
-
-//            tutaj ostroznie bo sa 2 przypadki tzn: w ifie i w "forze" bloku ifelse
-            if (temp.getIdPositionGOTO() != -1) {
-//                UWAGA BO JEST TYLKO DO PIERWSZEJ A TRZEBA OBSLUZYC WSZYSTKO
-                int backToCode = temp.getIdPositionAfterElse();
-                System.out.println("\tINSTRUKCJE BLOKU ELSE:");
-                for (int j = jumpToElse; j < backToCode; j++) System.out.println("\t\t" + ihy[j]);
-            }
-            System.out.println("\n***********************************************************\n");
-        }
-
-
-    }
 
     private static ArrayList<BranchHandleItem> zGetAListSingleInstructionsIF(
             ArrayList<BranchHandleItem> bhi, ArrayList<ForLoopNEW> cfi) {
@@ -548,17 +580,6 @@ public class AST {
 
         return hashmapInstructionPositionId;
 
-    }
-
-    public static void zczyWskazujeZapetle(InstructionHandle[] ihy, int i) {
-        String werrdykt = "";
-        for (int start = i; start > i - 3; start--) {
-            if (ihy[i].getPrev().toString().contains("goto")) {
-                werrdykt = "ta instrukcja pokazuje za petle";
-                break;
-            } else werrdykt = "ta instrukcja jest w srodku";
-        }
-        System.out.println(werrdykt);
     }
 
 }
