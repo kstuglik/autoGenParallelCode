@@ -9,7 +9,7 @@ public class LaunchProperties {
     public static final String NUMBER_OF_THREADS_NAME = "NUM_THREADS";
     public static final String EXECUTOR_SERVICE_NAME = "SERVICE";
     public static final String START_INDEX_VAR_NAME = "start";
-    public static final String END_INDEX_VAR_NAME = "end";
+    public static final String END_INDEX_VAR_NAME = "stop";
     // others??
     public static final String END_FINAL_INDEX_VAR_NAME = "endFinal";
     public static final String SUBTASK_METHOD_NAME = "SubTask";
@@ -45,7 +45,6 @@ public class LaunchProperties {
     public static String MATRIX_A_VAR_NAME = "matrixA";
     public static String MATRIX_B_VAR_NAME = "matrixB";
     public static String MATRIX_C_VAR_NAME = "matrixC";
-
 
 
     public static String getPathToIntputFile() {

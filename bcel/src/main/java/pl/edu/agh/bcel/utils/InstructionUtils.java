@@ -41,8 +41,11 @@ public class InstructionUtils {
                 LaunchProperties.END_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         int endFinalVarIndex = VariableUtils.getLVarByName(
                 LaunchProperties.END_FINAL_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int dataSizeIndex = VariableUtils.getLVarByName(
-                LaunchProperties.DATASIZE_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+//        int dataSizeIndex = VariableUtils.getLVarByName(
+//                LaunchProperties.DATASIZE_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+
+        int dataSizeIndex = VariableUtils.getFieldIdByName(LaunchProperties.DATASIZE_VAR_NAME, cg);
+
 
         InstructionHandle ih_6 = il.append(InstructionFactory.createLoad(Type.INT, endVarIndex));
         il.append(InstructionFactory.createLoad(Type.INT, dataSizeIndex));
@@ -87,6 +90,8 @@ public class InstructionUtils {
 
     public static InstructionList getInstructionsStartInit(ClassGen cg, MethodGen mg, short dataSize) {
         InstructionList il = new InstructionList();
+
+
         int loopIteratorIndex = VariableUtils.getLVarByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         int startVarIndex = VariableUtils.getLVarByName(LaunchProperties.START_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         int numThreadsFieldIndex = VariableUtils.getFieldRefId(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);

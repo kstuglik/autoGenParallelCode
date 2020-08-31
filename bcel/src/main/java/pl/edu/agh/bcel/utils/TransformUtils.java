@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 
-
 public class TransformUtils {
 
     public static void addCallJCudaMultiply(ClassGen cg, MethodGen mg) throws Exception {
@@ -321,7 +320,10 @@ public class TransformUtils {
                 //1,
                 null, null);
 
+
         transferLocalVariables(methodGen, subTaskMethod);
+
+
         updateBranchInstructions(subTaskInstructionList);
         int newLoopIteratorVariableIndex = VariableUtils.getLVarByName(iteratorName, subTaskMethod.getLocalVariableTable(classGen.getConstantPool())).getIndex();
         LoopUtilsOld.broadenCompareCondition(subTaskInstructionList.getInstructionHandles());
@@ -398,29 +400,15 @@ public class TransformUtils {
                 .forEach(handle -> retargetSingleHandle(cg.getConstantPool(), handle, classNameIndex));
     }
 
-    public static void setNewLoopBody(ClassGen cg, MethodGen mg, short dataSize) {
+    public static InstructionList setNewLoopBody(ClassGen cg, MethodGen mg, short dataSize, int idBegin, int idEnd) {
         InstructionList il = mg.getInstructionList();
-        InstructionHandle[] loopHandles = LoopUtilsOld.getForLoop(mg);
-        InstructionHandle firstLoopInstruction = loopHandles[0];
-        InstructionHandle lastLoopInstruction = loopHandles[loopHandles.length - 1];
+        InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
 
-        mg.addLocalVariable(LaunchProperties.START_INDEX_VAR_NAME,
-                Type.INT,
-                firstLoopInstruction,
-                lastLoopInstruction);
+        mg.addLocalVariable(LaunchProperties.START_INDEX_VAR_NAME, Type.INT, ihy[idBegin], ihy[idEnd]);
+        mg.addLocalVariable(LaunchProperties.END_INDEX_VAR_NAME, Type.FLOAT, ihy[idBegin], ihy[idEnd]);
+        mg.addLocalVariable(LaunchProperties.END_FINAL_INDEX_VAR_NAME, Type.INT, ihy[idBegin], ihy[idEnd]);
 
-        mg.addLocalVariable(LaunchProperties.END_INDEX_VAR_NAME,
-                Type.FLOAT,
-                firstLoopInstruction,
-                lastLoopInstruction);
-
-        mg.addLocalVariable(LaunchProperties.END_FINAL_INDEX_VAR_NAME,
-                Type.INT,
-                firstLoopInstruction,
-                lastLoopInstruction);
-
-
-        InstructionHandle startVarStart = loopHandles[4];
+        InstructionHandle startVarStart = ihy[idBegin];
         InstructionList endVarStart = InstructionUtils.getInstructionsStartInit(cg, mg, dataSize);
         InstructionHandle startVarEnd = endVarStart.getEnd();
 
@@ -439,11 +427,10 @@ public class TransformUtils {
         il.append(startListCallable, endListCallable);
         il.append(startVarFinalEnd, endVarFinalEnd);
 
-        updateMethodParametersScope(mg, mg.getConstantPool());
-        mg.setMaxStack();
-        mg.setMaxLocals();
-        cg.replaceMethod(mg.getMethod(), mg.getMethod());
-
+//        mg.setMaxStack();
+//        mg.setMaxLocals();
+//        cg.replaceMethod(mg.getMethod(), mg.getMethod());
+        return il;
     }
 
     public static void transferLocalVariables(MethodGen mg, MethodGen subTaskmg) {

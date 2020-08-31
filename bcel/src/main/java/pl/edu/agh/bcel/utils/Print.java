@@ -30,6 +30,13 @@ public class Print {
         return sb.toString().replace('\0', c);
     }
 
+    public static void simplePrintByTypeId(InstructionFactory factory, InstructionList il, Type type, int id) {
+        il.append(factory.createFieldAccess(
+                "java.lang.System", "out", new ObjectType("java.io.PrintStream"), Const.GETSTATIC));
+        il.append(InstructionFactory.createLoad(type, id));
+        il.append(factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[]{Type.INT}, Const.INVOKEVIRTUAL));
+    }
+
 }
 
 

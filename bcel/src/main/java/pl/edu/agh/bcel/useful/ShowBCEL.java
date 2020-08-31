@@ -17,19 +17,7 @@ public class ShowBCEL {
 
         LaunchProperties.CLASS_DIR = "target/classes/";
         LaunchProperties.CLASS_NAME = "temp";
-        LaunchProperties.CLASS_METHOD = "main";
-
-//        LaunchProperties.CLASS_DIR = "target/classes/matrix/";
-//        LaunchProperties.CLASS_NAME = "SerialMultiplier";
-//        LaunchProperties.CLASS_METHOD = "multiply";
-
-//        LaunchProperties.CLASS_DIR = "target/classes/nbody/";
-//        LaunchProperties.CLASS_NAME = "SerialNbody_T1";
-//        LaunchProperties.CLASS_METHOD = "moveBodies";
-
-//        Scanner _in = new Scanner(System.in);
-//        System.out.println("CLASS_NAME:\t");
-//        String CLASS_FILE = _in.next();
+        LaunchProperties.CLASS_METHOD = "multiply";
 
         JavaClass analyzedClass = new ClassParser(LaunchProperties.getPathToIntputFile()).parse();
 

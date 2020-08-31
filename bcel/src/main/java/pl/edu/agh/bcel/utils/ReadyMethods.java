@@ -13,7 +13,6 @@ public class ReadyMethods {
         MethodGen mg = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, new ArrayType(Type.FLOAT, 1), new Type[]{new ArrayType(Type.INT, 2)}, new String[]{"arg0"}, "flattenIArray2Dto1D", cg.getClassName(), il, cp);
         InstructionFactory factory = new InstructionFactory(cg, mg.getConstantPool());
 
-
         InstructionHandle ih_0 = il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
         il.append(InstructionConst.ARRAYLENGTH);
         il.append(InstructionFactory.createStore(Type.INT, 1));
@@ -174,11 +173,12 @@ public class ReadyMethods {
         il.dispose();
     }
 
-    public static void addMethodSetStepLVar(ClassGen cg) {
+    public static void addMethodSetStep(ClassGen cg) {
 
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionList il = new InstructionList();
-        MethodGen method = new MethodGen(Const.ACC_PRIVATE | Const.ACC_STATIC, Type.INT, Type.NO_ARGS, new String[]{}, "setStepLVar", cg.getClassName(), il, cp);
+        MethodGen method = new MethodGen(Const.ACC_PRIVATE | Const.ACC_STATIC,
+                Type.INT, Type.NO_ARGS, new String[]{}, "setStep", cg.getClassName(), il, cp);
         InstructionFactory factory = new InstructionFactory(method.getConstantPool());
 
         InstructionHandle ih_0 = il.append(factory.createFieldAccess(cg.getClassName(), "matrixA", new ArrayType(Type.INT, 2), Const.GETSTATIC));
@@ -194,6 +194,46 @@ public class ReadyMethods {
         il.append(InstructionConst.IDIV);
         il.append(InstructionFactory.createReturn(Type.INT));
         if_icmpge_7.setTarget(ih_12);
+        method.setMaxStack();
+        method.setMaxLocals();
+        cg.addMethod(method.getMethod());
+        il.dispose();
+    }
+
+    public static void addMethodSetStop(ClassGen cg, MethodGen mg) {
+        ConstantPoolGen cp = cg.getConstantPool();
+        InstructionList il = new InstructionList();
+
+
+        MethodGen method = new MethodGen(Const.ACC_PRIVATE | Const.ACC_STATIC,
+                Type.INT, new Type[]{Type.INT, Type.INT, Type.INT},
+                new String[]{"i", "dataSize", "numThreads"}, "setStop", cg.getClassName(), il, cp);
+        InstructionFactory factory = new InstructionFactory(method.getConstantPool());
+
+        
+        InstructionHandle ih_0 = il.append(InstructionFactory.createLoad(Type.INT, 0));
+        il.append(new PUSH(cp, 1));
+        il.append(InstructionConst.IADD);
+        il.append(InstructionFactory.createLoad(Type.INT, 1));
+        il.append(InstructionFactory.createLoad(Type.INT, 2));
+        il.append(InstructionConst.IDIV);
+        il.append(InstructionConst.IMUL);
+        il.append(new PUSH(cp, 1));
+        il.append(InstructionConst.ISUB);
+        il.append(InstructionFactory.createStore(Type.INT, 3));
+        InstructionHandle ih_10 = il.append(InstructionFactory.createLoad(Type.INT, 3));
+        il.append(InstructionFactory.createLoad(Type.INT, 1));
+        BranchInstruction if_icmplt_12 = InstructionFactory.createBranchInstruction(Const.IF_ICMPLT, null);
+        il.append(if_icmplt_12);
+        il.append(InstructionFactory.createLoad(Type.INT, 1));
+        il.append(new PUSH(cp, 1));
+        il.append(InstructionConst.ISUB);
+        il.append(InstructionFactory.createStore(Type.INT, 3));
+        InstructionHandle ih_19 = il.append(InstructionFactory.createLoad(Type.INT, 3));
+        il.append(InstructionFactory.createReturn(Type.INT));
+        if_icmplt_12.setTarget(ih_19);
+
+
         method.setMaxStack();
         method.setMaxLocals();
         cg.addMethod(method.getMethod());
@@ -325,6 +365,4 @@ public class ReadyMethods {
         cg.addMethod(mg.getMethod());
 //    il.dispose();
     }
-
-
 }

@@ -16,7 +16,7 @@ public class VariableUtils {
 
     protected static void createLVarFromList(
             MethodGen mg, List<LocalVariable> listLVarToCreate, HashMap<Integer, Integer> hashmapLVarIdOldAndNew) {
-        System.out.println("---> CREATE LOCAL VARIABLE IF NO EXISTED <---");
+        System.out.println("\n---> CREATE LOCAL VARIABLE IF NO EXISTED <---\n");
         for (LocalVariable item : listLVarToCreate) {
             LocalVariableGen lg = mg.addLocalVariable(item.getName(), Type.getType(item.getSignature()), null, null);
             int oldVarId = item.getIndex();
@@ -24,6 +24,7 @@ public class VariableUtils {
             hashmapLVarIdOldAndNew.replace(oldVarId, newVarId);
             System.out.println("\t\tvariable name:\t" + item.getName() + ", [ID]:\told = " + oldVarId + ", new = " + newVarId);
         }
+        System.out.println();
     }
 
     private static String getConstantName(ConstantPool constantPool, ConstantCP constant) {
@@ -65,6 +66,7 @@ public class VariableUtils {
         HashMap<Integer, Integer> hashmapLVarIndexesOldAndNew = VariableUtils.getHashmapOldAndNewLVarId(mgOld, mgNew);
 
         List<LocalVariable> listLVarToCreate = VariableUtils.getLVarListToCreate(mgOld, hashmapLVarIndexesOldAndNew);
+
         VariableUtils.createLVarFromList(mgNew, listLVarToCreate, hashmapLVarIndexesOldAndNew);
 
         return hashmapLVarIndexesOldAndNew;
@@ -77,8 +79,9 @@ public class VariableUtils {
         HashMap<Integer, Integer> hashmapOlNewLVarId = new HashMap<>();
 
         for (String key : oldVariables.keySet()) {
-            int idOld = oldVariables.getOrDefault(key, -1);
+            int idOld = oldVariables.get(key);
             int idNew = newVariables.getOrDefault(key, -1);
+//            System.out.println("\t\t"+key + ", old ID: " + oldVariables.get(key)+", new ID: "+idNew);
             hashmapOlNewLVarId.put(idOld, idNew);
         }
 
@@ -123,7 +126,9 @@ public class VariableUtils {
 //        if the variable id is in my list and is assigned -1, it copies this object
         for (LocalVariable item : lvs) {
             int idLVarInNewMethod = hashmapLVarIdOldAndNew.getOrDefault(item.getIndex(), -777);
-            if (idLVarInNewMethod == -1) listLVarToCreate.add(item);
+            if (idLVarInNewMethod == -1) {
+                listLVarToCreate.add(item);
+            }
         }
 
         return listLVarToCreate;

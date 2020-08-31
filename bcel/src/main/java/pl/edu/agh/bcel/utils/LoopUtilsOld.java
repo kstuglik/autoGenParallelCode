@@ -87,15 +87,6 @@ public class LoopUtilsOld {
         }
     }
 
-    public static void displayInfoAboutLoopInMethod(List<ForLoopItem> forLoopItems) {
-        System.out.println("\nLOOPS IN METHOD");
-        for (int i = 0; i < forLoopItems.size(); i++) {
-            ForLoopItem item = forLoopItems.get(i);
-            System.out.println("loop no:" + i);
-            item.displayInfoAboutHandles();
-        }
-    }
-
     public static InstructionHandle[] emptyLoop(InstructionHandle[] ihy) {
         InstructionHandle[] conditionInstructions = Arrays.copyOf(ihy, 5);
         InstructionHandle[] closingInstructions = Arrays.copyOfRange(ihy, ihy.length - 2, ihy.length);
@@ -124,7 +115,9 @@ public class LoopUtilsOld {
         InstructionHandle ih = getGoto(mg.getInstructionList().getInstructionHandles());
         int startPosition = ((BranchHandle) ih).getTarget().getPrev().getPrev().getPosition();
         int endPosition = ih.getPosition();
-        return getIhsBetweenFromTo(mg.getInstructionList().getInstructionHandles(), startPosition, endPosition);
+        return getIhsBetweenFromTo(
+                mg.getInstructionList().getInstructionHandles(),
+                startPosition, endPosition);
     }
 
     public static int getForLoopVariableIndex(InstructionHandle[] ihy) {

@@ -45,7 +45,7 @@ public class ReadyFields {
 
         int id = mg.addLocalVariable("step", Type.INT, null, null).getIndex();
 
-        il.append(factory.createInvoke(mg.getClassName(), "setStepLVar", Type.INT, Type.NO_ARGS, Const.INVOKESTATIC));
+        il.append(factory.createInvoke(mg.getClassName(), "setStep", Type.INT, Type.NO_ARGS, Const.INVOKESTATIC));
         il.append(InstructionFactory.createStore(Type.INT, id));
 
         InstructionList currentList = mg.getInstructionList();
@@ -62,7 +62,6 @@ public class ReadyFields {
         InstructionFactory factory = new InstructionFactory(cg, cp);
         InstructionList il = new InstructionList();
 
-
         il.append(factory.createInvoke(
                 cg.getClassName(), "init", new ObjectType("ArrayList<Callable<Integer>>"),
                 Type.NO_ARGS, Const.INVOKESTATIC));
@@ -71,11 +70,11 @@ public class ReadyFields {
         il.append(InstructionFactory.createLoad(Type.OBJECT, LaunchProperties.TASK_POOL_ID));
         il.append(InstructionFactory.createStore(Type.OBJECT, LaunchProperties.TASK_POOL_ID + 1));
 
+
         InstructionList currentList = mg.getInstructionList();
+
         il.append(currentList);
         mg.setInstructionList(il);
-
-        TransformUtils.updateMethodParametersScope(mg, cp);
         mg.setMaxStack();
         mg.setMaxLocals();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
