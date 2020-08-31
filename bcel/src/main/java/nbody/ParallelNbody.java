@@ -41,14 +41,10 @@ public class ParallelNbody {
         refreshBeginningState(dataSize);
         for (int i = 0; i < NUM_THREADS; i++) {
             int start = i * (dataSize / NUM_THREADS);
-            int stop = (i + 1) * (dataSize / NUM_THREADS) - 1;
-            if (stop > dataSize - 1) {
-                stop = dataSize - 1;
-            }
-            int finalStop = stop;
+            int stop = setStop(i, dataSize, NUM_THREADS);
             tasks.add(new Callable<Integer>() {
                 public Integer call() {
-                    return partialUpdate(start, finalStop);
+                    return partialUpdate(start, stop);
                 }
             });
         }
@@ -73,6 +69,15 @@ public class ParallelNbody {
         for (int i = 0; i < dataSize; i++) {
             beginningState[i] = new Body(bodies[i]);
         }
+    }
+
+    private static int setStop(int i, int dataSize, int numThreads) {
+        int var3 = (i + 1) * (dataSize / numThreads) - 1;
+        if (var3 >= dataSize) {
+            var3 = dataSize - 1;
+        }
+
+        return var3;
     }
 
     public static void simulate(int steps) {
