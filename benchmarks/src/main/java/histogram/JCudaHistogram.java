@@ -78,7 +78,7 @@ public class JCudaHistogram {
                 ptr_C, N);
 
 // show results
-        float data[] = new float[N];
+        float[] data = new float[N];
         cudaMemcpy(Pointer.to(data), ptr_C, N * Sizeof.FLOAT, cudaMemcpyDeviceToHost);
 //        System.out.println("=");
         System.out.println(Arrays.toString(data));
@@ -103,9 +103,9 @@ public class JCudaHistogram {
     }
 
     public JCudaHistogram(float[] matrix_AA, int range) {
-        this.N = matrix_AA.length;
+        N = matrix_AA.length;
 
-        this.matrix_A = matrix_AA;
+        matrix_A = matrix_AA;
         matrix_B = new float[N];
         matrix_C = new float[N];
 

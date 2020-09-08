@@ -97,23 +97,22 @@ public class ForLoopUtils {
 //        }
 //    }
 
-    public static BranchHandle getBranchHandleIF(InstructionList il, InstructionHandle instructionHandle) {
+    public static BranchHandle getBranchHandleIF(InstructionList il, Instruction instruction) {
         BranchHandle if_compare = null;
-        Instruction item = instructionHandle.getInstruction();
-        if (item instanceof IF_ICMPGE) if_compare = il.append(new IF_ICMPGE(null));
-        if (item instanceof IF_ICMPGT) if_compare = il.append(new IF_ICMPGT(null));
-        if (item instanceof IF_ICMPLE) if_compare = il.append(new IF_ICMPLE(null));
-        if (item instanceof IF_ICMPLT) if_compare = il.append(new IF_ICMPLT(null));
-        if (item instanceof IF_ICMPEQ) if_compare = il.append(new IF_ICMPEQ(null));
-        if (item instanceof IF_ICMPNE) if_compare = il.append(new IF_ICMPNE(null));
-        if (item instanceof IF_ACMPEQ) if_compare = il.append(new IF_ACMPEQ(null));
-        if (item instanceof IF_ACMPNE) if_compare = il.append(new IF_ACMPNE(null));
-        if (item instanceof IFLE) if_compare = il.append(new IFLE(null));
-        if (item instanceof IFLT) if_compare = il.append(new IFLT(null));
-        if (item instanceof IFGE) if_compare = il.append(new IFGE(null));
-        if (item instanceof IFGT) if_compare = il.append(new IFGT(null));
-        if (item instanceof IFEQ) if_compare = il.append(new IFEQ(null));
-        if (item instanceof IFNE) if_compare = il.append(new IFNE(null));
+        if (instruction instanceof IF_ICMPGE) if_compare = il.append(new IF_ICMPGE(null));
+        if (instruction instanceof IF_ICMPGT) if_compare = il.append(new IF_ICMPGT(null));
+        if (instruction instanceof IF_ICMPLE) if_compare = il.append(new IF_ICMPLE(null));
+        if (instruction instanceof IF_ICMPLT) if_compare = il.append(new IF_ICMPLT(null));
+        if (instruction instanceof IF_ICMPEQ) if_compare = il.append(new IF_ICMPEQ(null));
+        if (instruction instanceof IF_ICMPNE) if_compare = il.append(new IF_ICMPNE(null));
+        if (instruction instanceof IF_ACMPEQ) if_compare = il.append(new IF_ACMPEQ(null));
+        if (instruction instanceof IF_ACMPNE) if_compare = il.append(new IF_ACMPNE(null));
+        if (instruction instanceof IFLE) if_compare = il.append(new IFLE(null));
+        if (instruction instanceof IFLT) if_compare = il.append(new IFLT(null));
+        if (instruction instanceof IFGE) if_compare = il.append(new IFGE(null));
+        if (instruction instanceof IFGT) if_compare = il.append(new IFGT(null));
+        if (instruction instanceof IFEQ) if_compare = il.append(new IFEQ(null));
+        if (instruction instanceof IFNE) if_compare = il.append(new IFNE(null));
         return if_compare;
     }
 

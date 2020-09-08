@@ -13,18 +13,17 @@ import java.io.IOException;
 
 public class ShowByteCode {
     public static void main(String[] argv) throws IOException {
+        LaunchProperties.CLASS_DIR = "bcel/target/classes/histogram/";
+        LaunchProperties.CLASS_NAME = "SerialHistogramScala";
+        LaunchProperties.CLASS_METHOD = "calculate";
+//
+//        LaunchProperties.CLASS_DIR = "bcel/target/classes/histogram/";
+//        LaunchProperties.CLASS_NAME = "ParallelHistogram";
+//        LaunchProperties.CLASS_METHOD = "calculate";
 
-//        LaunchProperties.CLASS_DIR = "target/classes/nbody/";
-//        LaunchProperties.CLASS_NAME = "SerialNbody_ITEST";
-//        LaunchProperties.CLASS_METHOD = "moveBodies";
-
-//        LaunchProperties.CLASS_DIR = "target/classes/matrix/";
-//        LaunchProperties.CLASS_NAME = "SerialMultiplier_ITEST";
+//        LaunchProperties.CLASS_DIR = "target/classes/";
+//        LaunchProperties.CLASS_NAME = "temp";
 //        LaunchProperties.CLASS_METHOD = "multiply";
-
-        LaunchProperties.CLASS_DIR = "target/classes/";
-        LaunchProperties.CLASS_NAME = "temp";
-        LaunchProperties.CLASS_METHOD = "multiply";
 
         JavaClass _analyzedClass = new ClassParser(LaunchProperties.getPathToIntputFile()).parse();
 

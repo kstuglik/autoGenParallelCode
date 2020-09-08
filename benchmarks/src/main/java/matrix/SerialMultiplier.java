@@ -2,8 +2,11 @@ package matrix;
 
 public class SerialMultiplier {
 
-    private int[][] A, B, C;
-    private int resultRows, resultColumns;
+    private final int[][] A;
+    private final int[][] B;
+    private final int[][] C;
+    private final int resultRows;
+    private final int resultColumns;
 
     public SerialMultiplier(int[][] pA, int[][] pB) {
         this.A = pA;

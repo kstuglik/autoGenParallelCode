@@ -9,7 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import pl.edu.agh.bcel.ByteCodeModifier;
 import pl.edu.agh.bcel.LaunchProperties;
-import pl.edu.agh.bcel.NestedLoops.Structure;
+import pl.edu.agh.bcel.transformation.Structure;
 import pl.edu.agh.bcel.utils.ReadyFields;
 import pl.edu.agh.bcel.utils.ReadyMethods;
 import pl.edu.agh.bcel.utils.TransformUtils;
@@ -62,7 +62,7 @@ public class ParallelNBodyTest {
 
         ReadyMethods.addMethodSetStep(cgTarget);
         ReadyMethods.addMethodToInitTaskPool(cgTarget);
-        ReadyMethods.addMethodSetStop(cgTarget, mg);
+        ReadyMethods.addMethodSetStop(cgTarget);
 
         ReadyFields.addFieldTaskPool(cgTarget, mg);
         ReadyFields.initFieldExecutorService(cgTarget, mg);

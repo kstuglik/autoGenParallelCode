@@ -10,8 +10,11 @@ public class ParallelMultiplier {
 
     private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
 
-    private int[][] A, B, C;
-    private int resultRows, resultColumns;
+    private final int[][] A;
+    private final int[][] B;
+    private final int[][] C;
+    private final int resultRows;
+    private final int resultColumns;
 
     public ParallelMultiplier(int[][] pA, int[][] pB) {
         this.A = pA;

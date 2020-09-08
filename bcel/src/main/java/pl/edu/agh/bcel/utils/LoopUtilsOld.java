@@ -131,43 +131,6 @@ public class LoopUtilsOld {
                 .orElseThrow(() -> new IllegalArgumentException("Method passed to 'getForLoop' does not have for loop."));
     }
 
-    public static HashMap<String, List<Integer>> getHashMapLoopStructure(InstructionHandle[] ihy) {
-
-        List<Integer> instructionsIF = new ArrayList<>();
-        List<Integer> instructionsGOTO = new ArrayList<>();
-        List<Integer> instructionsRETURN = new ArrayList<>();
-        List<Integer> instructionsINC = new ArrayList<>();
-        List<Integer> instructionsLOAD = new ArrayList<>();
-        List<Integer> instructionsSTORE = new ArrayList<>();
-
-        HashMap<String, List<Integer>> hashMap = new HashMap<>();
-
-        for (int i = 0; i < ihy.length; i++) {
-            String phrase = ihy[i].getInstruction().getName();
-            if (phrase.contains("if")) instructionsIF.add(i);
-            else if (phrase.contains("goto")) instructionsGOTO.add(i);
-            else if (phrase.contains("return")) instructionsRETURN.add(i);
-            else if (phrase.contains("inc")) instructionsINC.add(i);
-            else if (phrase.contains("load") && !phrase.contains("aaload")) instructionsLOAD.add(i);
-            else if (phrase.contains("store") && !phrase.contains("aastore")) instructionsSTORE.add(i);
-        }
-
-        int lvlNestedLoopFor = instructionsIF.size() == instructionsGOTO.size() ? instructionsIF.size() : -1;
-
-        if (lvlNestedLoopFor != -1) System.out.println("\nLOOP LEVEL NESTED:\t" + lvlNestedLoopFor + "\n");
-
-        hashMap.put("if", instructionsIF);
-        hashMap.put("goto", instructionsGOTO);
-        hashMap.put("return", instructionsRETURN);
-        hashMap.put("inc", instructionsINC);
-        hashMap.put("load", instructionsLOAD);
-        hashMap.put("store", instructionsSTORE);
-
-        for (String key : hashMap.keySet()) System.out.println(key + ": " + hashMap.get(key));
-
-        return hashMap;
-    }
-
     public static InstructionHandle[] getIhsBetweenFromTo(InstructionHandle[] ihy, int start, int end) {
         return Arrays.stream(ihy)
                 .filter(instr -> isBetweenPositions(instr, start, end))

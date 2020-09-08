@@ -28,6 +28,10 @@ public class LaunchProperties {
     public static final int COLS_B = 1;
     public static final int ROWS_B = 3;
     public static final String TASK_POOL_NAME = "var55";
+    public static final int PARTIAL_RESULT_ID = 77;
+    public static final String TEMP_RESULT_NAME = "tempResult";
+    public static final String METHOD_INIT_ARRAYLIST = "init";
+    public static final String PART_RESULT_NAME = "part";
     public static short SIZE_OF_PROBLEM;
 
     public static String CLASS_DIR = "target/classes/matrix/";
@@ -42,9 +46,6 @@ public class LaunchProperties {
     public static String COL_NUM_VAR_NAME = "colNum";
     public static String STEP_VAR_NAME = "step";
     public static String CURR_ROW_VAR_NAME = "currRow";
-    public static String MATRIX_A_VAR_NAME = "matrixA";
-    public static String MATRIX_B_VAR_NAME = "matrixB";
-    public static String MATRIX_C_VAR_NAME = "matrixC";
 
 
     public static String getPathToIntputFile() {
@@ -52,6 +53,6 @@ public class LaunchProperties {
     }
 
     public static String getPathToOutputFile() {
-        return CLASS_DIR + CLASS_NAME + MODIFICATION_SUFFIX + CLASS_SUFFIX;
+        return CLASS_DIR + "GENERATED" + "/" + CLASS_NAME + CLASS_SUFFIX;
     }
 }

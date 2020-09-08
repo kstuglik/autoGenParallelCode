@@ -10,7 +10,9 @@ import static utils.ArrayUtils.randomIntArray2D;
 
 public class JCudaMultiplier {
 
-    float matrix_A[],matrix_B[],matrix_C[];
+    float[] matrix_A;
+    float[] matrix_B;
+    float[] matrix_C;
 
     int cols_A, rows_A ;
     int cols_B, rows_B;

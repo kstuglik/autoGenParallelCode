@@ -80,6 +80,33 @@ public class ReadyFields {
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
 
+    public static void addFieldGeneric(ClassGen cg, MethodGen mg, String genericType) {
+        ConstantPoolGen cp = cg.getConstantPool();
+        InstructionFactory factory = new InstructionFactory(cg, cp);
+        InstructionList il = new InstructionList();
+
+
+        il.append(factory.createInvoke(
+                cg.getClassName(), LaunchProperties.METHOD_INIT_ARRAYLIST, new ObjectType(
+                        genericType),
+                Type.NO_ARGS, Const.INVOKESTATIC));
+
+        il.append(InstructionFactory.createStore(Type.OBJECT, LaunchProperties.PARTIAL_RESULT_ID));
+        il.append(InstructionFactory.createLoad(Type.OBJECT, LaunchProperties.PARTIAL_RESULT_ID));
+        il.append(InstructionFactory.createStore(Type.OBJECT, LaunchProperties.PARTIAL_RESULT_ID + 1));
+
+
+        InstructionList currentList = mg.getInstructionList();
+
+        il.append(currentList);
+        mg.setInstructionList(il);
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
+
+    }
+
+
     public static void addFieldToClass(ClassGen cg, ConstantPoolGen cp, Type type, String fieldName) {
         FieldGen newField = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC, type, fieldName, cp);
         cg.addField(newField.getField());

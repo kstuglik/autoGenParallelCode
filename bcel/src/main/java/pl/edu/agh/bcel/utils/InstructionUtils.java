@@ -5,6 +5,7 @@ import org.apache.bcel.generic.*;
 import pl.edu.agh.bcel.LaunchProperties;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class InstructionUtils {
 
@@ -104,6 +105,13 @@ public class InstructionUtils {
         il.append(new ISTORE(startVarIndex));
 
         return il;
+    }
+
+    public static HashMap<Integer, Integer> getHashmapPositionId(MethodGen mg) {
+        HashMap<Integer, Integer> hashmapPositionId = new HashMap<>();
+        InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
+        for (int i = 0; i < ihy.length; i++) hashmapPositionId.put(ihy[i].getPosition(), i);
+        return hashmapPositionId;
     }
 
 }

@@ -7,7 +7,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import pl.edu.agh.bcel.ByteCodeModifier;
-import pl.edu.agh.bcel.NestedLoops.Structure;
+import pl.edu.agh.bcel.transformation.Structure;
 import pl.edu.agh.bcel.LaunchProperties;
 import pl.edu.agh.bcel.utils.ReadyFields;
 import pl.edu.agh.bcel.utils.ReadyMethods;
@@ -44,7 +44,7 @@ public class ParallelMatrixTest {
         TransformUtils.addThreadPoolExecutorService(cgTarget);
 
         ReadyMethods.addMethodSetStep(cgTarget);
-        ReadyMethods.addMethodSetStop(cgTarget, mg);
+        ReadyMethods.addMethodSetStop(cgTarget);
         ReadyMethods.addMethodToInitTaskPool(cgTarget);
 
         ReadyFields.addFieldStep(cgTarget, mg); // step jest dla matrix

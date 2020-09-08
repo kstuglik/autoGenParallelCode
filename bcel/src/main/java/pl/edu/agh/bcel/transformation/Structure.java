@@ -1,16 +1,16 @@
 package pl.edu.agh.bcel.transformation;
 
 import org.apache.bcel.generic.*;
-import pl.edu.agh.bcel.NestedLoops.ElementFOR;
-import pl.edu.agh.bcel.NestedLoops.ElementIF;
+import pl.edu.agh.bcel.nested.ElementFOR;
+import pl.edu.agh.bcel.nested.ElementIF;
 import pl.edu.agh.bcel.utils.ForLoopUtils;
+import pl.edu.agh.bcel.utils.InstructionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-
-public class Main {
+public class Structure {
 
     public static void caseMatrix(ClassGen cg, MethodGen mg) {
 
@@ -98,14 +98,15 @@ public class Main {
 //            efEk.displayItem(ihy);
 //        }
 
-        Histogram.histogramSubtask(cg, mg, listFORow, ihy);
+        Histogram.histogramSubtask(cg, mg, listFORow);
+        Histogram.histogramCalculate(cg, mg, listFORow);
 
     }
 
     public static void phaseFirst(ClassGen cg, MethodGen mg, ArrayList<ElementFOR> listFORow) {
 
         InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
-        HashMap<Integer, Integer> hmPozycjaId = getHashmapPositionId(mg);
+        HashMap<Integer, Integer> hmPozycjaId = InstructionUtils.getHashmapPositionId(mg);
 
 
         for (int i = 0; i < ihy.length; i++) {
@@ -133,7 +134,7 @@ public class Main {
             ArrayList<Integer> listaIfowDoUzupelnienia) {
 
         InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
-        HashMap<Integer, Integer> hmPozycjaId = getHashmapPositionId(mg);
+        HashMap<Integer, Integer> hmPozycjaId = InstructionUtils.getHashmapPositionId(mg);
 
 
         for (int i = 0; i < ihy.length; i++) {
@@ -197,17 +198,11 @@ public class Main {
             listFORow.get(i).setListaIfow(a);
         }
 
+        System.out.println("abc.size() - 1 = " + (abc.size() - 1));
         listFORow.get(abc.size() - 1).setListaIfow(abc.get(abc.size() - 1));
 
         updateFirstInside(listFORow);
 
-    }
-
-    private static HashMap<Integer, Integer> getHashmapPositionId(MethodGen mg) {
-        HashMap<Integer, Integer> hashmapPositionId = new HashMap<>();
-        InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
-        for (int i = 0; i < ihy.length; i++) hashmapPositionId.put(ihy[i].getPosition(), i);
-        return hashmapPositionId;
     }
 
     private static void updateFirstInside(ArrayList<ElementFOR> listFORow) {

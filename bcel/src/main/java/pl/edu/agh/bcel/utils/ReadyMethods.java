@@ -200,7 +200,7 @@ public class ReadyMethods {
         il.dispose();
     }
 
-    public static void addMethodSetStop(ClassGen cg, MethodGen mg) {
+    public static void addMethodSetStop(ClassGen cg) {
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionList il = new InstructionList();
 
