@@ -1,4 +1,4 @@
-package pl.edu.agh.bcel.NestedLoops;
+package pl.edu.agh.bcel.Nested;
 
 import org.apache.bcel.generic.InstructionHandle;
 
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class ElementFOR {
 
-    private ArrayList<Integer> listaIfow = new ArrayList<>();
+    private ArrayList<Integer> listaIfow;
 
     private int idPrevStore;
     private int idPrevLoad;
@@ -31,10 +31,18 @@ public class ElementFOR {
         this.idInc = idInc;
         this.idGoTo = idGoTo;
         this.idIteratora = idIteratora;
+        this.listaIfow = new ArrayList<>();
     }
 
     public void addListaIfow(Integer i) {
         this.listaIfow.add(i);
+    }
+
+    public int getIdLastIfInList() {
+        if (listaIfow.size() > 0) {
+            return listaIfow.get(listaIfow.size() - 1);
+        } else
+            return -1;
     }
 
     public void displayItem(InstructionHandle[] ihy) {

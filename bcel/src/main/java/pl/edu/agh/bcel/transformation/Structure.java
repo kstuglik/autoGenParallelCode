@@ -1,6 +1,8 @@
-package pl.edu.agh.bcel.NestedLoops;
+package pl.edu.agh.bcel.transformation;
 
 import org.apache.bcel.generic.*;
+import pl.edu.agh.bcel.NestedLoops.ElementFOR;
+import pl.edu.agh.bcel.NestedLoops.ElementIF;
 import pl.edu.agh.bcel.utils.ForLoopUtils;
 
 import java.util.ArrayList;
@@ -8,7 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 
-public class Structure {
+public class Main {
 
     public static void caseMatrix(ClassGen cg, MethodGen mg) {
 
@@ -36,8 +38,8 @@ public class Structure {
             efEk.displayItem(ihy);
         }
 
-        Transformation.matrixSubtask(cg, mg, listFORow, ihy);
-        Transformation.matrixMultiply(cg, mg, listFORow, ihy);
+        Matrix.matrixSubtask(cg, mg, listFORow, ihy);
+        Matrix.matrixMultiply(cg, mg, listFORow, ihy);
 
     }
 
@@ -66,8 +68,37 @@ public class Structure {
             efEk.displayItem(ihy);
         }
 
-        Transformation.nbodyMovies(cg, mg, listFORow, ihy);
-        Transformation.nbodySubtask(cg, mg, listFORow, ihy);
+        Nbody.nbodyMovies(cg, mg, listFORow, ihy);
+        Nbody.nbodySubtask(cg, mg, listFORow, ihy);
+
+    }
+
+    public static void caseHistogram(ClassGen cg, MethodGen mg) {
+
+        InstructionList il = new InstructionList();
+        ConstantPoolGen cp = cg.getConstantPool();
+
+        InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
+        ArrayList<ElementFOR> listFORow = new ArrayList<>();
+        ArrayList<ElementIF> samotneIfy = new ArrayList<>();
+        ArrayList<ElementIF> blokiIfElse = new ArrayList<>();
+        ArrayList<Integer> listaIfowDoUzupelnienia = new ArrayList<>();
+
+        phaseFirst(cg, mg, listFORow);
+        phaseSecond(cg, mg, samotneIfy, blokiIfElse, listaIfowDoUzupelnienia);
+        phaseThird(listaIfowDoUzupelnienia, listFORow);
+
+        System.out.println("rozpoznane petle for");
+        for (ElementFOR foRek : listFORow) {
+            foRek.displayItem(ihy);
+        }
+
+//        System.out.println("rozpoznane bloki if-else");
+//        for (ElementIF efEk : blokiIfElse) {
+//            efEk.displayItem(ihy);
+//        }
+
+        Histogram.histogramSubtask(cg, mg, listFORow, ihy);
 
     }
 

@@ -1,4 +1,4 @@
-package pl.edu.agh.bcel.NestedLoops;
+package pl.edu.agh.bcel.Nested;
 
 import org.apache.bcel.generic.InstructionHandle;
 
