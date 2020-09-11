@@ -31,13 +31,16 @@ public class SerialHistogram {
 
     public static void main(String[] args) {
 
-        float[] A = ArrayUtils.randomFloatArray1D(10, 5);
-        SerialHistogram serial = new SerialHistogram(A, 10);
+        float[] A = ArrayUtils.randomFloatArray1D(1000000, 5);
+        SerialHistogram serial = new SerialHistogram(A, 1000000);
 
-        System.out.println(Arrays.toString(serial.getData()));
-
+//        System.out.println(Arrays.toString(serial.getData()));
+        long startTime = System.nanoTime();
         serial.calculate();
+        long endTime = System.nanoTime();
+        long timeElapsed = endTime - startTime;
+        System.out.println("Execution time in milliseconds : " + timeElapsed / 1000000);
 
-        System.out.println(Arrays.toString(serial.getResult()));
+//        System.out.println(Arrays.toString(serial.getResult()));
     }
 }

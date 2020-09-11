@@ -1,6 +1,9 @@
 package histogram;
 
+import utils.ArrayUtils;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -9,19 +12,18 @@ public class ParallelHistogram {
 
     private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
 
-    private final float[] data;
-    private final float[] results;
-    private List partialResults;
+    private final int[] data;
+    private final int[] results;
 
-    public ParallelHistogram(float[] data, int N) {
+    public ParallelHistogram(int[] data, int limit) {
         this.data = data;
-        results = new float[N];
+        results = new int[limit + 1];
     }
 
     public void calculate() {
         ExecutorService service = Executors.newFixedThreadPool(NUM_THREADS);
-        List<Callable<float[]>> tasks = new LinkedList<>();
-        partialResults = new ArrayList();
+        List<Callable<int[]>> tasks = new LinkedList<>();
+        List<Future<int[]>> partialResults = new LinkedList<>();
         int dataSize = data.length;
         for (int i = 0; i < NUM_THREADS; i++) {
             int start = i * (dataSize / NUM_THREADS);
@@ -38,11 +40,9 @@ public class ParallelHistogram {
             e.printStackTrace();
         }
         service.shutdown();
-        for (int i1 = 0; i1 < partialResults.size(); i1++) {
-           Future partialResult = (Future)this.partialResults.get(i1);
-
-           try {
-                int[] part = (int[])partialResult.get();
+        for (Future<int[]> partialResult : partialResults) {
+            try {
+                int[] part = partialResult.get();
                 for (int i = 0; i < results.length; i++) {
                     results[i] += part[i];
                 }
@@ -52,16 +52,30 @@ public class ParallelHistogram {
         }
     }
 
-    public float[] getResult() {
+    public int[] getResult() {
         return results;
     }
 
-    private float[] processChunk(int start, int stop) {
-        float[] partialResult = new float[results.length];
+    private int[] processChunk(int start, int stop) {
+        int[] partialResult = new int[results.length];
         for (int i = start; i <= stop; i++) {
-            partialResult[i] = data[i]+ 1;
+            partialResult[data[i]]++;
         }
         return partialResult;
     }
 
+    public static void main(String[] args) {
+
+        float[] A = ArrayUtils.randomFloatArray1D(40, 5);
+        SerialHistogram serial = new SerialHistogram(A, 40);
+
+        System.out.println(Arrays.toString(serial.getData()));
+        long startTime = System.nanoTime();
+        serial.calculate();
+        long endTime = System.nanoTime();
+        long timeElapsed = endTime - startTime;
+        System.out.println("Execution time in milliseconds : " + timeElapsed / 1000000);
+
+        System.out.println(Arrays.toString(serial.getResult()));
+    }
 }

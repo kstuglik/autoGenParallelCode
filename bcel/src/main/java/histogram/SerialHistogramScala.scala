@@ -2,9 +2,6 @@ package histogram
 
 import java.util.Arrays
 
-import histogram.SerialHistogramScala.results
-
-
 object SerialHistogramScala {
 
   private var data: Array[Float] = _
@@ -14,18 +11,10 @@ object SerialHistogramScala {
   def main(args: Array[String]): Unit = {
     val A: Array[Float] = ArrayUtil.randomFloatArray1D(10, 5)
     val serial: SerialHistogramScala = new SerialHistogramScala(A, 10)
-    println(Arrays.toString(serial.getData))
-    serial.calculate()
-    println(Arrays.toString(serial.getResult))
+    println(Arrays.toString(getData))
+    calculate()
+    println(Arrays.toString(getResult))
   }
-
-}
-
-class SerialHistogramScala(data: Array[Float], N: Int) {
-
-  SerialHistogramScala.data = data
-
-  results = Array.ofDim[Float](N)
 
   def calculate(): Unit = {
     for (i <- 0 until data.length) {
@@ -37,4 +26,11 @@ class SerialHistogramScala(data: Array[Float], N: Int) {
 
   def getResult(): Array[Float] = results
 
+  class SerialHistogramScala(data2: Array[Float], N: Int) {
+    data = data2
+    results = Array.ofDim[Float](N)
+  }
+
 }
+
+
