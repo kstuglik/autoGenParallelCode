@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class Nbody {
 
-    public static void nbodyMovies(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listaFORow, InstructionHandle[] ihy) {
+    public static void nbodyMovies(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR, InstructionHandle[] ihy) {
 
         //      *****************************************************************************************
         HashMap<Integer, ArrayList<BranchHandle>> hashmapIFinFOR = new HashMap<>();
@@ -28,34 +28,34 @@ public class Nbody {
                 Type.VOID, Type.NO_ARGS, new String[]{}, mgOld.getName(), null, il, cp);
         HashMap<Integer, Integer> hashmapIdOldAndNewLVar = VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
         //      *****************************************************************************************
-        ElementFOR item = listaFORow.get(0);
+        ElementFOR elementFor = listElementsFOR.get(0);
         ArrayList<BranchHandle> listaIFinFOR = new ArrayList<>();
         ArrayList<BranchInstruction> listaGOTO = new ArrayList<>();
         ArrayList<InstructionHandle> listaSTART = new ArrayList<>();
         //      *****************************************************************************************
 
 
-        int ile = item.getListaIfow().size();
-        int idOstatniegoIfaWPetli = item.getListaIfow().get(ile - 1);
+        int ile = elementFor.getListWithIdInstructionIF().size();
+        int idOstatniegoIfaWPetli = elementFor.getListWithIdInstructionIF().get(ile - 1);
 
-        int start = listaFORow.get(0).getIdInsideLoop();
-        int inc = listaFORow.get(0).getIdInc() - 1;
+        int start = listElementsFOR.get(0).getIdInsideLoop();
+        int inc = listElementsFOR.get(0).getIdInc() - 1;
 
-        for (int j = 0; j < item.getIdPrevLoad(); j++) il.append(ihy[j].getInstruction());
+        for (int j = 0; j < elementFor.getIdPrevLoad(); j++) il.append(ihy[j].getInstruction());
 
         int numThreadsFieldIndex = VariableUtils.getFieldRefId(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
 
-        int loopIteratorIndex = ForLoopUtils.getIdLoadOrStoreFromInstruction(ihy[item.getIdPrevLoad() - 1].getInstruction());
+        int loopIteratorIndex = ForLoopUtils.getIdLoadOrStoreFromInstruction(ihy[elementFor.getIdPrevLoad() - 1].getInstruction());
         int dataSizeIndex = VariableUtils.getFieldIdByName("dataSize", cg);//zmienic na wartosc z LaunchPropeties
 
 //        zastanowic sie nad tym jak ogarniac te podmiane...
-        InstructionHandle prevLoad = il.append(ihy[item.getIdPrevLoad()].getInstruction());
+        InstructionHandle prevLoad = il.append(ihy[elementFor.getIdPrevLoad()].getInstruction());
         il.append(factory.createFieldAccess(cg.getClassName(), "NUM_THREADS", Type.INT, Const.GETSTATIC));
 
-        BranchHandle if_0 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListaIfow().get(0)].getInstruction());
+        BranchHandle if_0 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListWithIdInstructionIF().get(0)].getInstruction());
 
-        LocalVariableGen l1 = mgNew.addLocalVariable(LaunchProperties.START_INDEX_VAR_NAME, Type.INT, null, null);
-        LocalVariableGen l2 = mgNew.addLocalVariable(LaunchProperties.END_INDEX_VAR_NAME, Type.INT, null, null);
+        LocalVariableGen l1 = mgNew.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, null, null);
+        LocalVariableGen l2 = mgNew.addLocalVariable(LaunchProperties.END_CONDITION_NAME, Type.INT, null, null);
 
 //        start variable
         il.append(new ILOAD(loopIteratorIndex));
@@ -77,13 +77,13 @@ public class Nbody {
         il.append(factory.createNew(new ObjectType("Callable<Integer>() {" +
                 "public Integer call() {" +
                 "return " + LaunchProperties.SUBTASK_METHOD_NAME + "(" +
-                LaunchProperties.START_INDEX_VAR_NAME + "," + LaunchProperties.END_INDEX_VAR_NAME +
+                LaunchProperties.START_CONDITION_NAME + "," + LaunchProperties.END_CONDITION_NAME +
                 ");}}"
         )));
 
         il.append(factory.createInvoke("java.util.List", "add", Type.BOOLEAN, new Type[]{Type.OBJECT}, Const.INVOKEINTERFACE));
 
-        InstructionHandle next = il.append(ihy[item.getIdInc()].getInstruction());
+        InstructionHandle next = il.append(ihy[elementFor.getIdInc()].getInstruction());
         BranchInstruction gotobh = InstructionFactory.createBranchInstruction(Const.GOTO, prevLoad);
         il.append(gotobh);
 
@@ -118,7 +118,7 @@ public class Nbody {
         cg.replaceMethod(mgOld.getMethod(), mgNew.getMethod());
     }
 
-    public static void nbodySubtask(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listaFORow, InstructionHandle[] ihy) {
+    public static void nbodySubtask(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR, InstructionHandle[] ihy) {
         //      *****************************************************************************************
         HashMap<Integer, ArrayList<BranchHandle>> hashmapIFinFOR = new HashMap<>();
         HashMap<Integer, ArrayList<BranchInstruction>> hashmapGOTO = new HashMap<>();
@@ -132,42 +132,42 @@ public class Nbody {
         MethodGen mgNew = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
                 Type.INT, Type.NO_ARGS, new String[]{}, LaunchProperties.SUBTASK_METHOD_NAME,
                 cg.getClassName(), il, cp);
-        LocalVariableGen startVariable = mgNew.addLocalVariable(LaunchProperties.START_INDEX_VAR_NAME, Type.INT, null, null);
-        LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.END_INDEX_VAR_NAME, Type.INT, null, null);
+        LocalVariableGen startVariable = mgNew.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, null, null);
+        LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.END_CONDITION_NAME, Type.INT, null, null);
         //      *****************************************************************************************
         HashMap<Integer, Integer> hashmapIdOldAndNewLVar = VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
         //      *****************************************************************************************
-        ElementFOR item = listaFORow.get(0);
+        ElementFOR elementFor = listElementsFOR.get(0);
         ArrayList<BranchHandle> listaIFinFOR = new ArrayList<>();
         ArrayList<BranchInstruction> listaGOTO = new ArrayList<>();
         ArrayList<InstructionHandle> listaSTART = new ArrayList<>();
         //      *****************************************************************************************
 
         il.append(new ILOAD(0));//set start
-        Instruction in2 = ForLoopUtils.updateLVarIndexes(ihy[item.getIdPrevStore() + 1].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
+        Instruction in2 = VariableUtils.updateLVarIndexes(ihy[elementFor.getIdPrevStore() + 1].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
         il.append(in2);
 
 
-        in2 = ForLoopUtils.updateLVarIndexes(ihy[item.getIdPrevLoad()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
+        in2 = VariableUtils.updateLVarIndexes(ihy[elementFor.getIdPrevLoad()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
         InstructionHandle start = il.append(in2);
         il.append(new ILOAD(1));//set stop
 
-        for (int i = item.getIdPrevLoad() + 2; i < item.getListaIfow().get(0); i++) {
-            in2 = ForLoopUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
+        for (int i = elementFor.getIdPrevLoad() + 2; i < elementFor.getListWithIdInstructionIF().get(0); i++) {
+            in2 = VariableUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
             il.append(in2);
         }
 
-//        BranchHandle if_01 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListaIfow().get(0)]);
+//        BranchHandle if_01 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListaIfow().get(0)]);
 //        mozna dodac w przyszlosci obsluge, tzn teraz: przed <, po <=, a co będzie dla > ?
         BranchHandle if_01 = il.append(new IF_ICMPGT(null));
 
 
-        for (int j = item.getIdInsideLoop(); j < item.getIdInc(); j++) {
-            Instruction temp = ForLoopUtils.updateLVarIndexes(ihy[j].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
+        for (int j = elementFor.getIdInsideLoop(); j < elementFor.getIdInc(); j++) {
+            Instruction temp = VariableUtils.updateLVarIndexes(ihy[j].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
             il.append(temp);
         }
 
-        in2 = ForLoopUtils.updateLVarIndexes(ihy[item.getIdInc()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
+        in2 = VariableUtils.updateLVarIndexes(ihy[elementFor.getIdInc()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
         InstructionHandle incr = il.append(in2);
 
         BranchInstruction goto_01 = InstructionFactory.createBranchInstruction(Const.GOTO, start);
@@ -179,7 +179,7 @@ public class Nbody {
 
         if_01.setTarget(returnHandler);
 
-        mgNew.setArgumentNames(new String[]{LaunchProperties.START_INDEX_VAR_NAME, LaunchProperties.END_INDEX_VAR_NAME});
+        mgNew.setArgumentNames(new String[]{LaunchProperties.START_CONDITION_NAME, LaunchProperties.END_CONDITION_NAME});
         mgNew.setArgumentTypes(new Type[]{Type.INT, Type.INT});
         mgNew.setMaxLocals();
         mgNew.setMaxStack();

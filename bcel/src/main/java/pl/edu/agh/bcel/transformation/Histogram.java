@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class Histogram {
 
-    public static void histogramCalculate(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listaFORow) {
+    public static void histogramCalculate(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR) {
 
         InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
 //      *****************************************************************************************
@@ -29,8 +29,8 @@ public class Histogram {
                 Type.VOID, Type.NO_ARGS, new String[]{}, LaunchProperties.CLASS_METHOD,
                 cg.getClassName(), il, cp);
 
-        int l1 = mgNew.addLocalVariable(LaunchProperties.START_INDEX_VAR_NAME, Type.INT, null, null).getIndex();
-        int l2 = mgNew.addLocalVariable(LaunchProperties.END_INDEX_VAR_NAME, Type.INT, null, null).getIndex();
+        int l1 = mgNew.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, null, null).getIndex();
+        int l2 = mgNew.addLocalVariable(LaunchProperties.END_CONDITION_NAME, Type.INT, null, null).getIndex();
 //      *****************************************************************************************
         HashMap<Integer, Integer> hashmapIdOldAndNewLVar = VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
 //      *****************************************************************************************
@@ -49,22 +49,22 @@ public class Histogram {
         il.append(factory.createInvoke("java.util.ArrayList", "<init>", Type.VOID, Type.NO_ARGS, Const.INVOKESPECIAL));
         il.append(factory.createFieldAccess(cg.getClassName(), "partialResults", new ObjectType("java.util.List"), Const.PUTSTATIC));
 
-        ElementFOR item = listaFORow.get(0);
-        int idIteratoraZaktualizowane = hashmapIdOldAndNewLVar.get(item.getIdIteratora());
+        ElementFOR item = listElementsFOR.get(0);
+        int idIteratorZaktualizowane = hashmapIdOldAndNewLVar.get(item.getidIterator());
 
         for (int j = 0; j < item.getIdPrevLoad(); j++) {
             Instruction instruction = ihy[j].getInstruction();
-            il.append(ForLoopUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
+            il.append(VariableUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
         }
 
         Instruction instruction = ihy[item.getIdPrevLoad()].getInstruction();
-        InstructionHandle prevLoad = il.append(ForLoopUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
+        InstructionHandle prevLoad = il.append(VariableUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
 
         il.append(factory.createFieldAccess(cg.getClassName(), "NUM_THREADS", Type.INT, Const.GETSTATIC));
-        BranchHandle if_from_for_0 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListaIfow().get(0)].getInstruction());
+        BranchHandle if_from_for_0 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListWithIdInstructionIF().get(0)].getInstruction());
 
 //        start variable
-        il.append(new ILOAD(idIteratoraZaktualizowane));
+        il.append(new ILOAD(idIteratorZaktualizowane));
         il.append(factory.createFieldAccess(cg.getClassName(), "data",
                 new ArrayType("FLOAT", 1), Const.GETSTATIC));
         il.append(new ARRAYLENGTH());
@@ -75,7 +75,7 @@ public class Histogram {
 
 
 //         end variable
-        il.append(new ILOAD(idIteratoraZaktualizowane));
+        il.append(new ILOAD(idIteratorZaktualizowane));
         il.append(factory.createFieldAccess(cg.getClassName(), "data", new ArrayType("FLOAT", 1), Const.GETSTATIC));
         il.append(new ARRAYLENGTH());
         il.append(factory.createFieldAccess(cg.getClassName(), "NUM_THREADS", Type.INT, Const.GETSTATIC));
@@ -85,13 +85,13 @@ public class Histogram {
         il.append(InstructionFactory.createLoad(Type.OBJECT, LaunchProperties.TASK_POOL_ID));
         il.append(factory.createNew(new ObjectType("Callable() {" +
                 "@Override public float[] call() throws Exception { return " + LaunchProperties.SUBTASK_METHOD_NAME + "(" +
-                LaunchProperties.START_INDEX_VAR_NAME + "," + LaunchProperties.END_INDEX_VAR_NAME +
+                LaunchProperties.START_CONDITION_NAME + "," + LaunchProperties.END_CONDITION_NAME +
                 ");}}")));
 
         il.append(factory.createInvoke("java.util.List", "add", Type.BOOLEAN, new Type[]{Type.OBJECT}, Const.INVOKEINTERFACE));
 
         instruction = ihy[item.getIdInc()].getInstruction();
-        InstructionHandle inc_from_for_0 = il.append(ForLoopUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
+        InstructionHandle inc_from_for_0 = il.append(VariableUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
         BranchHandle goto_from_for_0 = il.append(new GOTO(prevLoad));
 
 //      ****************************************************************************************************
@@ -116,14 +116,14 @@ public class Histogram {
 //      ****************************************************************************************************
         InstructionHandle afterTryCatch = il.append(factory.createPrintln("asd"));
 //      **************************************************************************************************
-        item = listaFORow.get(0);
+        item = listElementsFOR.get(0);
         int idIteratorI2 = mgNew.addLocalVariable("i2", Type.INT, null, null).getIndex();
         il.append(new ICONST(0));
         il.append(new ISTORE(idIteratorI2));
         InstructionHandle prevLoad2 = il.append(new ILOAD(idIteratorI2));
         il.append(factory.createFieldAccess(cg.getClassName(), "results", new ArrayType(Type.FLOAT, 1), Const.GETSTATIC));
         il.append(InstructionConst.ARRAYLENGTH);
-        BranchHandle if_from_for_1 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListaIfow().get(0)].getInstruction());
+        BranchHandle if_from_for_1 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListWithIdInstructionIF().get(0)].getInstruction());
 //**********************************************************************************************************************
         LocalVariableGen l4 = mgNew.addLocalVariable(LaunchProperties.TEMP_RESULT_NAME,
                 new ObjectType("java.util.concurrent.Future"), null, null);
@@ -150,40 +150,40 @@ public class Histogram {
 
         for (int i = item.getIdPrevStore(); i < item.getIdPrevLoad(); i++) {
             instruction = ihy[i].getInstruction();
-            il.append(ForLoopUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
+            il.append(VariableUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
         }
         instruction = ihy[item.getIdPrevLoad()].getInstruction();
-        InstructionHandle prev_from_for_11 = il.append(ForLoopUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
+        InstructionHandle prev_from_for_11 = il.append(VariableUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
 
 
 //        tutaj wiedzialem ze jest podmiana tablic - nazw, dlatego takie a nie inne przesuniecie pobranej instrukcji
         il.append(factory.createFieldAccess(cg.getClassName(), "results", new ArrayType(Type.FLOAT, 1), Const.GETSTATIC));
 //        il.append(InstructionConst.ARRAYLENGTH);
-        for (int i = item.getIdPrevLoad() + 2; i < item.getListaIfow().get(0); i++) {
+        for (int i = item.getIdPrevLoad() + 2; i < item.getListWithIdInstructionIF().get(0); i++) {
             instruction = ihy[i].getInstruction();
-            il.append(ForLoopUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
+            il.append(VariableUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
         }
 
-        instruction = ihy[item.getListaIfow().get(0)].getInstruction();
+        instruction = ihy[item.getListWithIdInstructionIF().get(0)].getInstruction();
         BranchHandle if_from_for_11 = ForLoopUtils.getBranchHandleIF(il, instruction);
 //specyficzna podmiana (miejscowo), zamiast data -> part
 
         il.append(factory.createFieldAccess(cg.getClassName(), "results", new ArrayType(Type.FLOAT, 1), Const.GETSTATIC));
-        il.append(new ILOAD(idIteratoraZaktualizowane));
+        il.append(new ILOAD(idIteratorZaktualizowane));
 //        il.append(new DUP());
 
         il.append(factory.createFieldAccess(cg.getClassName(), "results", new ArrayType(Type.FLOAT, 1), Const.GETSTATIC));
-        il.append(new ILOAD(idIteratoraZaktualizowane));
+        il.append(new ILOAD(idIteratorZaktualizowane));
         il.append(new AALOAD());
         il.append(new ILOAD(l5.getIndex()));
-        il.append(new ILOAD(idIteratoraZaktualizowane));
+        il.append(new ILOAD(idIteratorZaktualizowane));
         il.append(new IALOAD());
         il.append(new I2F());
         il.append(new FADD());
         il.append(new FASTORE());
 
         instruction = ihy[item.getIdInc()].getInstruction();
-        InstructionHandle inc_from_for_11 = il.append(ForLoopUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
+        InstructionHandle inc_from_for_11 = il.append(VariableUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
 
         BranchHandle goto_from_for_11 = il.append(new GOTO(prev_from_for_11));
 
@@ -224,7 +224,7 @@ public class Histogram {
         cg.getConstantPool().addMethodref(mgNew);
     }
 
-    public static void histogramSubtask(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listaFORow) {
+    public static void histogramSubtask(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR) {
 
         InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
         //      *****************************************************************************************
@@ -240,8 +240,8 @@ public class Histogram {
                 new ArrayType(Type.FLOAT, 1), Type.NO_ARGS, new String[]{}, LaunchProperties.SUBTASK_METHOD_NAME,
                 cg.getClassName(), il, cp);
         //      *****************************************************************************************
-        LocalVariableGen startVariable = mgNew.addLocalVariable(LaunchProperties.START_INDEX_VAR_NAME, Type.INT, null, null);
-        LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.END_INDEX_VAR_NAME, Type.INT, null, null);
+        LocalVariableGen startVariable = mgNew.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, null, null);
+        LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.END_CONDITION_NAME, Type.INT, null, null);
         //      *****************************************************************************************
         HashMap<Integer, Integer> hashmapIdOldAndNewLVar = VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
         //      *****************************************************************************************
@@ -252,7 +252,7 @@ public class Histogram {
         ArrayList<InstructionHandle> listaNEXT = new ArrayList<>();
         ArrayList<InstructionHandle> listaINSIDE = new ArrayList<>();
         //      *****************************************************************************************
-        ElementFOR item = listaFORow.get(0);
+        ElementFOR item = listElementsFOR.get(0);
 
         LocalVariableGen lg = mgNew.addLocalVariable("partialResultsResult", new ArrayType("FLOAT", 1), null, null);
         int idpartialResults = lg.getIndex();
@@ -266,29 +266,29 @@ public class Histogram {
 
         il.append(new ILOAD(0));
         for (int i = item.getIdPrevStore() + 1; i < item.getIdPrevLoad(); i++) {
-            Instruction ih1 = ForLoopUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
+            Instruction ih1 = VariableUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
             il.append(ih1);
         }
 
-        Instruction star_00 = ForLoopUtils.updateLVarIndexes(ihy[item.getIdPrevLoad()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
+        Instruction star_00 = VariableUtils.updateLVarIndexes(ihy[item.getIdPrevLoad()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
         InstructionHandle aa = il.append(star_00);
 
 
         il.append(new ILOAD(1));
 
-        BranchHandle if_00 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListaIfow().get(0)].getInstruction());
+        BranchHandle if_00 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListWithIdInstructionIF().get(0)].getInstruction());
 
 //        *****************************************************************************************
 //        sprytna podmiana pierwszej instrukcji ktora jest od "strony lewej"
         il.append(new ALOAD(lg.getIndex()));
         for (int i = item.getIdInsideLoop() + 1; i < item.getIdInc(); i++) {
-            Instruction ih1 = ForLoopUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
+            Instruction ih1 = VariableUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
             il.append(ih1);
         }
 
 //        *****************************************************************************************
-        item = listaFORow.get(0);
-        Instruction inc_00 = ForLoopUtils.updateLVarIndexes(ihy[item.getIdInc()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
+        item = listElementsFOR.get(0);
+        Instruction inc_00 = VariableUtils.updateLVarIndexes(ihy[item.getIdInc()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
         InstructionHandle aaa = il.append(inc_00);
 
         BranchInstruction goto_00 = InstructionFactory.createBranchInstruction(Const.GOTO, aa);
@@ -300,7 +300,7 @@ public class Histogram {
 
         if_00.setTarget(returnHandler);
 
-        mgNew.setArgumentNames(new String[]{LaunchProperties.START_INDEX_VAR_NAME, LaunchProperties.END_INDEX_VAR_NAME});
+        mgNew.setArgumentNames(new String[]{LaunchProperties.START_CONDITION_NAME, LaunchProperties.END_CONDITION_NAME});
         mgNew.setArgumentTypes(new Type[]{Type.INT, Type.INT});
         mgNew.setMaxLocals();
         mgNew.setMaxStack();
