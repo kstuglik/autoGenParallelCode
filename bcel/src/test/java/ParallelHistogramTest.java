@@ -1,7 +1,6 @@
 import org.apache.bcel.classfile.*;
 import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.MethodGen;
-import org.apache.bcel.util.SyntheticRepository;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -10,8 +9,6 @@ import pl.edu.agh.bcel.LaunchProperties;
 import pl.edu.agh.bcel.transformation.Structure;
 import pl.edu.agh.bcel.utils.ReadyFields;
 import pl.edu.agh.bcel.utils.ReadyMethods;
-import pl.edu.agh.bcel.utils.TransformUtils;
-import scala.reflect.internal.util.ScalaClassLoader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,8 +36,8 @@ public class ParallelHistogramTest {
         Method transformedMethod = ByteCodeModifier.getSelectedMethod0(cgTarget, LaunchProperties.CLASS_METHOD);
         MethodGen mg = new MethodGen(transformedMethod, cgTarget.getClassName(), cgTarget.getConstantPool());
 
-        TransformUtils.addThreadPoolExecutorService(cgTarget);
-
+//        ReadyFields.addThreadPoolExecutorService(cgTarget);
+        ReadyFields.addStaticFields(cgTarget);
         ReadyMethods.addMethodToInitTaskPool(cgTarget);
         ReadyMethods.addMethodSetStop(cgTarget);
 
@@ -55,7 +52,7 @@ public class ParallelHistogramTest {
             System.out.println("i = " + i + "," + lvt[i]);
         }
 
-        System.out.println("GOTO: " + LaunchProperties.getPathToOutputFile());
+        System.out.println("\n\nGOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());
 
         try {

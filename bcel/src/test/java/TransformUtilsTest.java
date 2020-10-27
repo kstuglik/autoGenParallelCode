@@ -41,7 +41,7 @@ public class TransformUtilsTest {
         Method transformedMethod = ByteCodeModifier.getSelectedMethod0(cgTarget, LaunchProperties.CLASS_METHOD);
         MethodGen mg = new MethodGen(transformedMethod, cgTarget.getClassName(), cgTarget.getConstantPool());
 
-        TransformUtils.addThreadPoolExecutorService(cgTarget);
+//        ReadyFields.addThreadPoolExecutorService(cgTarget);
         Field[] fields = cgTarget.getFields();
 
         System.out.println("GOTO: " + LaunchProperties.getPathToOutputFile());

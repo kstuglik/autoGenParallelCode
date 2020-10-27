@@ -12,7 +12,6 @@ import pl.edu.agh.bcel.LaunchProperties;
 import pl.edu.agh.bcel.transformation.Structure;
 import pl.edu.agh.bcel.utils.ReadyFields;
 import pl.edu.agh.bcel.utils.ReadyMethods;
-import pl.edu.agh.bcel.utils.TransformUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,8 +57,8 @@ public class ParallelNBodyTest {
         Method transformedMethod = ByteCodeModifier.getSelectedMethod0(cgTarget, LaunchProperties.CLASS_METHOD);
         MethodGen mg = new MethodGen(transformedMethod, cgTarget.getClassName(), cgTarget.getConstantPool());
 
-        TransformUtils.addThreadPoolExecutorService(cgTarget);
-
+//        ReadyFields.addThreadPoolExecutorService(cgTarget);
+        ReadyFields.addStaticFields(cgTarget);
         ReadyMethods.addMethodSetStep(cgTarget);
         ReadyMethods.addMethodToInitTaskPool(cgTarget);
         ReadyMethods.addMethodSetStop(cgTarget);

@@ -44,7 +44,7 @@ public class JCudaMatrixTest {
         System.out.println("3)\til.lenght = " + mg.getInstructionList().getLength());
         TransformUtils.addCallJCudaMultiply(cgTarget, mg);
 
-        System.out.println("GOTO: " + LaunchProperties.getPathToOutputFile());
+        System.out.println("\n\nGOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());
 
         try {

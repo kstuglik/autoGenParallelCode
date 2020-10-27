@@ -1,5 +1,10 @@
+/*
+    ADD import to result file:
+        import java.util.concurrent.Callable;
+ */
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.classfile.LocalVariable;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.MethodGen;
@@ -7,8 +12,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import pl.edu.agh.bcel.ByteCodeModifier;
-import pl.edu.agh.bcel.transformation.Structure;
 import pl.edu.agh.bcel.LaunchProperties;
+import pl.edu.agh.bcel.transformation.Structure;
 import pl.edu.agh.bcel.utils.ReadyFields;
 import pl.edu.agh.bcel.utils.ReadyMethods;
 
@@ -16,20 +21,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-
-public class ParallelMatrixTest {
-
-
+public class ParallelFftTest {
     @BeforeClass
     public static void init() {
-        LaunchProperties.CLASS_DIR = "target/classes/matrix/";
-        LaunchProperties.CLASS_NAME = "SerialMultiplier";
-        LaunchProperties.CLASS_METHOD = "multiply";
-        LaunchProperties.MODIFICATION_SUFFIX = "_ITEST";
+        LaunchProperties.CLASS_DIR = "target/classes/fft/";
+        LaunchProperties.CLASS_NAME = "SerialFFT";
+        LaunchProperties.CLASS_METHOD = "fft";
     }
-
-
-//      ADD import: java.util.concurrent.Callable;
 
     @Test
     public void matrixParallelTest() throws Exception {
@@ -40,18 +38,13 @@ public class ParallelMatrixTest {
         Method transformedMethod = ByteCodeModifier.getSelectedMethod0(cgTarget, LaunchProperties.CLASS_METHOD);
         MethodGen mg = new MethodGen(transformedMethod, cgTarget.getClassName(), cgTarget.getConstantPool());
 
-//        ReadyFields.addThreadPoolExecutorService(cgTarget);
         ReadyFields.addStaticFields(cgTarget);
-        ReadyMethods.addMethodSetStep(cgTarget);
-        ReadyMethods.addMethodSetStop(cgTarget);
-        ReadyMethods.addMethodToInitTaskPool(cgTarget);
-
-        ReadyFields.addFieldStep(cgTarget, mg); // step jest dla matrix
         ReadyFields.addFieldTaskPool(cgTarget, mg);
-        ReadyFields.initFieldExecutorService(cgTarget, mg);
 
-        Structure.caseMatrix(cgTarget, mg);
+        ReadyMethods.addMethodToInitTaskPool(cgTarget);
+        ReadyMethods.addMethodSetStop(cgTarget);
 
+        Structure.caseFFT(cgTarget, mg);
 
         System.out.println("\n\nGOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());
@@ -77,5 +70,4 @@ public class ParallelMatrixTest {
         }
 
     }
-
 }
