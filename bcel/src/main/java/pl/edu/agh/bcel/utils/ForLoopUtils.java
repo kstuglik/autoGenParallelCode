@@ -1,13 +1,11 @@
 package pl.edu.agh.bcel.utils;
 
-import org.apache.bcel.classfile.LocalVariable;
 import org.apache.bcel.generic.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class ForLoopUtils {
 
@@ -98,22 +96,22 @@ public class ForLoopUtils {
 //    }
 
     public static BranchHandle getBranchHandleIF(InstructionList il, Instruction instruction) {
-        BranchHandle if_compare = null;
-        if (instruction instanceof IF_ICMPGE) if_compare = il.append(new IF_ICMPGE(null));
-        if (instruction instanceof IF_ICMPGT) if_compare = il.append(new IF_ICMPGT(null));
-        if (instruction instanceof IF_ICMPLE) if_compare = il.append(new IF_ICMPLE(null));
-        if (instruction instanceof IF_ICMPLT) if_compare = il.append(new IF_ICMPLT(null));
-        if (instruction instanceof IF_ICMPEQ) if_compare = il.append(new IF_ICMPEQ(null));
-        if (instruction instanceof IF_ICMPNE) if_compare = il.append(new IF_ICMPNE(null));
-        if (instruction instanceof IF_ACMPEQ) if_compare = il.append(new IF_ACMPEQ(null));
-        if (instruction instanceof IF_ACMPNE) if_compare = il.append(new IF_ACMPNE(null));
-        if (instruction instanceof IFLE) if_compare = il.append(new IFLE(null));
-        if (instruction instanceof IFLT) if_compare = il.append(new IFLT(null));
-        if (instruction instanceof IFGE) if_compare = il.append(new IFGE(null));
-        if (instruction instanceof IFGT) if_compare = il.append(new IFGT(null));
-        if (instruction instanceof IFEQ) if_compare = il.append(new IFEQ(null));
-        if (instruction instanceof IFNE) if_compare = il.append(new IFNE(null));
-        return if_compare;
+
+        if (instruction instanceof IF_ICMPGE) return il.append(new IF_ICMPGE(null));
+        else if (instruction instanceof IF_ICMPGT) return il.append(new IF_ICMPGT(null));
+        else if (instruction instanceof IF_ICMPLE) return il.append(new IF_ICMPLE(null));
+        else if (instruction instanceof IF_ICMPLT) return il.append(new IF_ICMPLT(null));
+        else if (instruction instanceof IF_ICMPEQ) return il.append(new IF_ICMPEQ(null));
+        else if (instruction instanceof IF_ICMPNE) return il.append(new IF_ICMPNE(null));
+        else if (instruction instanceof IF_ACMPEQ) return il.append(new IF_ACMPEQ(null));
+        else if (instruction instanceof IF_ACMPNE) return il.append(new IF_ACMPNE(null));
+        else if (instruction instanceof IFLE) return il.append(new IFLE(null));
+        else if (instruction instanceof IFLT) return il.append(new IFLT(null));
+        else if (instruction instanceof IFGE) return il.append(new IFGE(null));
+        else if (instruction instanceof IFGT) return il.append(new IFGT(null));
+        else if (instruction instanceof IFEQ) return il.append(new IFEQ(null));
+        else if (instruction instanceof IFNE) return il.append(new IFNE(null));
+        else return null;
     }
 
     public static int getIdByPositionInCode(HashMap<Integer, Integer> hashmapPositionId, int position) {
@@ -332,56 +330,5 @@ public class ForLoopUtils {
 //        return il_new;
 //    }
 
-    public static void replaceSpecificIndexes(int idOLD, int idToReplace, HashMap<Integer, Integer> hashmapIdOldAndNewLVar) {
-        hashmapIdOldAndNewLVar.replace(idOLD, idToReplace);
-    }
-
-    public static Instruction updateLVarIndexes(
-            Instruction instr, HashMap<Integer, Integer> hashmapIdOldAndNewLVar, MethodGen mgNEW, ClassGen cg) {
-
-        Pattern pattern = Pattern.compile("-?\\d+?");
-        Instruction replace = null;
-        int idOLD = -1, idNEW;
-
-        if (instr.toString().contains("_")) {
-
-            String[] string = instr.toString().split("\\W+|_");
-            int ile = string.length;
-
-            if (instr.toString().contains("load") || instr.toString().contains("store")) {
-
-                idOLD = Integer.parseInt(string[1]);
-                idNEW = hashmapIdOldAndNewLVar.getOrDefault(idOLD, -1);
-
-                if (idNEW != -1) {
-                    LocalVariable lv = VariableUtils.getLVarNameById(idNEW, mgNEW.getLocalVariableTable(cg.getConstantPool()));
-
-                    if (instr.toString().contains("load")) {
-                        replace = InstructionFactory.createLoad(Type.getType(lv.getSignature()), idNEW);
-                    } else if (instr.toString().contains("store")) {
-                        replace = InstructionFactory.createStore(Type.getType(lv.getSignature()), idNEW);
-
-                    }
-                }
-            }
-        }
-
-        if (instr.toString().contains("inc")) {
-
-            String[] string = instr.toString().split("\\W+|_");
-            int ile = string.length;
-
-            idOLD = Integer.parseInt(string[ile - 2]);
-            idNEW = hashmapIdOldAndNewLVar.getOrDefault(idOLD, -1);
-
-            if (idNEW != -1) {
-                int incrementValue = Integer.parseInt(string[ile - 1]);
-                replace = new IINC(idNEW, incrementValue);
-            }
-        }
-
-        if (replace != null) return replace;
-        else return instr;
-    }
 
 }

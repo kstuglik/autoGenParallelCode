@@ -7,6 +7,7 @@ import java.util.stream.IntStream;
 
 public class ArrayUtils {
 
+
     public static int[] convertF2IArray1D(float[] data) {
         return IntStream.range(0, data.length).map(i -> (int) data[i]).toArray();
     }
@@ -25,11 +26,22 @@ public class ArrayUtils {
         return result;
     }
 
-    public static float[] generateFArray1D(int N, int range) {
-        float[] arr = new float[N];
-        Random random = new Random(range);
+    public static double[] generateDArray1D(int N, double range) {
+        double[] arr = new double[N];
+        double min = 0.0;
+        Random random = new Random();
         for (int i = 0; i < N; i++) {
-            arr[i] = random.nextFloat();
+            arr[i] =  min + random.nextDouble() * (range - min);
+        }
+        return arr;
+    }
+
+    public static float[] generateFArray1D(int N, float range) {
+        float[] arr = new float[N];
+        float min = 0.0f;
+        Random random = new Random();
+        for (int i = 0; i < N; i++) {
+            arr[i] =  min + random.nextFloat() * (range - min);
         }
         return arr;
     }
@@ -68,6 +80,11 @@ public class ArrayUtils {
         for (float v : A) dos.writeFloat(v);
 
         dos.close();
+    }
+
+    public static int[] rewrite(float[] data) {
+        int[] temp = IntStream.range(0, data.length).map(i -> (int) data[i]).toArray();
+        return temp;
     }
 
 }

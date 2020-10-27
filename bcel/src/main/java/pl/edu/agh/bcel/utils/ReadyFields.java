@@ -1,6 +1,7 @@
 package pl.edu.agh.bcel.utils;
 
 import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.LocalVariable;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
@@ -11,32 +12,39 @@ import java.util.concurrent.ExecutorService;
 
 public class ReadyFields {
 
-    protected static void addFieldNumThreads(InstructionList instructionList, InstructionFactory instructionFactory, String className) {
-        instructionList.append(instructionFactory.createInvoke("java.lang.Runtime",
-                "getRuntime",
-                Type.getType(Runtime.class),
-                Type.NO_ARGS,
-                Const.INVOKESTATIC));
-        instructionList.append(instructionFactory.createInvoke("java.lang.Runtime",
-                "availableProcessors",
-                Type.INT,
-                Type.NO_ARGS,
-                Const.INVOKEVIRTUAL));
-        instructionList.append(instructionFactory.createPutStatic(className,
-                LaunchProperties.NUMBER_OF_THREADS_NAME,
-                Type.INT));
-//        instructionList.append(instructionFactory.createGetStatic(className,
-//                                                                  Constants.NUMBER_OF_THREADS_CONSTANT_NAME,
-//                                                                  Type.INT));
-//        instructionList.append(instructionFactory.createInvoke("java.util.concurrent.Executors",
-//                                                               "newFixedThreadPool",
-//                                                               Type.getType(ExecutorService.class),
-//                                                               new Type[]{Type.INT},
-//                                                               Const.INVOKESTATIC));
-//        instructionList.append(instructionFactory.createPutStatic(className,
-//                                                                  Constants.EXECUTOR_SERVICE_CONSTANT_NAME,
-//                                                                  Type.getType(ExecutorService.class)));
-        instructionList.append(InstructionFactory.createReturn(Type.VOID));
+    public static void addStaticFields(ClassGen cg) {
+        String className = cg.getClassName();
+        ConstantPoolGen cp = cg.getConstantPool();
+        InstructionList il = new InstructionList();
+        InstructionFactory factory = new InstructionFactory(cg, cp);
+        int FLAGS = Const.ACC_PUBLIC | Const.ACC_STATIC;// | Const.ACC_FINAL;
+
+
+        FieldGen threadCount = new FieldGen(FLAGS, Type.INT, LaunchProperties.NUMBER_OF_THREADS_NAME, cp);
+        cg.addField(threadCount.getField());
+        il.append(factory.createInvoke("java.lang.Runtime", "getRuntime", Type.getType(Runtime.class), Type.NO_ARGS, Const.INVOKESTATIC));
+        il.append(factory.createInvoke("java.lang.Runtime", "availableProcessors", Type.INT, Type.NO_ARGS, Const.INVOKEVIRTUAL));
+        il.append(factory.createPutStatic(className, LaunchProperties.NUMBER_OF_THREADS_NAME, Type.INT));
+
+
+        FieldGen thershold = new FieldGen(FLAGS, Type.INT,LaunchProperties.THRESHOLD_NAME, cp);
+        cg.addField(thershold.getField());
+        il.append(new PUSH(cp,1024));il.append(new PUSH(cp,32));il.append(new IMUL());
+        il.append(factory.createPutStatic(cg.getClassName(),LaunchProperties.THRESHOLD_NAME,Type.INT));
+
+
+        FieldGen service = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.getType(ExecutorService.class), LaunchProperties.EXECUTOR_SERVICE_NAME, cp);
+        cg.addField(service.getField());
+        il.append(factory.createGetStatic(cg.getClassName(), LaunchProperties.NUMBER_OF_THREADS_NAME, Type.INT));
+        il.append(factory.createInvoke("java.util.concurrent.Executors", "newFixedThreadPool", Type.getType(ExecutorService.class), new Type[]{Type.INT}, Const.INVOKESTATIC));
+        il.append(factory.createPutStatic(cg.getClassName(), LaunchProperties.EXECUTOR_SERVICE_NAME, Type.getType(ExecutorService.class)));
+
+
+        il.append(InstructionFactory.createReturn(Type.VOID));
+        MethodGen mg = new MethodGen(Const.ACC_STATIC, Type.VOID, Type.NO_ARGS, new String[0], Const.STATIC_INITIALIZER_NAME, className, il, cp);
+        mg.setMaxLocals();
+        mg.setMaxStack();
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
 
     public static void addFieldStep(ClassGen cg, MethodGen mg) {
@@ -78,38 +86,6 @@ public class ReadyFields {
         mg.setMaxStack();
         mg.setMaxLocals();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
-    }
-
-    public static void addFieldGeneric(ClassGen cg, MethodGen mg, String genericType) {
-        ConstantPoolGen cp = cg.getConstantPool();
-        InstructionFactory factory = new InstructionFactory(cg, cp);
-        InstructionList il = new InstructionList();
-
-
-        il.append(factory.createInvoke(
-                cg.getClassName(), LaunchProperties.METHOD_INIT_ARRAYLIST, new ObjectType(
-                        genericType),
-                Type.NO_ARGS, Const.INVOKESTATIC));
-
-        il.append(InstructionFactory.createStore(Type.OBJECT, LaunchProperties.PARTIAL_RESULT_ID));
-        il.append(InstructionFactory.createLoad(Type.OBJECT, LaunchProperties.PARTIAL_RESULT_ID));
-        il.append(InstructionFactory.createStore(Type.OBJECT, LaunchProperties.PARTIAL_RESULT_ID + 1));
-
-
-        InstructionList currentList = mg.getInstructionList();
-
-        il.append(currentList);
-        mg.setInstructionList(il);
-        mg.setMaxStack();
-        mg.setMaxLocals();
-        cg.replaceMethod(mg.getMethod(), mg.getMethod());
-
-    }
-
-
-    public static void addFieldToClass(ClassGen cg, ConstantPoolGen cp, Type type, String fieldName) {
-        FieldGen newField = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC, type, fieldName, cp);
-        cg.addField(newField.getField());
     }
 
     public static void addFieldsForJcuda(ClassGen cg) {
@@ -285,6 +261,60 @@ public class ReadyFields {
         il.append(factory.createFieldAccess(cg.getClassName(), "alpha", Type.FLOAT, Const.PUTSTATIC));
         il.append(new PUSH(cp, 0.0f));
         il.append(factory.createFieldAccess(cg.getClassName(), "beta", Type.FLOAT, Const.PUTSTATIC));
+    }
+
+//    public static void addThreadPoolExecutorService(ClassGen cg) {
+//        String className = cg.getClassName();
+//        ConstantPoolGen cp = cg.getConstantPool();
+//        FieldGen service = new FieldGen(
+//                Const.ACC_PUBLIC | Const.ACC_STATIC, Type.getType(ExecutorService.class),
+//                LaunchProperties.EXECUTOR_SERVICE_NAME, cp);
+//
+//        cg.addField(service.getField());
+//
+//        InstructionList il = new InstructionList();
+//        il.append(InstructionFactory.createReturn(Type.VOID));
+//
+//        MethodGen mg = new MethodGen(Const.ACC_STATIC,
+//                Type.VOID, Type.NO_ARGS, new String[0],
+//                Const.STATIC_INITIALIZER_NAME,
+//                className, il, cp);
+//
+//        mg.setMaxLocals();
+//        mg.setMaxStack();
+//        cg.replaceMethod(mg.getMethod(), mg.getMethod());
+//        il.dispose();
+//    }
+
+    public static void addFieldGeneric(ClassGen cg, MethodGen mg, String genericType) {
+        ConstantPoolGen cp = cg.getConstantPool();
+        InstructionFactory factory = new InstructionFactory(cg, cp);
+        InstructionList il = new InstructionList();
+
+
+        il.append(factory.createInvoke(
+                cg.getClassName(), LaunchProperties.METHOD_INIT_ARRAYLIST, new ObjectType(
+                        genericType),
+                Type.NO_ARGS, Const.INVOKESTATIC));
+
+        il.append(InstructionFactory.createStore(Type.OBJECT, LaunchProperties.PARTIAL_RESULT_ID));
+        il.append(InstructionFactory.createLoad(Type.OBJECT, LaunchProperties.PARTIAL_RESULT_ID));
+        il.append(InstructionFactory.createStore(Type.OBJECT, LaunchProperties.PARTIAL_RESULT_ID + 1));
+
+
+        InstructionList currentList = mg.getInstructionList();
+
+        il.append(currentList);
+        mg.setInstructionList(il);
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        cg.replaceMethod(mg.getMethod(), mg.getMethod());
+
+    }
+
+    public static void addFieldToClass(ClassGen cg, ConstantPoolGen cp, Type type, String fieldName) {
+        FieldGen newField = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC, type, fieldName, cp);
+        cg.addField(newField.getField());
     }
 
 }

@@ -22,7 +22,7 @@ public class VariableUtils {
             int oldVarId = item.getIndex();
             int newVarId = lg.getIndex();
             hashmapLVarIdOldAndNew.replace(oldVarId, newVarId);
-            System.out.println("\t\tvariable name:\t" + item.getName() + ", [ID]:\told = " + oldVarId + ", new = " + newVarId);
+            System.out.print("\nvariable name:\t" + item.getName() + ", [ID]:\told = " + oldVarId + ", new = " + newVarId);
         }
         System.out.println();
     }
@@ -81,7 +81,7 @@ public class VariableUtils {
         for (String key : oldVariables.keySet()) {
             int idOld = oldVariables.get(key);
             int idNew = newVariables.getOrDefault(key, -1);
-//            System.out.println("\t\t"+key + ", old ID: " + oldVariables.get(key)+", new ID: "+idNew);
+//            System.out.print(""+key + ", old ID: " + oldVariables.get(key)+", new ID: "+idNew);
             hashmapOlNewLVarId.put(idOld, idNew);
         }
 
@@ -121,10 +121,11 @@ public class VariableUtils {
             MethodGen mgOld, HashMap<Integer, Integer> hashmapLVarIdOldAndNew) {
 
         List<LocalVariable> listLVarToCreate = new ArrayList<>();
-        LocalVariable[] lvs = mgOld.getLocalVariableTable(mgOld.getConstantPool()).getLocalVariableTable();
+        LocalVariable[] lvsAll = mgOld.getLocalVariableTable(mgOld.getConstantPool()).getLocalVariableTable();
+        LocalVariable[] lvsOhneThis = Arrays.copyOfRange(lvsAll, 1, lvsAll.length);
 
 //        if the variable id is in my list and is assigned -1, it copies this object
-        for (LocalVariable item : lvs) {
+        for (LocalVariable item : lvsOhneThis) {
             int idLVarInNewMethod = hashmapLVarIdOldAndNew.getOrDefault(item.getIndex(), -777);
             if (idLVarInNewMethod == -1) {
                 listLVarToCreate.add(item);
@@ -201,6 +202,67 @@ public class VariableUtils {
         return Arrays.stream(mg.getLocalVariables())
                 .filter(variable -> variableIndexes.contains(variable.getIndex()))
                 .collect(Collectors.toList());
+    }
+
+    public static void replaceSpecificIndexes(int idOLD, int idToReplace, HashMap<Integer, Integer> hashmapIdOldAndNewLVar) {
+        hashmapIdOldAndNewLVar.replace(idOLD, idToReplace);
+    }
+
+    public static Instruction updateLVarIndexes(
+            Instruction instr, HashMap<Integer, Integer> hashmapIdOldAndNewLVar, MethodGen mgNEW, ClassGen cg) {
+
+        Instruction replace = null;
+        int idOLD = -1, idNEW;
+
+        if (instr.toString().contains("load") || instr.toString().contains("store")) {
+
+            String[] string = instr.toString().split("\\W+|_");
+            int ile = string.length;
+
+            if (instr.toString().contains("_")) {
+                if (instr.toString().contains("const")) idOLD = Integer.parseInt(string[1]);
+                else idOLD = Integer.parseInt(string[ile - 1]);
+                idNEW = hashmapIdOldAndNewLVar.getOrDefault(idOLD, -1);
+                System.out.println("idOLD:" + idOLD + ", idNEW:" + idNEW);
+
+                if (idNEW != -1) {
+                    LocalVariable lv = VariableUtils.getLVarNameById(idNEW, mgNEW.getLocalVariableTable(cg.getConstantPool()));
+
+                    if (string[0].contains("load")) {
+                        replace = InstructionFactory.createLoad(Type.getType(lv.getSignature()), idNEW);
+                    } else if (string[0].contains("store")) {
+                        replace = InstructionFactory.createStore(Type.getType(lv.getSignature()), idNEW);
+                    } else if (string[0].contains("const")) {
+                        if (idNEW > 5)
+                            replace = InstructionFactory.createStore(Type.getType(lv.getSignature()), idNEW);
+                        else
+                            replace = new ICONST(idNEW);
+                    }
+                }
+            } else {
+
+                idOLD = Integer.parseInt(string[ile - 1]);
+                idNEW = hashmapIdOldAndNewLVar.getOrDefault(idOLD, -1);
+
+                if (idNEW != -1) {
+                    if (string[0].contains("store")) replace = new ISTORE(idNEW);
+                    else if (string[0].contains("load")) replace = new ILOAD(idNEW);
+                    else if (string[0].contains("inc")) {
+                        idOLD = Integer.parseInt(string[ile - 2]);
+                        idNEW = hashmapIdOldAndNewLVar.getOrDefault(idOLD, -1);
+
+                        if (idNEW != -1) {
+                            int incrementValue = Integer.parseInt(string[ile - 1]);
+                            replace = new IINC(idNEW, incrementValue);
+                        }
+                    }
+
+                }
+            }
+        }
+
+        if (replace != null) return replace;
+        else return instr;
     }
 
 }

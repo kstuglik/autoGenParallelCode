@@ -17,7 +17,7 @@ public class InstructionUtils {
         il.append(factory.createNew(new ObjectType("Callable<Integer>() {" +
                 "public Integer call() {" +
                 "return " + LaunchProperties.SUBTASK_METHOD_NAME + "(" +
-                LaunchProperties.START_INDEX_VAR_NAME + "," + LaunchProperties.END_FINAL_INDEX_VAR_NAME +
+                LaunchProperties.START_CONDITION_NAME + "," + LaunchProperties.END_FINAL_INDEX_VAR_NAME +
                 ");}}"
         )));
 
@@ -39,7 +39,7 @@ public class InstructionUtils {
         InstructionList il = new InstructionList();
 
         int endVarIndex = VariableUtils.getLVarByName(
-                LaunchProperties.END_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+                LaunchProperties.END_CONDITION_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         int endFinalVarIndex = VariableUtils.getLVarByName(
                 LaunchProperties.END_FINAL_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
 //        int dataSizeIndex = VariableUtils.getLVarByName(
@@ -71,7 +71,7 @@ public class InstructionUtils {
     public static InstructionList getInstructionsEndInit(ClassGen cg, MethodGen mg, short dataSize) {
         InstructionList il = new InstructionList();
         int loopIteratorIndex = VariableUtils.getLVarByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int endVarIndex = VariableUtils.getLVarByName(LaunchProperties.END_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int endVarIndex = VariableUtils.getLVarByName(LaunchProperties.END_CONDITION_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         int numThreadsFieldIndex = VariableUtils.getFieldRefId(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
 
         il.append(new ILOAD(loopIteratorIndex));
@@ -94,7 +94,7 @@ public class InstructionUtils {
 
 
         int loopIteratorIndex = VariableUtils.getLVarByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int startVarIndex = VariableUtils.getLVarByName(LaunchProperties.START_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int startVarIndex = VariableUtils.getLVarByName(LaunchProperties.START_CONDITION_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         int numThreadsFieldIndex = VariableUtils.getFieldRefId(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
 
         il.append(new ILOAD(loopIteratorIndex));

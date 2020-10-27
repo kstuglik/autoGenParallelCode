@@ -237,7 +237,7 @@ public class ReadyMethods {
         method.setMaxStack();
         method.setMaxLocals();
         cg.addMethod(method.getMethod());
-        il.dispose();
+//        il.dispose();
     }
 
     public static void addMethodToInitTaskPool(ClassGen cg) {
@@ -256,7 +256,7 @@ public class ReadyMethods {
         mg.setMaxLocals();
         mg.setMaxStack();
         cg.addMethod(mg.getMethod());
-        il.dispose();
+//        il.dispose();
     }
 
     public static void addMultiplyMethod(ClassGen cg) {

@@ -6,7 +6,6 @@ import org.apache.bcel.generic.*;
 import pl.edu.agh.bcel.LaunchProperties;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 
@@ -82,21 +81,6 @@ public class TransformUtils {
         il.dispose();
     }
 
-    public static void addClassFields_old(ClassGen cg, ConstantPoolGen cp) {
-        FieldGen threadCount = new FieldGen(
-                Const.ACC_PUBLIC | Const.ACC_STATIC | Const.ACC_FINAL,
-                Type.INT,
-                LaunchProperties.NUMBER_OF_THREADS_NAME,
-                cp);
-        FieldGen service = new FieldGen(
-                Const.ACC_PUBLIC | Const.ACC_STATIC,
-                Type.getType(ExecutorService.class),
-                LaunchProperties.EXECUTOR_SERVICE_NAME,
-                cp);
-        cg.addField(threadCount.getField());
-        cg.addField(service.getField());
-    }
-
 /*CHECK IN FUTURE: id for field or variable
         int id = ConstantPoolUtils.getFieldIndex(cg,"jcm");
         int id = New.getLoacalVariableID("jcm",cp,mg);
@@ -127,41 +111,6 @@ public class TransformUtils {
         mg.setMaxLocals();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
 
-    }
-
-    public static void addThreadPoolExecutorService(ClassGen cg) {
-
-        Optional<MethodGen> classInitMethod = MethodUtils.findMethodByName(cg, Const.STATIC_INITIALIZER_NAME);
-        ConstantPoolGen cp = cg.getConstantPool();
-        addClassFields_old(cg, cp);
-        InstructionList il_new = new InstructionList();
-
-        classInitMethod.ifPresent(init -> {
-            il_new.append(init.getInstructionList());
-            try {
-                il_new.delete(il_new.getEnd());
-            } catch (TargetLostException e) {
-                e.printStackTrace();
-            }
-            retargetStaticPuts(cg, il_new);
-        });
-
-        InstructionFactory _factory = new InstructionFactory(cg, cp);
-
-        String className = cg.getClassName();
-
-        ReadyFields.addFieldNumThreads(il_new, _factory, className);
-
-        MethodGen mg = new MethodGen(Const.ACC_STATIC,
-                Type.VOID, Type.NO_ARGS, new String[0],
-                Const.STATIC_INITIALIZER_NAME,
-                className, il_new, cp);
-
-
-        mg.setMaxLocals();
-        mg.setMaxStack();
-        cg.replaceMethod(mg.getMethod(), mg.getMethod());
-//        il_new.dispose();
     }
 
     public static void addTryCatchService(ClassGen cg, MethodGen mg) {
@@ -310,12 +259,12 @@ public class TransformUtils {
                 subTaskInstructionList,
                 classGen.getConstantPool());
 
-        LocalVariableGen startVariable = subTaskMethod.addLocalVariable(LaunchProperties.START_INDEX_VAR_NAME,
+        LocalVariableGen startVariable = subTaskMethod.addLocalVariable(LaunchProperties.START_CONDITION_NAME,
                 Type.INT,
                 //0,
                 null, null);
 
-        LocalVariableGen endVariable = subTaskMethod.addLocalVariable(LaunchProperties.END_INDEX_VAR_NAME,
+        LocalVariableGen endVariable = subTaskMethod.addLocalVariable(LaunchProperties.END_CONDITION_NAME,
                 Type.INT,
                 //1,
                 null, null);
@@ -331,7 +280,7 @@ public class TransformUtils {
         LoopUtilsOld.updateLoopStartCondition(subTaskInstructionList.getInstructionHandles(), startVariable.getIndex());
         LoopUtilsOld.updateLoopEndCondition(subTaskInstructionList.getInstructionHandles(), endVariable.getIndex());
 
-        subTaskMethod.setArgumentNames(new String[]{LaunchProperties.START_INDEX_VAR_NAME, LaunchProperties.END_INDEX_VAR_NAME});
+        subTaskMethod.setArgumentNames(new String[]{LaunchProperties.START_CONDITION_NAME, LaunchProperties.END_CONDITION_NAME});
         subTaskMethod.setArgumentTypes(new Type[]{Type.INT, Type.INT});
         subTaskMethod.setMaxLocals();
         subTaskMethod.setMaxStack();
@@ -404,8 +353,8 @@ public class TransformUtils {
         InstructionList il = mg.getInstructionList();
         InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
 
-        mg.addLocalVariable(LaunchProperties.START_INDEX_VAR_NAME, Type.INT, ihy[idBegin], ihy[idEnd]);
-        mg.addLocalVariable(LaunchProperties.END_INDEX_VAR_NAME, Type.FLOAT, ihy[idBegin], ihy[idEnd]);
+        mg.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, ihy[idBegin], ihy[idEnd]);
+        mg.addLocalVariable(LaunchProperties.END_CONDITION_NAME, Type.FLOAT, ihy[idBegin], ihy[idEnd]);
         mg.addLocalVariable(LaunchProperties.END_FINAL_INDEX_VAR_NAME, Type.INT, ihy[idBegin], ihy[idEnd]);
 
         InstructionHandle startVarStart = ihy[idBegin];
