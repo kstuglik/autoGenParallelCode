@@ -1,5 +1,6 @@
 package pl.edu.agh.bcel.nested;
 
+import org.apache.bcel.generic.BranchHandle;
 import org.apache.bcel.generic.InstructionHandle;
 
 public class ElementIF {
@@ -7,6 +8,7 @@ public class ElementIF {
     private int id;
     private int idGoto;
     private int idJump;
+    private BranchHandle branchHandleIf;
 
     public ElementIF(int id, int idGoto, int idJump, int idPrevLoad) {
         this.id = id;
@@ -15,16 +17,24 @@ public class ElementIF {
         this.idJump = idJump;
     }
 
-    public void displayItem(InstructionHandle[] ihy) {
-        System.out.println();
-        System.out.println("********************************IFek*************************************");
-        System.out.println("idPrevLoad:\t" + this.idPrevLoad + ",\t" + getInstruction(ihy, this.idPrevLoad));
-        System.out.println("id        :\t" + this.id + ",\t" + getInstruction(ihy, this.id));
-        System.out.println("idGoto    :\t" + this.idGoto + ",\t" + getInstruction(ihy, this.idGoto));
-        System.out.println("idJump    :\t" + this.idJump + ",\t" + getInstruction(ihy, this.idJump));
-        System.out.println();
+    private static void displayOneLine(String name, int idPrevStore, String instruction) {
+        System.out.println(String.format("|%-15s| ", name) + String.format("%-3d, ", idPrevStore) + instruction);
     }
 
+    public BranchHandle getBranchHandleIf() {
+        return branchHandleIf;
+    }
+
+    public void setBranchHandleIf(BranchHandle branchHandleIf) {
+        this.branchHandleIf = branchHandleIf;
+    }
+
+    public void displayElementIf(InstructionHandle[] ihy) {
+        displayOneLine("\tidPrevLoad", idPrevLoad, getInstruction(ihy, this.idPrevLoad));
+        displayOneLine("\tid", id, getInstruction(ihy, this.id));
+        displayOneLine("\tidGoto", idGoto, getInstruction(ihy, this.idGoto));
+        displayOneLine("\tidJump", idJump, getInstruction(ihy, this.idJump));
+    }
 
     public int getId() {
         return id;

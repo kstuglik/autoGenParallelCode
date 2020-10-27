@@ -15,10 +15,14 @@ public class ShowBCEL {
 
     public static void main(String[] args) throws IOException {
 
-        LaunchProperties.CLASS_DIR = "bcel/target/classes/histogram/";
-        LaunchProperties.CLASS_NAME = "SerialHistogramScala";
-        LaunchProperties.CLASS_METHOD = "calculate";
+//        LaunchProperties.CLASS_DIR = "bcel/target/classes/histogram/";
+//        LaunchProperties.CLASS_NAME = "SerialHistogramScala";
+//        LaunchProperties.CLASS_METHOD = "calculate";
 
+
+        LaunchProperties.CLASS_DIR = "bcel/target/classes/";
+        LaunchProperties.CLASS_NAME = "temp";
+        LaunchProperties.CLASS_METHOD = "main";
 
         JavaClass analyzedClass = new ClassParser(LaunchProperties.getPathToIntputFile()).parse();
 

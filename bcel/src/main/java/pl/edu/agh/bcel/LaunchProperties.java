@@ -8,11 +8,12 @@ public class LaunchProperties {
     /*PARALLEL PARAMS*/
     public static final String NUMBER_OF_THREADS_NAME = "NUM_THREADS";
     public static final String EXECUTOR_SERVICE_NAME = "SERVICE";
-    public static final String START_INDEX_VAR_NAME = "start";
-    public static final String END_INDEX_VAR_NAME = "stop";
+    public static final String THRESHOLD_NAME = "THRESHOLD";
+    public static final String START_CONDITION_NAME = "startI";
+    public static final String END_CONDITION_NAME = "stopI";
     // others??
     public static final String END_FINAL_INDEX_VAR_NAME = "endFinal";
-    public static final String SUBTASK_METHOD_NAME = "SubTask";
+    public static final String SUBTASK_METHOD_NAME = "subTask";
     public static final String LOOP_ITERATOR_NAME = "i";
     public static final String GOTO_INSTRUCTION_NAME = "goto";
     public static final String DATASIZE_VAR_NAME = "dataSize";
@@ -38,8 +39,6 @@ public class LaunchProperties {
     public static String MODIFICATION_SUFFIX = "_MOD";
     public static String CLASS_NAME;
     public static String CLASS_METHOD;
-    public static String PATH_TO_INTPUT_FILE;
-    public static String PATH_TO_OUTPUT_FILE;
     //    WARNING: task polll is generic list, my variable has name: var55 and the same id
     public static int TASK_POOL_ID = 55;
     public static String ROW_NUM_VAR_NAME = "rowNum";

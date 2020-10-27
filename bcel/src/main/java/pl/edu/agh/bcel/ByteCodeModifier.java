@@ -17,7 +17,7 @@ public class ByteCodeModifier {
     public ClassGen cg;
     public MethodGen _mg;
     public ConstantPoolGen _cp;
-    public InstructionFactory _factory;
+    public InstructionFactory factory;
     public InstructionList _il_new;
 
 
@@ -47,7 +47,7 @@ public class ByteCodeModifier {
 
         _cp = cg.getConstantPool();
         _il_new = new InstructionList();
-        _factory = new InstructionFactory(cg, _cp);
+        factory = new InstructionFactory(cg, _cp);
 
         _mg = new MethodGen(Const.ACC_STATIC | Const.ACC_PUBLIC,
                 Type.VOID, new Type[]{new ArrayType(Type.STRING, 1)},
@@ -60,7 +60,7 @@ public class ByteCodeModifier {
 
         _cp = cg.getConstantPool();
         _il_new = new InstructionList();
-        _factory = new InstructionFactory(cg, _cp);
+        factory = new InstructionFactory(cg, _cp);
 
         getSelectedMethod0(cg, LaunchProperties.CLASS_METHOD);
     }
