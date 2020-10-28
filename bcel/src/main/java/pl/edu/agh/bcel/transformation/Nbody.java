@@ -35,8 +35,8 @@ public class Nbody {
         //      *****************************************************************************************
 
 
-        int ile = elementFor.getListWithIdInstructionIF().size();
-        int idOstatniegoIfaWPetli = elementFor.getListWithIdInstructionIF().get(ile - 1);
+        int ile = elementFor.getListWithIdInstructionIfInsideFor().size();
+        int idOstatniegoIfaWPetli = elementFor.getListWithIdInstructionIfInsideFor().get(ile - 1);
 
         int start = listElementsFOR.get(0).getIdInsideLoop();
         int inc = listElementsFOR.get(0).getIdInc() - 1;
@@ -52,7 +52,7 @@ public class Nbody {
         InstructionHandle prevLoad = il.append(ihy[elementFor.getIdPrevLoad()].getInstruction());
         il.append(factory.createFieldAccess(cg.getClassName(), "NUM_THREADS", Type.INT, Const.GETSTATIC));
 
-        BranchHandle if_0 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListWithIdInstructionIF().get(0)].getInstruction());
+        BranchHandle if_0 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListWithIdInstructionIfInsideFor().get(0)].getInstruction());
 
         LocalVariableGen l1 = mgNew.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, null, null);
         LocalVariableGen l2 = mgNew.addLocalVariable(LaunchProperties.END_CONDITION_NAME, Type.INT, null, null);
@@ -152,7 +152,7 @@ public class Nbody {
         InstructionHandle start = il.append(in2);
         il.append(new ILOAD(1));//set stop
 
-        for (int i = elementFor.getIdPrevLoad() + 2; i < elementFor.getListWithIdInstructionIF().get(0); i++) {
+        for (int i = elementFor.getIdPrevLoad() + 2; i < elementFor.getListWithIdInstructionIfInsideFor().get(0); i++) {
             in2 = VariableUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
             il.append(in2);
         }

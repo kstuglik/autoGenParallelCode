@@ -99,9 +99,9 @@
 //
 //        for (int i = odtad; i <= dotad; i++) {
 //
-//            ForLoopNEW item = listOfPairedBlocksFOR.get(i);
-//            ArrayList<Integer> ids = item.getIdsIFinFor();
-//            ArrayList<Integer> idsls = item.getIdsIFinForStartLoop();
+//            ForLoopNEW elementFor = listOfPairedBlocksFOR.get(i);
+//            ArrayList<Integer> ids = elementFor.getIdsIFinFor();
+//            ArrayList<Integer> idsls = elementFor.getIdsIFinForStartLoop();
 //
 //            System.out.println("ids[0] = " + ids.get(0) + ", " + ihy[ids.get(0)]);
 //            int ile = ids.size();
@@ -112,9 +112,9 @@
 //
 //
 ////        PART ONE: instrukcje z FORa
-//            int idOstatniegoIfaWPetli = item.getInstrIF().get(ile - 1).getIdPosition();
+//            int idOstatniegoIfaWPetli = elementFor.getInstrIF().get(ile - 1).getIdPosition();
 ////            tutaj bylo mniejsze lub rowne ale nie wiem skad ta "niedokladnosc"
-//            for (int j = item.getIdPositionPrevStore(); j <= idOstatniegoIfaWPetli; j++) {
+//            for (int j = elementFor.getIdPositionPrevStore(); j <= idOstatniegoIfaWPetli; j++) {
 //                System.out.println("j = " + j + ", " + ihy[j].getInstruction().toString());
 //                if (idsls.contains(j)) {
 //                    System.out.println("doddano: loopstart: " + j);
@@ -129,7 +129,7 @@
 //            }
 //
 //
-//            int inc = item.getIdPositionINC();
+//            int inc = elementFor.getIdPositionINC();
 //            if (idOstatniegoIfaWPetli + 1 == inc) {
 //                System.out.println("przypadek gdy INC jest ostatnim poleceniem w petli, tutaj next ==inc");
 //            } else {
@@ -152,11 +152,11 @@
 //
 //        for (int a = dotad; a >= odtad; a--) {
 //
-//            ForLoopNEW item = listOfPairedBlocksFOR.get(a);
+//            ForLoopNEW elementFor = listOfPairedBlocksFOR.get(a);
 //            ArrayList<InstructionHandle> listaNEXT = new ArrayList<>();
 //
 ////          *********************************************
-//            int inc = item.getIdPositionINC();
+//            int inc = elementFor.getIdPositionINC();
 //            InstructionHandle ih;
 //            String[] string = ihy[inc].getInstruction().toString().split("\\W+|_");
 //
@@ -198,16 +198,16 @@
 //
 //        for (int petlaNumer = odtad; petlaNumer <= dotad; petlaNumer++) {
 //
-//            ForLoopNEW item = listOfPairedBlocksFOR.get(petlaNumer);
-//            int ileIfow = item.getInstrIF().size();
-//            int positionInside = item.getInstrIF().get(ileIfow - 1).getInstruction().getNext().getPosition();
+//            ForLoopNEW elementFor = listOfPairedBlocksFOR.get(petlaNumer);
+//            int ileIfow = elementFor.getInstrIF().size();
+//            int positionInside = elementFor.getInstrIF().get(ileIfow - 1).getInstruction().getNext().getPosition();
 //
 //            for (int i = 0; i < ileIfow; i++) {
-//                BranchHandleItem itemif = item.getInstrIF().get(i);
+//                BranchHandleelementFor elementForif = elementFor.getInstrIF().get(i);
 //
-//                if (itemif.getPositionToJump() == positionInside) {
+//                if (elementForif.getPositionToJump() == positionInside) {
 //                    hashmapIFinFOR.get(petlaNumer).get(i).setTarget(hashmapSTART.get(petlaNumer).get(hashmapSTART.get(petlaNumer).size() - 1));
-//                } else if (itemif.getPositionToJump() > positionInside) {
+//                } else if (elementForif.getPositionToJump() > positionInside) {
 //                    if (petlaNumer == odtad) hashmapIFinFOR.get(petlaNumer).get(i).setTarget(returnHandler);
 //                    else hashmapIFinFOR.get(petlaNumer).get(i).setTarget(hashmapNEXT.get(petlaNumer - 1).get(0));
 //                } else hashmapIFinFOR.get(petlaNumer).get(i).setTarget(hashmapSTART.get(petlaNumer).get(i + 2));

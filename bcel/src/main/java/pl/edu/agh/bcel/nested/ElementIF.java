@@ -9,6 +9,8 @@ public class ElementIF {
     private int idGoto;
     private int idJump;
     private BranchHandle branchHandleIf;
+    private boolean isInsideElementFor;
+    private String signature;
 
     public ElementIF(int id, int idGoto, int idJump, int idPrevLoad) {
         this.id = id;
@@ -19,6 +21,22 @@ public class ElementIF {
 
     private static void displayOneLine(String name, int idPrevStore, String instruction) {
         System.out.println(String.format("|%-15s| ", name) + String.format("%-3d, ", idPrevStore) + instruction);
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    public boolean isInsideElementFor() {
+        return isInsideElementFor;
+    }
+
+    public void setInsideElementFor(boolean insideElementFor) {
+        isInsideElementFor = insideElementFor;
     }
 
     public BranchHandle getBranchHandleIf() {

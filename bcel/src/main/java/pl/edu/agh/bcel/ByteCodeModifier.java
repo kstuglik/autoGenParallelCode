@@ -16,7 +16,7 @@ public class ByteCodeModifier {
     public JavaClass _analyzedClass;
     public ClassGen cg;
     public MethodGen _mg;
-    public ConstantPoolGen _cp;
+    public ConstantPoolGen cp;
     public InstructionFactory factory;
     public InstructionList _il_new;
 
@@ -45,22 +45,22 @@ public class ByteCodeModifier {
         cg = new ClassGen(LaunchProperties.CLASS_NAME, "java.lang.Object", "<generate>",
                 Const.ACC_PUBLIC | Const.ACC_SUPER, null);
 
-        _cp = cg.getConstantPool();
+        cp = cg.getConstantPool();
         _il_new = new InstructionList();
-        factory = new InstructionFactory(cg, _cp);
+        factory = new InstructionFactory(cg, cp);
 
         _mg = new MethodGen(Const.ACC_STATIC | Const.ACC_PUBLIC,
                 Type.VOID, new Type[]{new ArrayType(Type.STRING, 1)},
-                new String[]{"argv"}, LaunchProperties.CLASS_METHOD, LaunchProperties.CLASS_NAME, _il_new, _cp);
+                new String[]{"argv"}, LaunchProperties.CLASS_METHOD, LaunchProperties.CLASS_NAME, _il_new, cp);
     }
 
     public void prepareToModify() throws IOException {
         _analyzedClass = new ClassParser(LaunchProperties.CLASS_DIR + LaunchProperties.CLASS_NAME + LaunchProperties.CLASS_SUFFIX).parse();
         cg = new ClassGen(_analyzedClass);
 
-        _cp = cg.getConstantPool();
+        cp = cg.getConstantPool();
         _il_new = new InstructionList();
-        factory = new InstructionFactory(cg, _cp);
+        factory = new InstructionFactory(cg, cp);
 
         getSelectedMethod0(cg, LaunchProperties.CLASS_METHOD);
     }

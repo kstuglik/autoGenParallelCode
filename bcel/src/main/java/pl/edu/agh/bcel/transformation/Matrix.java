@@ -56,12 +56,12 @@ public class Matrix {
         Instruction star_00 = VariableUtils.updateLVarIndexes(ihy[elementFor1.getIdPrevLoad()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
         InstructionHandle aa = il.append(star_00);
 
-        for (int i = elementFor1.getIdPrevLoad() + 1; i < elementFor1.getListWithIdInstructionIF().get(0); i++) {
+        for (int i = elementFor1.getIdPrevLoad() + 1; i < elementFor1.getListWithIdInstructionIfInsideFor().get(0); i++) {
             Instruction ih01 = VariableUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
             il.append(ih01);
         }
 
-        BranchHandle if_00 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor1.getListWithIdInstructionIF().get(0)].getInstruction());
+        BranchHandle if_00 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor1.getListWithIdInstructionIfInsideFor().get(0)].getInstruction());
 
 //        ***************************************************************
         ElementFOR elementFor2 = listElementsFOR.get(1);
@@ -74,12 +74,12 @@ public class Matrix {
         Instruction start_11 = VariableUtils.updateLVarIndexes(ihy[elementFor2.getIdPrevLoad()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
         InstructionHandle bb = il.append(start_11);
 
-        for (int i = elementFor2.getIdPrevLoad() + 1; i < elementFor2.getListWithIdInstructionIF().get(0); i++) {
+        for (int i = elementFor2.getIdPrevLoad() + 1; i < elementFor2.getListWithIdInstructionIfInsideFor().get(0); i++) {
             Instruction ih1 = VariableUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
             il.append(ih1);
         }
 
-        BranchHandle if_11 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor2.getListWithIdInstructionIF().get(0)].getInstruction());
+        BranchHandle if_11 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor2.getListWithIdInstructionIfInsideFor().get(0)].getInstruction());
 
         listaINSIDE.add(il.append(factory.createPrintln("ABC")));
         int pole1 = elementFor1.getidIterator();
@@ -249,12 +249,12 @@ public class Matrix {
         Instruction star_00 = VariableUtils.updateLVarIndexes(ihy[elementFor.getIdPrevLoad()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
         InstructionHandle aa = il.append(star_00);
 
-        for (int i = elementFor.getIdPrevLoad() + 1; i < elementFor.getListWithIdInstructionIF().get(0); i++) {
+        for (int i = elementFor.getIdPrevLoad() + 1; i < elementFor.getListWithIdInstructionIfInsideFor().get(0); i++) {
             Instruction ih01 = VariableUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
             il.append(ih01);
         }
 
-        BranchHandle if_00 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListWithIdInstructionIF().get(0)].getInstruction());
+        BranchHandle if_00 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListWithIdInstructionIfInsideFor().get(0)].getInstruction());
 
 //        *****************************************************************************************
 //        powtorzenei pierwszego ifa, dzialanie celowe poniewac increment jest +step, wicc nie moze przejsc za to
@@ -266,7 +266,7 @@ public class Matrix {
 //        taki trick, bo po tym ja dale, odgornie ze cos zostaje zamienione to w haszmapiie tez sie zmienilo...
         il.append(new ILOAD(oldidIterator));
         il.append(new IADD());
-        BranchHandle if_01 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListWithIdInstructionIF().get(0)].getInstruction());
+        BranchHandle if_01 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListWithIdInstructionIfInsideFor().get(0)].getInstruction());
 
 
 //        ***************************************************************
@@ -281,15 +281,15 @@ public class Matrix {
         Instruction start_11 = VariableUtils.updateLVarIndexes(ihy[elementFor.getIdPrevLoad()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
         InstructionHandle bb = il.append(start_11);
 
-        for (int i = elementFor.getIdPrevLoad() + 1; i < elementFor.getListWithIdInstructionIF().get(0); i++) {
+        for (int i = elementFor.getIdPrevLoad() + 1; i < elementFor.getListWithIdInstructionIfInsideFor().get(0); i++) {
             Instruction ih1 = VariableUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
             il.append(ih1);
         }
 
-        BranchHandle if_11 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListWithIdInstructionIF().get(0)].getInstruction());
+        BranchHandle if_11 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListWithIdInstructionIfInsideFor().get(0)].getInstruction());
 
         listaINSIDE.add(il.append(factory.createPrintln("ABC")));
-        for (int i = elementFor.getListWithIdInstructionIF().get(0) + 1; i < elementFor.getIdInc(); i++) {
+        for (int i = elementFor.getListWithIdInstructionIfInsideFor().get(0) + 1; i < elementFor.getIdInc(); i++) {
             Instruction ih1 = VariableUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
             il.append(ih1);
         }

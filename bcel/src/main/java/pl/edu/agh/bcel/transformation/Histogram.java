@@ -61,7 +61,7 @@ public class Histogram {
         InstructionHandle prevLoad = il.append(VariableUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
 
         il.append(factory.createFieldAccess(cg.getClassName(), "NUM_THREADS", Type.INT, Const.GETSTATIC));
-        BranchHandle if_from_for_0 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListWithIdInstructionIF().get(0)].getInstruction());
+        BranchHandle if_from_for_0 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListWithIdInstructionIfInsideFor().get(0)].getInstruction());
 
 //        start variable
         il.append(new ILOAD(idIteratorZaktualizowane));
@@ -123,7 +123,7 @@ public class Histogram {
         InstructionHandle prevLoad2 = il.append(new ILOAD(idIteratorI2));
         il.append(factory.createFieldAccess(cg.getClassName(), "results", new ArrayType(Type.FLOAT, 1), Const.GETSTATIC));
         il.append(InstructionConst.ARRAYLENGTH);
-        BranchHandle if_from_for_1 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListWithIdInstructionIF().get(0)].getInstruction());
+        BranchHandle if_from_for_1 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListWithIdInstructionIfInsideFor().get(0)].getInstruction());
 //**********************************************************************************************************************
         LocalVariableGen l4 = mgNew.addLocalVariable(LaunchProperties.TEMP_RESULT_NAME,
                 new ObjectType("java.util.concurrent.Future"), null, null);
@@ -159,12 +159,12 @@ public class Histogram {
 //        tutaj wiedzialem ze jest podmiana tablic - nazw, dlatego takie a nie inne przesuniecie pobranej instrukcji
         il.append(factory.createFieldAccess(cg.getClassName(), "results", new ArrayType(Type.FLOAT, 1), Const.GETSTATIC));
 //        il.append(InstructionConst.ARRAYLENGTH);
-        for (int i = item.getIdPrevLoad() + 2; i < item.getListWithIdInstructionIF().get(0); i++) {
+        for (int i = item.getIdPrevLoad() + 2; i < item.getListWithIdInstructionIfInsideFor().get(0); i++) {
             instruction = ihy[i].getInstruction();
             il.append(VariableUtils.updateLVarIndexes(instruction, hashmapIdOldAndNewLVar, mgNew, cg));
         }
 
-        instruction = ihy[item.getListWithIdInstructionIF().get(0)].getInstruction();
+        instruction = ihy[item.getListWithIdInstructionIfInsideFor().get(0)].getInstruction();
         BranchHandle if_from_for_11 = ForLoopUtils.getBranchHandleIF(il, instruction);
 //specyficzna podmiana (miejscowo), zamiast data -> part
 
@@ -276,7 +276,7 @@ public class Histogram {
 
         il.append(new ILOAD(1));
 
-        BranchHandle if_00 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListWithIdInstructionIF().get(0)].getInstruction());
+        BranchHandle if_00 = ForLoopUtils.getBranchHandleIF(il, ihy[item.getListWithIdInstructionIfInsideFor().get(0)].getInstruction());
 
 //        *****************************************************************************************
 //        sprytna podmiana pierwszej instrukcji ktora jest od "strony lewej"

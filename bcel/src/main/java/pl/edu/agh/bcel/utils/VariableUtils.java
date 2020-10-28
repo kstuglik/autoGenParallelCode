@@ -7,6 +7,8 @@ import pl.edu.agh.bcel.LaunchProperties;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Integer.parseInt;
+
 public class VariableUtils {
 
     public static boolean checkIfFieldExist(Field[] fields, String fieldName) {
@@ -263,6 +265,83 @@ public class VariableUtils {
 
         if (replace != null) return replace;
         else return instr;
+    }
+
+    private static void displayLVarFromMethod(ConstantPoolGen cp, MethodGen mgNew) {
+        LocalVariable[] lvtp = mgNew.getLocalVariableTable(cp).getLocalVariableTable();
+        System.out.println("\n");
+        for (LocalVariable localVariable : lvtp) System.out.println(localVariable);
+        System.out.println("\n");
+    }
+
+    public static int getCorrectIdInNewMethod(int id, int position, MethodGen mgOld, MethodGen mgNew) {
+
+        LocalVariable[] lvgOld = mgOld.getLocalVariableTable(mgOld.getConstantPool()).getLocalVariableTable();
+
+        for (LocalVariable localVariable : lvgOld) {
+            int tempEnd = localVariable.getStartPC() + localVariable.getLength();
+            int tempId = localVariable.getIndex();
+            if (tempId == id && tempEnd >= position)
+                return VariableUtils.getLVarIdByName(localVariable.getName(), mgNew);
+        }
+
+        return 0;
+    }
+
+    public static Instruction replaceOldIdInInstruction(InstructionHandle instruction, MethodGen mgOld, MethodGen mgNew) {
+//        load/store
+        Instruction replace = null;
+        String instrString = instruction.toString();
+        String[] string = instrString.split("\\W+|_");
+        int idOLD = -1;
+        int idNEW = 0;
+        int length = string.length;
+
+        if (string[2].contains("load") || string[2].contains("store")) {
+            if (instruction.toString().contains("_")) idOLD = parseInt(string[3]);
+            else idOLD = parseInt(string[length - 1]);
+            idNEW = VariableUtils.getCorrectIdInNewMethod(idOLD, instruction.getPosition(), mgOld, mgNew);
+            if (idNEW != -1) {
+//                STORE
+                switch (string[2]) {
+                    case "istore":
+                        replace = new ISTORE(idNEW);
+                        break;
+                    case "dstore":
+                        replace = new DSTORE(idNEW);
+                        break;
+                    case "fstore":
+                        replace = new FSTORE(idNEW);
+                        break;
+                    case "astore":
+                        replace = new ASTORE(idNEW);
+                        break;
+//                LOAD
+                    case "aload":
+                        replace = new ALOAD(idNEW);
+                        break;
+                    case "fload":
+                        replace = new FLOAD(idNEW);
+                        break;
+                    case "iload":
+                        replace = new ILOAD(idNEW);
+                        break;
+                    case "dload":
+                        replace = new DLOAD(idNEW);
+                        break;
+                }
+            }
+        } else if (instrString.contains("inc")) {
+            idOLD = parseInt(string[length - 2]);
+            idNEW = VariableUtils.getCorrectIdInNewMethod(idOLD, instruction.getPosition(), mgOld, mgNew);
+            if (idNEW != -1) {
+                int incrementValue = parseInt(string[length - 1]);
+                replace = new IINC(idNEW, incrementValue);
+            }
+        }
+//        System.out.print("\t"+idNEW+"\n");
+        if (replace != null) return replace;
+        else return instruction.getInstruction();
     }
 
 }
