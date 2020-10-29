@@ -6,6 +6,7 @@ import org.apache.bcel.generic.*;
 import pl.edu.agh.bcel.Label;
 import pl.edu.agh.bcel.LaunchProperties;
 import pl.edu.agh.bcel.nested.ElementFOR;
+import pl.edu.agh.bcel.nested.ElementIF;
 import pl.edu.agh.bcel.utils.ForLoopUtils;
 import pl.edu.agh.bcel.utils.VariableUtils;
 
@@ -24,8 +25,6 @@ public class FFT {
 
         MethodGen mgNew = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.INT,
                 new Type[]{}, new String[]{}, LaunchProperties.SUBTASK_METHOD_NAME, cg.getClassName(), il, cp);
-
-        System.out.println("wszystkich elementow for jest: " + listElementsFOR.size() + "\n");
 
         ElementFOR elFor1 = listElementsFOR.get(3);
         ElementFOR elFor2 = listElementsFOR.get(4);
@@ -102,15 +101,13 @@ public class FFT {
 
     }
 
-    public static void fftMethod(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR) throws NullPointerException, TargetLostException {
+    public static void fftMethod(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR, ArrayList<ElementIF> listElementsIF) throws NullPointerException, TargetLostException {
 
         InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
         InstructionList il = new InstructionList();
 
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionFactory factory = new InstructionFactory(cg, cp);
-
-        System.out.println("wszystkich elementow for jest: " + listElementsFOR.size() + "\n");
 
         ElementFOR elFor0 = listElementsFOR.get(0);
         int start = elFor0.getIdPrevStore();
@@ -145,13 +142,12 @@ public class FFT {
 
         }
 
-
         InstructionHandle rh = il.append(ihy[elFor0.getIdGoTo() + 1].getInstruction());
         elFor0.getListWithBranchHandleIfInFor().get(0).setTarget(rh);
 
         ElementFOR elFor1 = listElementsFOR.get(1);
-        start = elFor0.getIdPrevStore();
-        end = elFor0.getIdGoTo();
+        start = elFor1.getIdPrevStore() + 1;//+1 poniewaz petla wczesniej "wziela te 1 instrukcje" za handler
+        end = elFor1.getIdGoTo();
 
         for (int id = start; id <= end; id++) {
 
@@ -174,15 +170,19 @@ public class FFT {
             } else if (elFor1.getListWithIdInstructionIfInsideFor().contains(id)) {
                 BranchHandle bh = ForLoopUtils.getBranchHandleIF(il, ihy[id].getInstruction());
                 elFor1.addBranchHandleIfInForToArrayList(bh);
-            } else {
-                il.append(in);
-            }
+            } else if (elFor1.getListWithIdInstructionIfInsideLoop().contains(id)) {
+                BranchHandle bh = ForLoopUtils.getBranchHandleIF(il, ihy[id].getInstruction());
+                elFor1.addBranchHandleIfInLoopToArrayList(bh);
+            } else il.append(in);
 
         }
 
         InstructionHandle rh2 = il.append(InstructionFactory.createReturn(Type.VOID));
-        elFor0.getListWithBranchHandleIfInFor().get(0).setTarget(rh2);
+        elFor1.getListWithBranchHandleIfInFor().get(0).setTarget(rh2);
 
+        elFor1.getListWithBranchHandleIfInLoop().get(0).setTarget(
+                elFor1.getInstructionHandleINC()
+        );
 
 
         mgOld.setInstructionList(il);
@@ -190,7 +190,6 @@ public class FFT {
         mgOld.setMaxStack();
         cg.replaceMethod(mgOld.getMethod(), mgOld.getMethod());
         cg.getConstantPool().addMethodref(mgOld);
-
     }
 
 }

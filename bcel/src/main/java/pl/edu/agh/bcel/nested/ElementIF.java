@@ -3,6 +3,8 @@ package pl.edu.agh.bcel.nested;
 import org.apache.bcel.generic.BranchHandle;
 import org.apache.bcel.generic.InstructionHandle;
 
+import java.util.ArrayList;
+
 public class ElementIF {
     private int idPrevLoad;
     private int id;
@@ -21,6 +23,20 @@ public class ElementIF {
 
     private static void displayOneLine(String name, int idPrevStore, String instruction) {
         System.out.println(String.format("|%-15s| ", name) + String.format("%-3d, ", idPrevStore) + instruction);
+    }
+
+    public static void displayElementsIf(InstructionHandle[] ihy, ArrayList<ElementIF> listIFs) {
+        int i = 0;
+        System.out.println("\n\n" + "DETECTED: IF-all-instructions" + "\n");
+        for (ElementIF ifElement : listIFs) {
+            System.out.println("\n***************** IF-ELSE-" + (i++) + " ***************** ");
+            ifElement.displayElementIf(ihy);
+        }
+    }
+
+    public static ElementIF getElementIfWithId(ArrayList<ElementIF> listElementsIF, int id) {
+        for (ElementIF elementIF : listElementsIF) if (elementIF.getId() == id) return elementIF;
+        return null;
     }
 
     public String getSignature() {
@@ -89,4 +105,5 @@ public class ElementIF {
     public String getInstruction(InstructionHandle[] ihy, int id) {
         return id != -1 ? ihy[id].toString() : "-1";
     }
+
 }

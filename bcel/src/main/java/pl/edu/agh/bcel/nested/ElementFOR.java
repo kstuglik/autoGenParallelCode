@@ -10,8 +10,9 @@ import java.util.Collections;
 public class ElementFOR {
 
     private final ArrayList<BranchHandle> listWithBranchHandleIfInFor;
-    private ArrayList<Integer> listWithIdInstructionIfInsideFor;
+    private final ArrayList<BranchHandle> listWithBranchHandleIfInLoop;
     private final ArrayList<Integer> listWithIdInstructionIfInsideLoop;
+    private ArrayList<Integer> listWithIdInstructionIfInsideFor;
     private int idPrevStore;
     private int idPrevLoad;
     private int firstInside;
@@ -35,10 +36,11 @@ public class ElementFOR {
         this.idInc = idInc;
         this.idGoTo = idGoTo;
         this.idIterator = idIterator;
-        this.listWithIdInstructionIfInsideFor = new ArrayList<>();
-        this.listWithBranchHandleIfInFor = new ArrayList<>();
         this.typeOfNested = -1;
+        this.listWithIdInstructionIfInsideFor = new ArrayList<>();
         this.listWithIdInstructionIfInsideLoop = new ArrayList<>();
+        this.listWithBranchHandleIfInFor = new ArrayList<>();
+        this.listWithBranchHandleIfInLoop = new ArrayList<>();
     }
 
     private static void displayOneLine(String name, int idPrevStore, String instruction) {
@@ -71,6 +73,28 @@ public class ElementFOR {
         }
     }
 
+    public static void displayElementsFor(InstructionHandle[] ihy, ArrayList<ElementFOR> listFORs) {
+        int i = 0;
+        System.out.println("\n\n" + "DETECTED: FOR-loops-instructions" + "\n");
+        for (ElementFOR elementFor : listFORs) {
+            System.out.println("\n***************** FOR-" + (i++) + " ***************** ");
+            elementFor.displayElementFor(ihy);
+        }
+    }
+
+    public static void setTypeOfNestedInListElementFor(ArrayList<ElementFOR> listElementsFOR) {
+        for (int i = 1; i < listElementsFOR.size(); i++) {
+            ElementFOR elFor1 = listElementsFOR.get(i - 1);
+            ElementFOR elFor2 = listElementsFOR.get(i);
+
+            if (elFor2.getIdGoTo() < elFor1.getIdGoTo()) {
+                if (elFor1.getTypeOfNested() == -1) elFor1.setTypeOfNested(0);
+                elFor2.setTypeOfNested(1);
+            }
+
+        }
+    }
+
     public ArrayList<Integer> getListWithIdInstructionIfInsideLoop() {
         return listWithIdInstructionIfInsideLoop;
     }
@@ -83,9 +107,16 @@ public class ElementFOR {
         return listWithBranchHandleIfInFor;
     }
 
+    public ArrayList<BranchHandle> getListWithBranchHandleIfInLoop() {
+        return listWithBranchHandleIfInLoop;
+    }
+
     public void addBranchHandleIfInForToArrayList(BranchHandle bhIfInFor) {
-        if (bhIfInFor != null)
-            listWithBranchHandleIfInFor.add(bhIfInFor);
+        if (bhIfInFor != null) listWithBranchHandleIfInFor.add(bhIfInFor);
+    }
+
+    public void addBranchHandleIfInLoopToArrayList(BranchHandle bhIfInLoop) {
+        if (bhIfInLoop != null) listWithBranchHandleIfInLoop.add(bhIfInLoop);
     }
 
     public InstructionHandle getInstructionHandleFirstInside() {
@@ -243,5 +274,6 @@ public class ElementFOR {
             System.out.println("for-" + i + ", type nested: " + listElementsFOR.get(i).getTypeOfNested());
         }
     }
+
 
 }

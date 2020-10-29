@@ -1,6 +1,9 @@
 package pl.edu.agh.bcel.transformation;
 
-import org.apache.bcel.generic.*;
+import org.apache.bcel.generic.ClassGen;
+import org.apache.bcel.generic.InstructionHandle;
+import org.apache.bcel.generic.MethodGen;
+import org.apache.bcel.generic.TargetLostException;
 import pl.edu.agh.bcel.nested.ElementFOR;
 import pl.edu.agh.bcel.nested.ElementIF;
 import pl.edu.agh.bcel.utils.ForLoopUtils;
@@ -12,94 +15,8 @@ import java.util.HashMap;
 
 public class Structure {
 
-    public static void caseMatrix(ClassGen cg, MethodGen mg) {
+    public static void selectBaseCase(ClassGen cg, MethodGen mg, String signature) throws TargetLostException {
 
-        InstructionList il = new InstructionList();
-        ConstantPoolGen cp = cg.getConstantPool();
-        InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
-
-        ArrayList<ElementFOR> listElementsFOR = new ArrayList<>();
-        ArrayList<ElementIF> listElementsIF = new ArrayList<>();
-
-
-        System.out.println("\n-------- PHASE FIRST --------\n");
-        phaseFirst(cg, mg, listElementsFOR);
-
-        System.out.println("\n-------- PHASE SECOND --------\n");
-        phaseSecond(mg, listElementsIF);
-
-        System.out.println("\n-------- PHASE THIRD --------\n");
-        phaseThird(listElementsIF, listElementsFOR);
-
-        displayElementsFor(ihy, listElementsFOR);
-//        displayElementsIf(ihy, listElementsIF);
-//        displayElementsIfOutside(ihy, listElementsIF, listIdInstructionIfOutside);
-
-        Matrix.matrixSubtask(cg, mg, listElementsFOR, ihy);
-        Matrix.matrixMultiply(cg, mg, listElementsFOR, ihy);
-
-    }
-
-    public static void caseNbody(ClassGen cg, MethodGen mg) {
-
-        InstructionList il = new InstructionList();
-        ConstantPoolGen cp = cg.getConstantPool();
-        InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
-
-        ArrayList<ElementFOR> listElementsFOR = new ArrayList<>();
-        ArrayList<ElementIF> listElementsIF = new ArrayList<>();
-
-
-        System.out.println("\n-------- PHASE FIRST --------\n");
-        phaseFirst(cg, mg, listElementsFOR);
-
-        System.out.println("\n-------- PHASE SECOND --------\n");
-        phaseSecond(mg, listElementsIF);
-
-        System.out.println("\n-------- PHASE THIRD --------\n");
-        phaseThird(listElementsIF, listElementsFOR);
-
-        displayElementsFor(ihy, listElementsFOR);
-//        displayElementsIf(ihy, listElementsIF);
-//        displayElementsIfOutside(ihy, listElementsIF, listIdInstructionIfOutside);
-
-        Nbody.nbodyMovies(cg, mg, listElementsFOR, ihy);
-        Nbody.nbodySubtask(cg, mg, listElementsFOR, ihy);
-
-    }
-
-    public static void caseHistogram(ClassGen cg, MethodGen mg) {
-
-        InstructionList il = new InstructionList();
-        ConstantPoolGen cp = cg.getConstantPool();
-        InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
-
-        ArrayList<ElementFOR> listElementsFOR = new ArrayList<>();
-        ArrayList<ElementIF> listElementsIF = new ArrayList<>();
-
-
-        System.out.println("\n-------- PHASE FIRST --------\n");
-        phaseFirst(cg, mg, listElementsFOR);
-
-        System.out.println("\n-------- PHASE SECOND --------\n");
-        phaseSecond(mg, listElementsIF);
-
-        System.out.println("\n-------- PHASE THIRD --------\n");
-        phaseThird(listElementsIF, listElementsFOR);
-
-        displayElementsFor(ihy, listElementsFOR);
-//        displayElementsIf(ihy, listElementsIF);
-//        displayElementsIfOutside(ihy, listElementsIF, listIdInstructionIfOutside);
-
-        Histogram.histogramSubtask(cg, mg, listElementsFOR);
-        Histogram.histogramCalculate(cg, mg, listElementsFOR);
-
-    }
-
-    public static void caseFFT(ClassGen cg, MethodGen mg) throws TargetLostException {
-
-        InstructionList il = new InstructionList();
-        ConstantPoolGen cp = cg.getConstantPool();
         InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
 
         ArrayList<ElementFOR> listElementsFOR = new ArrayList<>();
@@ -117,14 +34,27 @@ public class Structure {
 
         moveIdIfFromForStatementToLoop(listElementsFOR,listElementsIF);
 
+//        ElementFOR.displayElementsFor(ihy, listElementsFOR);
+//        ElementIF.displayElementsIf(ihy, listElementsIF);
 
-        displayElementsFor(ihy, listElementsFOR);
-//        displayElementsIf(ihy, listElementsIF);
-//        displayElementsIfOutside(ihy, listElementsIF, listIdInstructionIfOutside);
-
-//        kolejnosc ma znaczenie, druga z kolei metoda usuwa czesc instrukcji
-        FFT.fftSubtask(cg, mg, listElementsFOR);
-//        FFT.fftMethod(cg, mg, listElementsFOR,listElementsIF,listIdInstructionIfOutside);
+        switch (signature) {
+            case "matrix":
+                Matrix.matrixSubtask(cg, mg, listElementsFOR, ihy);
+                Matrix.matrixMultiply(cg, mg, listElementsFOR, ihy);
+                break;
+            case "nbody":
+                Nbody.nbodyMovies(cg, mg, listElementsFOR, ihy);
+                Nbody.nbodySubtask(cg, mg, listElementsFOR, ihy);
+                break;
+            case "fft":
+                FFT.fftSubtask(cg, mg, listElementsFOR);
+                FFT.fftMethod(cg, mg, listElementsFOR, listElementsIF);
+                break;
+            case "histogram":
+                Histogram.histogramSubtask(cg, mg, listElementsFOR);
+                Histogram.histogramCalculate(cg, mg, listElementsFOR);
+                break;
+        }
 
     }
 
@@ -152,22 +82,6 @@ public class Structure {
                 }
             }
         }
-    }
-
-    public static int getIdIncForStatement(InstructionHandle[] ihy, int idGoTo) {
-        int idINC = idGoTo;
-        InstructionHandle ih = ihy[idGoTo].getPrev();
-        idINC -= 1;
-        if (!ih.toString().contains("inc")) {
-            ih = ih.getPrev();
-            idINC -= 1;
-            for (int i = idINC; ; i--) {
-                ih = ih.getPrev();
-                if (!ih.toString().contains("load") && !ih.toString().contains("const")) break;
-                idINC -= 1;
-            }
-        }
-        return idINC;
     }
 
     public static void phaseSecond(MethodGen mg, ArrayList<ElementIF> listElementsIF) {
@@ -220,20 +134,17 @@ public class Structure {
 
     private static void phaseThird(ArrayList<ElementIF> listElementsIF, ArrayList<ElementFOR> listElementsFOR) {
 
-        ElementIF elementIF;
+        System.out.println("set ID from ElementIF for: ElementFor statement");
 
+        ElementIF elementIF;
         int idInstructionIf;
         ArrayList<Integer> listIdInstructionsIfInUse = new ArrayList<>();
 
-        System.out.println("set ID from ElementIF for: ElementFor statement");
-
-//        System.out.println("ALL ELEMENTS: " + listWithIdInstructionIF);
         for (int id = listElementsIF.size() - 1; id >= 0; id--) {
             for (ElementFOR elementFOR : listElementsFOR) {
                 elementIF = listElementsIF.get(id);
                 idInstructionIf = elementIF.getId();
-                if (elementIF.getId() >= elementFOR.getIdPrevLoad() &&
-                        elementIF.getId() < elementFOR.getIdInc()) {
+                if (elementIF.getId() >= elementFOR.getIdPrevLoad() && elementIF.getId() < elementFOR.getIdInc()) {
                     if (!listIdInstructionsIfInUse.contains(idInstructionIf)) {
                         listIdInstructionsIfInUse.add(idInstructionIf);
                         elementFOR.addIdInstructionIfInsideForIntoList(idInstructionIf);
@@ -249,21 +160,24 @@ public class Structure {
 
         listElementsFOR.sort(Comparator.comparing(ElementFOR::getIdPrevStore));
 
-        setTypeOfNestedInListElementFor(listElementsFOR);
+        ElementFOR.setTypeOfNestedInListElementFor(listElementsFOR);
 
     }
 
-    private static void setTypeOfNestedInListElementFor(ArrayList<ElementFOR> listElementsFOR) {
-        for (int i = 1; i < listElementsFOR.size(); i++) {
-            ElementFOR elFor1 = listElementsFOR.get(i - 1);
-            ElementFOR elFor2 = listElementsFOR.get(i);
-
-            if (elFor2.getIdGoTo() < elFor1.getIdGoTo()) {
-                if (elFor1.getTypeOfNested() == -1) elFor1.setTypeOfNested(0);
-                elFor2.setTypeOfNested(1);
+    public static int getIdIncForStatement(InstructionHandle[] ihy, int idGoTo) {
+        int idINC = idGoTo;
+        InstructionHandle ih = ihy[idGoTo].getPrev();
+        idINC -= 1;
+        if (!ih.toString().contains("inc")) {
+            ih = ih.getPrev();
+            idINC -= 1;
+            for (int i = idINC; ; i--) {
+                ih = ih.getPrev();
+                if (!ih.toString().contains("load") && !ih.toString().contains("const")) break;
+                idINC -= 1;
             }
-
         }
+        return idINC;
     }
 
     public static int zGetFirstPrevIdBySignature(InstructionHandle[] ihy, int start, String signature) {
@@ -283,63 +197,12 @@ public class Structure {
         return i;
     }
 
-    public static void moreNested(ClassGen cg, MethodGen mg) {
-
-        InstructionList il = new InstructionList();
-        ConstantPoolGen cp = cg.getConstantPool();
-        InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
-
-        ArrayList<ElementFOR> listElementsFOR = new ArrayList<>();
-        ArrayList<ElementIF> listElementsIF = new ArrayList<>();
-
-
-        System.out.println("\n-------- PHASE FIRST --------\n");
-        phaseFirst(cg, mg, listElementsFOR);
-
-        System.out.println("\n-------- PHASE SECOND --------\n");
-        phaseSecond(mg, listElementsIF);
-
-        System.out.println("\n-------- PHASE THIRD --------\n");
-        phaseThird(listElementsIF, listElementsFOR);
-
-        displayElementsFor(ihy, listElementsFOR);
-//        displayElementsIf(ihy, listElementsIF);
-//        displayElementsIfOutside(ihy, listElementsIF, listIdInstructionIfOutside);
-    }
-
-    private static void displayElementsFor(InstructionHandle[] ihy, ArrayList<ElementFOR> listFORs) {
-        int i = 0;
-        System.out.println("\n\n" + "DETECTED: FOR-loops-instructions" + "\n");
-        for (ElementFOR elementFor : listFORs) {
-            System.out.println("\n***************** FOR-" + (i++) + " ***************** ");
-            elementFor.displayElementFor(ihy);
-        }
-    }
-
-    private static void displayElementsIf(InstructionHandle[] ihy, ArrayList<ElementIF> listIFs) {
-        int i = 0;
-        System.out.println("\n\n" + "DETECTED: IF-all-instructions" + "\n");
-        for (ElementIF ifElement : listIFs) {
-            System.out.println("\n***************** IF-ELSE-" + (i++) + " ***************** ");
-            ifElement.displayElementIf(ihy);
-        }
-    }
-
-    private static ElementIF getElementIfWithId(ArrayList<ElementIF> listElementsIF, int id) {
-        for (ElementIF elementIF : listElementsIF) {
-            if (elementIF.getId() == id) {
-                return elementIF;
-            }
-        }
-        return null;
-    }
-
     public static void moveIdIfFromForStatementToLoop(ArrayList<ElementFOR> listElementsFOR,
                                                       ArrayList<ElementIF> listElementsIF) {
         for (ElementFOR elementFOR : listElementsFOR) {
             ArrayList<Integer> ifs = elementFOR.getListWithIdInstructionIfInsideFor();
             for (Integer anIf : ifs) {
-                ElementIF elementIF = getElementIfWithId(listElementsIF, anIf);
+                ElementIF elementIF = ElementIF.getElementIfWithId(listElementsIF, anIf);
                 if (elementIF != null) {
                     if (elementFOR.getIdInc() == elementIF.getIdJump()) {
                         elementFOR.addIdInstructionIfInsideLoopIntoList(elementIF.getId());
@@ -350,20 +213,12 @@ public class Structure {
                 }
             }
 
-            ArrayList<Integer> insideLoop = elementFOR.getListWithIdInstructionIfInsideLoop();
-            ArrayList<Integer> insideFor = elementFOR.getListWithIdInstructionIfInsideFor();
+            ArrayList<Integer> listWithIdsIfInsideLoop = elementFOR.getListWithIdInstructionIfInsideLoop();
+            ArrayList<Integer> listWithIdsIfInsideFor = elementFOR.getListWithIdInstructionIfInsideFor();
 
-            for (int i = 0; i < insideLoop.size(); i++) {
-                insideFor.remove(insideLoop.get(i));
-            }
-            elementFOR.setListWithIdInstructionIfInsideFor(insideFor);
+            for (Integer id : listWithIdsIfInsideLoop) listWithIdsIfInsideFor.remove(id);
+            elementFOR.setListWithIdInstructionIfInsideFor(listWithIdsIfInsideFor);
 
         }
     }
-
-    public void removeReduntantIdInArraylist(){
-
-    }
-
-
 }
