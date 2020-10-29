@@ -26,7 +26,7 @@ public class ParallelHistogramTest {
 //      ADD import: java.util.concurrent.Callable;
 
     @Test
-    public void matrixParallelTest() throws Exception {
+    public void histogramParallelTest() throws Exception {
 
         JavaClass analyzedClass = new ClassParser(LaunchProperties.getPathToIntputFile()).parse();
         ClassGen cgTarget = new ClassGen(analyzedClass);
@@ -45,7 +45,7 @@ public class ParallelHistogramTest {
         ReadyFields.initFieldExecutorService(cgTarget, mg);
 
 
-        Structure.caseHistogram(cgTarget, mg);
+        Structure.selectBaseCase(cgTarget, mg,"histogram");
 
         LocalVariable[] lvt = mg.getLocalVariableTable(mg.getConstantPool()).getLocalVariableTable();
         for (int i = 0; i < lvt.length; i++) {

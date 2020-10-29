@@ -67,7 +67,7 @@ public class ParallelNBodyTest {
         ReadyFields.initFieldExecutorService(cgTarget, mg);
 
 
-        Structure.caseNbody(cgTarget, mg);
+        Structure.selectBaseCase(cgTarget, mg,"nbody");
 
         System.out.println("\n\nGOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());

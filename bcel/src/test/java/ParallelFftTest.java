@@ -2,9 +2,9 @@
     ADD import to result file:
         import java.util.concurrent.Callable;
  */
+
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
-import org.apache.bcel.classfile.LocalVariable;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.MethodGen;
@@ -30,7 +30,7 @@ public class ParallelFftTest {
     }
 
     @Test
-    public void matrixParallelTest() throws Exception {
+    public void fftParallelTest() throws Exception {
 
         JavaClass analyzedClass = new ClassParser(LaunchProperties.getPathToIntputFile()).parse();
         ClassGen cgTarget = new ClassGen(analyzedClass);
@@ -44,7 +44,7 @@ public class ParallelFftTest {
         ReadyMethods.addMethodToInitTaskPool(cgTarget);
         ReadyMethods.addMethodSetStop(cgTarget);
 
-        Structure.caseFFT(cgTarget, mg);
+        Structure.selectBaseCase(cgTarget, mg, "fft");
 
         System.out.println("\n\nGOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());

@@ -7,8 +7,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import pl.edu.agh.bcel.ByteCodeModifier;
-import pl.edu.agh.bcel.transformation.Structure;
 import pl.edu.agh.bcel.LaunchProperties;
+import pl.edu.agh.bcel.transformation.Structure;
 import pl.edu.agh.bcel.utils.ReadyFields;
 import pl.edu.agh.bcel.utils.ReadyMethods;
 
@@ -50,7 +50,7 @@ public class ParallelMatrixTest {
         ReadyFields.addFieldTaskPool(cgTarget, mg);
         ReadyFields.initFieldExecutorService(cgTarget, mg);
 
-        Structure.caseMatrix(cgTarget, mg);
+        Structure.selectBaseCase(cgTarget, mg, "matrix");
 
 
         System.out.println("\n\nGOTO: " + LaunchProperties.getPathToOutputFile());

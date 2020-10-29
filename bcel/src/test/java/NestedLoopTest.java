@@ -15,7 +15,7 @@ ABOUT:
     USE: bcel/ in path if needed
  */
 
-public class NestedLoopTest{
+public class NestedLoopTest {
     @BeforeClass
     public static void init() {
         LaunchProperties.CLASS_DIR = "target/classes/";
@@ -31,7 +31,7 @@ public class NestedLoopTest{
         Method transformedMethod = ByteCodeModifier.getSelectedMethod0(cgTarget, LaunchProperties.CLASS_METHOD);
         MethodGen mg = new MethodGen(transformedMethod, cgTarget.getClassName(), cgTarget.getConstantPool());
 
-        Structure.moreNested(cgTarget, mg);
+        Structure.selectBaseCase(cgTarget, mg, "");
 
         System.out.println("\n\nGOTO: " + LaunchProperties.getPathToOutputFile());
         cgTarget.getJavaClass().dump(LaunchProperties.getPathToOutputFile());
