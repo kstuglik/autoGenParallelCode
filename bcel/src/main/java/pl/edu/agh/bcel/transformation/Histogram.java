@@ -30,7 +30,7 @@ public class Histogram {
                 cg.getClassName(), il, cp);
 
         int l1 = mgNew.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, null, null).getIndex();
-        int l2 = mgNew.addLocalVariable(LaunchProperties.END_CONDITION_NAME, Type.INT, null, null).getIndex();
+        int l2 = mgNew.addLocalVariable(LaunchProperties.STOP_CONDITION_NAME, Type.INT, null, null).getIndex();
 //      *****************************************************************************************
         HashMap<Integer, Integer> hashmapIdOldAndNewLVar = VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
 //      *****************************************************************************************
@@ -85,7 +85,7 @@ public class Histogram {
         il.append(InstructionFactory.createLoad(Type.OBJECT, LaunchProperties.TASK_POOL_ID));
         il.append(factory.createNew(new ObjectType("Callable() {" +
                 "@Override public float[] call() throws Exception { return " + LaunchProperties.SUBTASK_METHOD_NAME + "(" +
-                LaunchProperties.START_CONDITION_NAME + "," + LaunchProperties.END_CONDITION_NAME +
+                LaunchProperties.START_CONDITION_NAME + "," + LaunchProperties.STOP_CONDITION_NAME +
                 ");}}")));
 
         il.append(factory.createInvoke("java.util.List", "add", Type.BOOLEAN, new Type[]{Type.OBJECT}, Const.INVOKEINTERFACE));
@@ -241,7 +241,7 @@ public class Histogram {
                 cg.getClassName(), il, cp);
         //      *****************************************************************************************
         LocalVariableGen startVariable = mgNew.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, null, null);
-        LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.END_CONDITION_NAME, Type.INT, null, null);
+        LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.STOP_CONDITION_NAME, Type.INT, null, null);
         //      *****************************************************************************************
         HashMap<Integer, Integer> hashmapIdOldAndNewLVar = VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
         //      *****************************************************************************************
@@ -300,7 +300,7 @@ public class Histogram {
 
         if_00.setTarget(returnHandler);
 
-        mgNew.setArgumentNames(new String[]{LaunchProperties.START_CONDITION_NAME, LaunchProperties.END_CONDITION_NAME});
+        mgNew.setArgumentNames(new String[]{LaunchProperties.START_CONDITION_NAME, LaunchProperties.STOP_CONDITION_NAME});
         mgNew.setArgumentTypes(new Type[]{Type.INT, Type.INT});
         mgNew.setMaxLocals();
         mgNew.setMaxStack();

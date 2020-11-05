@@ -14,6 +14,7 @@ public class Label {
     private int id;
     private int startPc;
     private int endPc;
+    private boolean inUse;
 
     public Label(String name, String signature, int id, int startPc, int endPc) {
         setName(name);
@@ -21,14 +22,17 @@ public class Label {
         setId(id);
         setStartPc(startPc);
         setEndPc(endPc);
+        setInUse(false);
     }
 
     public static void setParamsInSubtskFromLabels(MethodGen mgNew, ArrayList<Label> labels) {
         ArrayList<Type> t = new ArrayList<>();
         ArrayList<String> s = new ArrayList<>();
         for (Label label : labels) {
+
             t.add(Type.getType(label.getSignature()));
             s.add(label.getName());
+
         }
         Type[] tt = t.toArray(new Type[0]);
         String[] ss = s.toArray(new String[0]);
@@ -39,33 +43,23 @@ public class Label {
         mgNew.setArgumentNames(ss);
     }
 
-    public static void createVariablesFromLabels(ArrayList<Label> labels, MethodGen mgNew, boolean init, ConstantPoolGen cp) {
+    public static void createVariablesFromLabels(ArrayList<Label> labels,
+                                                 MethodGen mgNew, ConstantPoolGen cp) {
         InstructionList il = mgNew.getInstructionList();
 
         for (Label label : labels) {
-            if (VariableUtils.getLVarIdByName(label.getName(), mgNew) == -1) {
+            if (VariableUtils.getLVarIdByName(label.getName(), mgNew) == -1
+//                    && label.getInUse()
+            ) {
                 LocalVariableGen lv = mgNew.addLocalVariable(
                         label.getName(),
                         Type.getType(label.getSignature()),
                         null, null);
-
-                if (init) {
-                    int idi = lv.getIndex();
-                    System.out.println(lv.getType());
-                    if (lv.getType() == Type.INT) {
-                        il.append(new PUSH(cp, 0));
-                        il.append(InstructionFactory.createStore(Type.INT, idi));
-                    } else if (lv.getType() == Type.DOUBLE) {
-                        il.append(new PUSH(cp, 0.0));
-                        il.append(InstructionFactory.createStore(Type.DOUBLE, idi));
-                    }
-
-                }
             }
         }
     }
 
-    public static ArrayList<Label> getListVariablesForSubTask(MethodGen mgOld, int position, String compare) {
+    public static ArrayList<Label> getListVariablesForSubTask(MethodGen mgOld, int position) {
 
         LocalVariable[] lv = mgOld.getLocalVariableTable(mgOld.getConstantPool()).getLocalVariableTable();
         ArrayList<Label> labels = new ArrayList<>();
@@ -78,28 +72,54 @@ public class Label {
             String signature;
             String name;
 
-            if (compare.equals("<")) {
-                if (startPc < position && endPc > position) {
-                    id = localVariable.getIndex();
-                    signature = localVariable.getSignature();
-                    name = localVariable.getName();
+            if (startPc < position && endPc > position) {
+                id = localVariable.getIndex();
+                signature = localVariable.getSignature();
+                name = localVariable.getName();
+                if (!name.equals("this")) labels.add(new Label(name, signature, id, startPc, endPc));
 
-                    if (!name.equals("this")) labels.add(new Label(name, signature, id, startPc, endPc));
-                }
             }
-            if (compare.equals(">=")) {
-                if (startPc >= position && endPc > position) {
-                    id = localVariable.getIndex();
-                    signature = localVariable.getSignature();
-                    name = localVariable.getName();
-
-                    if (!name.equals("this")) labels.add(new Label(name, signature, id, startPc, endPc));
-                }
-            }
-
         }
 
+
+        int index = labels.size() - 1;
+        labels.remove(index);
+        labels.add(new Label(LaunchProperties.START_CONDITION_NAME, "I", -1, -1, -1));
+        labels.add(new Label(LaunchProperties.STOP_CONDITION_NAME, "I", -1, -1, -1));
+
         return labels;
+    }
+
+    public static ArrayList<Label> getListVariablesToFinal(MethodGen mgOld, int idStart, int idStop) {
+
+        ArrayList<Label> result = new ArrayList<>();
+        InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
+        for (int i = idStart; i < idStop; i++) {
+            if (ihy[i].toString().contains("load") || ihy[i].toString().contains("store")) {
+                System.out.println(ihy[i]);
+            }
+        }
+        LocalVariable[] lvt = mgOld.getLocalVariableTable(mgOld.getConstantPool()).getLocalVariableTable();
+        for (int i = 0; i < lvt.length; i++) {
+            System.out.println(lvt[i]);
+        }
+        return result;
+    }
+
+    public static String displayNameFromArrayList(ArrayList<Label> alLabels) {
+        String response = "";
+        for (Label alLabel : alLabels) {
+            response += alLabel.getName() + " ";
+        }
+        return response;
+    }
+
+    public boolean getInUse() {
+        return inUse;
+    }
+
+    public void setInUse(boolean inUse) {
+        this.inUse = inUse;
     }
 
     public String getName() {
@@ -149,5 +169,4 @@ public class Label {
                 ", startPc: " + getStartPc() +
                 ", endPc: " + getEndPc());
     }
-
 }

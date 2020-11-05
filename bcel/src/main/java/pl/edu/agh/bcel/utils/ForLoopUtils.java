@@ -95,7 +95,26 @@ public class ForLoopUtils {
 //        }
 //    }
 
-    public static BranchHandle getBranchHandleIF(InstructionList il, Instruction instruction) {
+//    public static BranchInstruction getBranchHandleIF2(InstructionList il, Instruction instruction) {
+//
+//        if (instruction instanceof IF_ICMPGE) return new IF_ICMPGE(null);
+//        else if (instruction instanceof IF_ICMPGT) return new IF_ICMPGT(null);
+//        else if (instruction instanceof IF_ICMPLE) return new IF_ICMPLE(null);
+//        else if (instruction instanceof IF_ICMPLT) return new IF_ICMPLT(null);
+//        else if (instruction instanceof IF_ICMPEQ) return new IF_ICMPEQ(null);
+//        else if (instruction instanceof IF_ICMPNE) return new IF_ICMPNE(null);
+//        else if (instruction instanceof IF_ACMPEQ) return new IF_ACMPEQ(null);
+//        else if (instruction instanceof IF_ACMPNE) return new IF_ACMPNE(null);
+//        else if (instruction instanceof IFLE) return new IFLE(null);
+//        else if (instruction instanceof IFLT) return new IFLT(null);
+//        else if (instruction instanceof IFGE) return new IFGE(null);
+//        else if (instruction instanceof IFGT) return new IFGT(null);
+//        else if (instruction instanceof IFEQ) return new IFEQ(null);
+//        else if (instruction instanceof IFNE) return new IFNE(null);
+//        else return null;
+//    }
+
+        public static BranchHandle getBranchHandleIF(InstructionList il, Instruction instruction) {
 
         if (instruction instanceof IF_ICMPGE) return il.append(new IF_ICMPGE(null));
         else if (instruction instanceof IF_ICMPGT) return il.append(new IF_ICMPGT(null));

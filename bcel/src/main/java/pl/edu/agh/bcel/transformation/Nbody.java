@@ -55,7 +55,7 @@ public class Nbody {
         BranchHandle if_0 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListWithIdInstructionIfInsideFor().get(0)].getInstruction());
 
         LocalVariableGen l1 = mgNew.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, null, null);
-        LocalVariableGen l2 = mgNew.addLocalVariable(LaunchProperties.END_CONDITION_NAME, Type.INT, null, null);
+        LocalVariableGen l2 = mgNew.addLocalVariable(LaunchProperties.STOP_CONDITION_NAME, Type.INT, null, null);
 
 //        start variable
         il.append(new ILOAD(loopIteratorIndex));
@@ -77,7 +77,7 @@ public class Nbody {
         il.append(factory.createNew(new ObjectType("Callable<Integer>() {" +
                 "public Integer call() {" +
                 "return " + LaunchProperties.SUBTASK_METHOD_NAME + "(" +
-                LaunchProperties.START_CONDITION_NAME + "," + LaunchProperties.END_CONDITION_NAME +
+                LaunchProperties.START_CONDITION_NAME + "," + LaunchProperties.STOP_CONDITION_NAME +
                 ");}}"
         )));
 
@@ -133,7 +133,7 @@ public class Nbody {
                 Type.INT, Type.NO_ARGS, new String[]{}, LaunchProperties.SUBTASK_METHOD_NAME,
                 cg.getClassName(), il, cp);
         LocalVariableGen startVariable = mgNew.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, null, null);
-        LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.END_CONDITION_NAME, Type.INT, null, null);
+        LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.STOP_CONDITION_NAME, Type.INT, null, null);
         //      *****************************************************************************************
         HashMap<Integer, Integer> hashmapIdOldAndNewLVar = VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
         //      *****************************************************************************************
@@ -179,7 +179,7 @@ public class Nbody {
 
         if_01.setTarget(returnHandler);
 
-        mgNew.setArgumentNames(new String[]{LaunchProperties.START_CONDITION_NAME, LaunchProperties.END_CONDITION_NAME});
+        mgNew.setArgumentNames(new String[]{LaunchProperties.START_CONDITION_NAME, LaunchProperties.STOP_CONDITION_NAME});
         mgNew.setArgumentTypes(new Type[]{Type.INT, Type.INT});
         mgNew.setMaxLocals();
         mgNew.setMaxStack();

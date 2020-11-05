@@ -9,8 +9,8 @@ public class LaunchProperties {
     public static final String NUMBER_OF_THREADS_NAME = "NUM_THREADS";
     public static final String EXECUTOR_SERVICE_NAME = "SERVICE";
     public static final String THRESHOLD_NAME = "THRESHOLD";
-    public static final String START_CONDITION_NAME = "startI";
-    public static final String END_CONDITION_NAME = "stopI";
+    public static final String START_CONDITION_NAME = "finaliStart";
+    public static final String STOP_CONDITION_NAME = "finaliStop";
     // others??
     public static final String END_FINAL_INDEX_VAR_NAME = "endFinal";
     public static final String SUBTASK_METHOD_NAME = "subTask";

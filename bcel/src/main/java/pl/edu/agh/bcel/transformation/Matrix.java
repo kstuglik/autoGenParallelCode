@@ -319,7 +319,7 @@ public class Matrix {
 
         mgNew.setArgumentNames(new String[]{
                 LaunchProperties.START_CONDITION_NAME,
-                LaunchProperties.END_CONDITION_NAME,
+                LaunchProperties.STOP_CONDITION_NAME,
                 LaunchProperties.STEP_VAR_NAME
         });
         mgNew.setArgumentTypes(new Type[]{Type.INT, Type.INT, Type.INT});

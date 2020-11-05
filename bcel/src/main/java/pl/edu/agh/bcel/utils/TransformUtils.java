@@ -264,7 +264,7 @@ public class TransformUtils {
                 //0,
                 null, null);
 
-        LocalVariableGen endVariable = subTaskMethod.addLocalVariable(LaunchProperties.END_CONDITION_NAME,
+        LocalVariableGen endVariable = subTaskMethod.addLocalVariable(LaunchProperties.STOP_CONDITION_NAME,
                 Type.INT,
                 //1,
                 null, null);
@@ -280,7 +280,7 @@ public class TransformUtils {
         LoopUtilsOld.updateLoopStartCondition(subTaskInstructionList.getInstructionHandles(), startVariable.getIndex());
         LoopUtilsOld.updateLoopEndCondition(subTaskInstructionList.getInstructionHandles(), endVariable.getIndex());
 
-        subTaskMethod.setArgumentNames(new String[]{LaunchProperties.START_CONDITION_NAME, LaunchProperties.END_CONDITION_NAME});
+        subTaskMethod.setArgumentNames(new String[]{LaunchProperties.START_CONDITION_NAME, LaunchProperties.STOP_CONDITION_NAME});
         subTaskMethod.setArgumentTypes(new Type[]{Type.INT, Type.INT});
         subTaskMethod.setMaxLocals();
         subTaskMethod.setMaxStack();
@@ -354,7 +354,7 @@ public class TransformUtils {
         InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
 
         mg.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, ihy[idBegin], ihy[idEnd]);
-        mg.addLocalVariable(LaunchProperties.END_CONDITION_NAME, Type.FLOAT, ihy[idBegin], ihy[idEnd]);
+        mg.addLocalVariable(LaunchProperties.STOP_CONDITION_NAME, Type.FLOAT, ihy[idBegin], ihy[idEnd]);
         mg.addLocalVariable(LaunchProperties.END_FINAL_INDEX_VAR_NAME, Type.INT, ihy[idBegin], ihy[idEnd]);
 
         InstructionHandle startVarStart = ihy[idBegin];

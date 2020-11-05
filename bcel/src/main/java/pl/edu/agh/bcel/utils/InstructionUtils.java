@@ -39,7 +39,7 @@ public class InstructionUtils {
         InstructionList il = new InstructionList();
 
         int endVarIndex = VariableUtils.getLVarByName(
-                LaunchProperties.END_CONDITION_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+                LaunchProperties.STOP_CONDITION_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         int endFinalVarIndex = VariableUtils.getLVarByName(
                 LaunchProperties.END_FINAL_INDEX_VAR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
 //        int dataSizeIndex = VariableUtils.getLVarByName(
@@ -71,7 +71,7 @@ public class InstructionUtils {
     public static InstructionList getInstructionsEndInit(ClassGen cg, MethodGen mg, short dataSize) {
         InstructionList il = new InstructionList();
         int loopIteratorIndex = VariableUtils.getLVarByName(LaunchProperties.LOOP_ITERATOR_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
-        int endVarIndex = VariableUtils.getLVarByName(LaunchProperties.END_CONDITION_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
+        int endVarIndex = VariableUtils.getLVarByName(LaunchProperties.STOP_CONDITION_NAME, mg.getLocalVariableTable(cg.getConstantPool())).getIndex();
         int numThreadsFieldIndex = VariableUtils.getFieldRefId(cg, LaunchProperties.NUMBER_OF_THREADS_NAME);
 
         il.append(new ILOAD(loopIteratorIndex));

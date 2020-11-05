@@ -9,6 +9,8 @@ import java.util.Collections;
 
 public class ElementFOR {
 
+    public final ArrayList<BranchInstruction> listWithBranchInstruction2;
+    public final ArrayList<BranchInstruction> listWithBranchInstructionIfInLoop2;
     private final ArrayList<BranchHandle> listWithBranchHandleIfInFor;
     private final ArrayList<BranchHandle> listWithBranchHandleIfInLoop;
     private final ArrayList<Integer> listWithIdInstructionIfInsideLoop;
@@ -41,6 +43,8 @@ public class ElementFOR {
         this.listWithIdInstructionIfInsideLoop = new ArrayList<>();
         this.listWithBranchHandleIfInFor = new ArrayList<>();
         this.listWithBranchHandleIfInLoop = new ArrayList<>();
+        this.listWithBranchInstruction2 = new ArrayList<>();
+        this.listWithBranchInstructionIfInLoop2 = new ArrayList<>();
     }
 
     private static void displayOneLine(String name, int idPrevStore, String instruction) {
@@ -112,7 +116,9 @@ public class ElementFOR {
     }
 
     public void addBranchHandleIfInForToArrayList(BranchHandle bhIfInFor) {
-        if (bhIfInFor != null) listWithBranchHandleIfInFor.add(bhIfInFor);
+        if (bhIfInFor != null) {
+            listWithBranchHandleIfInFor.add(bhIfInFor);
+        }
     }
 
     public void addBranchHandleIfInLoopToArrayList(BranchHandle bhIfInLoop) {
