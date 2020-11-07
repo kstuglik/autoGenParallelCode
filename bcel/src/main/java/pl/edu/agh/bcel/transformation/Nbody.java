@@ -2,6 +2,7 @@ package pl.edu.agh.bcel.transformation;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.generic.*;
+import pl.edu.agh.bcel.Label;
 import pl.edu.agh.bcel.LaunchProperties;
 import pl.edu.agh.bcel.nested.ElementFOR;
 import pl.edu.agh.bcel.utils.ForLoopUtils;
@@ -10,7 +11,17 @@ import pl.edu.agh.bcel.utils.VariableUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static pl.edu.agh.bcel.Label.getListVariablesForSubTask;
+import static pl.edu.agh.bcel.Label.getListVariablesToFinal;
+
+//  EXAMPLE OF A TASK WITH 1 LOOP
+
 public class Nbody {
+
+    static ArrayList<Label> labelsParamsSubTask;
+    static ArrayList<Label> labelsVarInsideSubTask;
+
+    static int iteratorToPass;
 
     public static void nbodyMovies(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR, InstructionHandle[] ihy) {
 
@@ -118,69 +129,68 @@ public class Nbody {
         cg.replaceMethod(mgOld.getMethod(), mgNew.getMethod());
     }
 
-    public static void nbodySubtask(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR, InstructionHandle[] ihy) {
-        //      *****************************************************************************************
-        HashMap<Integer, ArrayList<BranchHandle>> hashmapIFinFOR = new HashMap<>();
-        HashMap<Integer, ArrayList<BranchInstruction>> hashmapGOTO = new HashMap<>();
-        HashMap<Integer, ArrayList<InstructionHandle>> hashmapNEXT = new HashMap<>();
-        HashMap<Integer, ArrayList<InstructionHandle>> hashmapSTART = new HashMap<>();
-        //      *****************************************************************************************
+    public static void nbodySubtask(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR) {
+
+        InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
         InstructionList il = new InstructionList();
-        InstructionFactory factory = new InstructionFactory(cg, cg.getConstantPool());
         ConstantPoolGen cp = cg.getConstantPool();
-        //      *****************************************************************************************
-        MethodGen mgNew = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
-                Type.INT, Type.NO_ARGS, new String[]{}, LaunchProperties.SUBTASK_METHOD_NAME,
-                cg.getClassName(), il, cp);
-        LocalVariableGen startVariable = mgNew.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, null, null);
-        LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.STOP_CONDITION_NAME, Type.INT, null, null);
-        //      *****************************************************************************************
-        HashMap<Integer, Integer> hashmapIdOldAndNewLVar = VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
-        //      *****************************************************************************************
+
+        MethodGen mgNew = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.INT,
+                new Type[]{}, new String[]{}, LaunchProperties.SUBTASK_METHOD_NAME, cg.getClassName(), il, cp);
+
+
         ElementFOR elementFor = listElementsFOR.get(0);
-        ArrayList<BranchHandle> listaIFinFOR = new ArrayList<>();
-        ArrayList<BranchInstruction> listaGOTO = new ArrayList<>();
-        ArrayList<InstructionHandle> listaSTART = new ArrayList<>();
-        //      *****************************************************************************************
+        int start = elementFor.getIdPrevLoad()-1;
+        int end = elementFor.getIdGoTo();
 
-        il.append(new ILOAD(0));//set start
-        Instruction in2 = VariableUtils.updateLVarIndexes(ihy[elementFor.getIdPrevStore() + 1].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
-        il.append(in2);
+        System.out.println("\n---- GET LIST VARIABLES TO SET IN SUBTASK-METHOD ----\n");
+        labelsParamsSubTask = getListVariablesForSubTask(mgOld, start);
+        Label.createVariablesFromLabels(labelsParamsSubTask, mgNew, cg.getConstantPool());
+
+        System.out.println("\n---- SET PARAMS IN SUBTASK-METHOD ----\n");
+        Label.setParamsInSubtskFromLabels(mgNew, labelsParamsSubTask);
 
 
-        in2 = VariableUtils.updateLVarIndexes(ihy[elementFor.getIdPrevLoad()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
-        InstructionHandle start = il.append(in2);
-        il.append(new ILOAD(1));//set stop
+        System.out.println("\n---- GET LIST VARIABLES TO SET WITH FINAL ----\n");
+        labelsVarInsideSubTask = getListVariablesToFinal(mgOld, start, end);
+        Label.createVariablesFromLabels(labelsVarInsideSubTask, mgNew, cg.getConstantPool());
 
-        for (int i = elementFor.getIdPrevLoad() + 2; i < elementFor.getListWithIdInstructionIfInsideFor().get(0); i++) {
-            in2 = VariableUtils.updateLVarIndexes(ihy[i].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
-            il.append(in2);
+
+        il.append(new ILOAD(0));//iload(finaliStart)
+        for (int id = start; id <= end; id++) {
+
+            Instruction in = VariableUtils.replaceOldIdInInstruction(ihy[id], mgOld, mgNew);
+
+            if (id == elementFor.getIdGoTo()) {
+                BranchInstruction bh = InstructionFactory.createBranchInstruction(
+                        Const.GOTO, elementFor.getInstructionHandlePrevLOAD());
+                elementFor.setBranchInstructionGOTO(bh);
+                il.append(bh);
+            } else if(id == elementFor.getListWithIdInstructionIfInsideFor().get(0)-1) {
+                il.append(new ILOAD(1));
+            }
+            else if (id == elementFor.getIdPrevLoad()) {
+                InstructionHandle ihPrevLoad = il.append(in);
+                elementFor.setInstructionHandlePrevLOAD(ihPrevLoad);
+            } else if (id == elementFor.getIdInc()) {
+                InstructionHandle ihINC = il.append(in);
+                elementFor.setInstructionHandleINC(ihINC);
+            } else if (id == elementFor.getIdInsideLoop()) {
+                InstructionHandle ihFirstInside = il.append(in);
+                elementFor.setInstructionHandleFirstInside(ihFirstInside);
+            } else if (elementFor.getListWithIdInstructionIfInsideFor().contains(id)) {
+                BranchHandle bh = ForLoopUtils.getBranchHandleIF(il, ihy[id].getInstruction());
+                elementFor.addBranchHandleIfInForToArrayList(bh);
+            } else il.append(in);
+
         }
-
-//        BranchHandle if_01 = ForLoopUtils.getBranchHandleIF(il, ihy[elementFor.getListaIfow().get(0)]);
-//        mozna dodac w przyszlosci obsluge, tzn teraz: przed <, po <=, a co będzie dla > ?
-        BranchHandle if_01 = il.append(new IF_ICMPGT(null));
-
-
-        for (int j = elementFor.getIdInsideLoop(); j < elementFor.getIdInc(); j++) {
-            Instruction temp = VariableUtils.updateLVarIndexes(ihy[j].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
-            il.append(temp);
-        }
-
-        in2 = VariableUtils.updateLVarIndexes(ihy[elementFor.getIdInc()].getInstruction(), hashmapIdOldAndNewLVar, mgNew, cg);
-        InstructionHandle incr = il.append(in2);
-
-        BranchInstruction goto_01 = InstructionFactory.createBranchInstruction(Const.GOTO, start);
-        il.append(goto_01);
 
 
         InstructionHandle returnHandler = il.append(new PUSH(cp, 0));
         il.append(InstructionFactory.createReturn(Type.INT));
+        elementFor.getListWithBranchHandleIfInFor().get(0).setTarget(returnHandler);
 
-        if_01.setTarget(returnHandler);
 
-        mgNew.setArgumentNames(new String[]{LaunchProperties.START_CONDITION_NAME, LaunchProperties.STOP_CONDITION_NAME});
-        mgNew.setArgumentTypes(new Type[]{Type.INT, Type.INT});
         mgNew.setMaxLocals();
         mgNew.setMaxStack();
         cg.addMethod(mgNew.getMethod());

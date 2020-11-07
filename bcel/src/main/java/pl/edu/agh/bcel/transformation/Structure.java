@@ -24,7 +24,7 @@ public class Structure {
 
 
         System.out.println("\n-------- PHASE FIRST --------\n");
-        phaseFirst(cg, mg, listElementsFOR);
+        phaseFirst(mg, listElementsFOR);
 
         System.out.println("\n-------- PHASE SECOND --------\n");
         phaseSecond(mg, listElementsIF);
@@ -32,7 +32,7 @@ public class Structure {
         System.out.println("\n-------- PHASE THIRD --------\n");
         phaseThird(listElementsIF, listElementsFOR);
 
-        moveIdIfFromForStatementToLoop(listElementsFOR,listElementsIF);
+        splitIdIfInstructionsBetweenForAndLoopPart(listElementsFOR, listElementsIF);
 
 //        ElementFOR.displayElementsFor(ihy, listElementsFOR);
 //        ElementIF.displayElementsIf(ihy, listElementsIF);
@@ -44,7 +44,7 @@ public class Structure {
                 break;
             case "nbody":
                 Nbody.nbodyMovies(cg, mg, listElementsFOR, ihy);
-                Nbody.nbodySubtask(cg, mg, listElementsFOR, ihy);
+                Nbody.nbodySubtask(cg, mg, listElementsFOR);
                 break;
             case "fft":
                 FFT.fftSubtask(cg, mg, listElementsFOR);
@@ -58,7 +58,7 @@ public class Structure {
 
     }
 
-    public static void phaseFirst(ClassGen cg, MethodGen mg, ArrayList<ElementFOR> listFORs) {
+    public static void phaseFirst(MethodGen mg, ArrayList<ElementFOR> listFORs) {
 
         System.out.println("list of the ElementFor is created");
         InstructionHandle[] ihy = mg.getInstructionList().getInstructionHandles();
@@ -72,7 +72,7 @@ public class Structure {
                 int idJump = hmPositionId.getOrDefault(position, -1);
 
                 if (idGoTo > idJump) {
-                    int idPrevStore = zGetFirstPrevIdBySignature(ihy, idJump, "storeprev");
+                    int idPrevStore = getIdInstructionPrevStore(ihy, idJump, "storeprev");
                     String[] string = ihy[idGoTo - 1].getInstruction().toString().split("\\W+|_");
                     int length = string.length;
                     int idIterator = Integer.parseInt(string[length - 2]);
@@ -180,7 +180,7 @@ public class Structure {
         return idINC;
     }
 
-    public static int zGetFirstPrevIdBySignature(InstructionHandle[] ihy, int start, String signature) {
+    public static int getIdInstructionPrevStore(InstructionHandle[] ihy, int start, String signature) {
 
         int i = start - 1;
         boolean extraPrevFlag = false;
@@ -197,8 +197,7 @@ public class Structure {
         return i;
     }
 
-    public static void moveIdIfFromForStatementToLoop(ArrayList<ElementFOR> listElementsFOR,
-                                                      ArrayList<ElementIF> listElementsIF) {
+    public static void splitIdIfInstructionsBetweenForAndLoopPart(ArrayList<ElementFOR> listElementsFOR, ArrayList<ElementIF> listElementsIF) {
         for (ElementFOR elementFOR : listElementsFOR) {
             ArrayList<Integer> ifs = elementFOR.getListWithIdInstructionIfInsideFor();
             for (Integer anIf : ifs) {
@@ -221,4 +220,5 @@ public class Structure {
 
         }
     }
+
 }
