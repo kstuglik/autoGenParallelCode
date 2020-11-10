@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 public class FFTTest {
 
-    private static final int ARR_LENGTH = 1024*1024*64;
+    private static final int ARR_LENGTH = 64*64*64;
     private static final double BOUND = 1.0;
 
     public static void main(String[] args) {
