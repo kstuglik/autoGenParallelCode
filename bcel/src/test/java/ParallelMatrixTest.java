@@ -46,7 +46,7 @@ public class ParallelMatrixTest {
         ReadyMethods.addMethodSetStop(cgTarget);
         ReadyMethods.addMethodToInitTaskPool(cgTarget);
 
-        ReadyFields.addFieldStep(cgTarget, mg); // step jest dla matrix
+        ReadyFields.addFieldStep(cgTarget, mg);
         ReadyFields.addFieldTaskPool(cgTarget, mg);
         ReadyFields.initFieldExecutorService(cgTarget, mg);
 

@@ -39,8 +39,8 @@ public class Structure {
 
         switch (signature) {
             case "matrix":
-                Matrix.matrixSubtask(cg, mg, listElementsFOR, ihy);
-                Matrix.matrixMultiply(cg, mg, listElementsFOR, ihy);
+                Matrix.matrixSubtask(cg, mg, listElementsFOR);
+                Matrix.matrixMultiply(cg, mg, listElementsFOR);
                 break;
             case "nbody":
                 Nbody.nbodyMovies(cg, mg, listElementsFOR, ihy);

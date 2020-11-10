@@ -18,10 +18,8 @@ import static pl.edu.agh.bcel.Label.getListVariablesToFinal;
 public class FFT {
     static ArrayList<Label> labelsParamsSubTask;
     static ArrayList<Label> labelsVarInsideSubTask;
-    static ArrayList<Label> labelsVarBetweenIntoFinal;
 
     static int iteratorToPass;
-
 
     public static void fftSubtask(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR) throws NullPointerException {
 
@@ -113,7 +111,6 @@ public class FFT {
         cg.getConstantPool().addMethodref(mgNew);
 
     }
-
 
     public static void fftMethod(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR, ArrayList<ElementIF> listElementsIF) throws NullPointerException, TargetLostException {
 

@@ -21,7 +21,7 @@ public class ShowBCEL {
 
 
         LaunchProperties.CLASS_DIR = "bcel/target/classes/";
-        LaunchProperties.CLASS_NAME = "temp";
+        LaunchProperties.CLASS_NAME = "Temp";
         LaunchProperties.CLASS_METHOD = "main";
 
         JavaClass analyzedClass = new ClassParser(LaunchProperties.getPathToIntputFile()).parse();
