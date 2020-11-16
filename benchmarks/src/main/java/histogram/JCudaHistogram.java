@@ -6,30 +6,41 @@ import jcuda.jcublas.JCublas;
 import jcuda.jcublas.JCublas2;
 import jcuda.jcublas.cublasHandle;
 import jcuda.jcublas.cublasOperation;
-import jcuda.runtime.JCuda;
-import jcuda.runtime.cudaMemcpyKind;
+import pl.edu.agh.bcel.utils.ArrayUtils;
 
 import java.util.Arrays;
 
 import static jcuda.runtime.JCuda.*;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyHostToDevice;
-import static utils.ArrayUtils.randomFloatArray1D;
 
 public class JCudaHistogram {
 
     static int N;
 
-    static Pointer alpha = Pointer.to(new float[] { 1.0f });
-    static Pointer beta = Pointer.to(new float[] { 1.0f });
+    static Pointer alpha = Pointer.to(new float[]{1.0f});
+    static Pointer beta = Pointer.to(new float[]{1.0f});
 
     static Pointer ptr_A = new Pointer(), ptr_B = new Pointer(), ptr_C = new Pointer();
     static float[] matrix_A;
     static float[] matrix_B;
     static float[] matrix_C;
 
-    public static void addMatrix(int n,int m)
-    {
+    public JCudaHistogram(float[] matrix_AA, int range) {
+        N = matrix_AA.length;
+
+        matrix_A = matrix_AA;
+        matrix_B = new float[N];
+        matrix_C = new float[N];
+
+        Arrays.fill(matrix_B, 1);
+        System.out.println(Arrays.toString(matrix_A));
+        System.out.println(Arrays.toString(matrix_B));
+        addMatrix(10, 10);
+        System.out.println(Arrays.toString(matrix_C));
+    }
+
+    public static void addMatrix(int n, int m) {
         JCublas.cublasInit();
         /* Allocate device memory for the matrices */
         JCublas.cublasAlloc(N, Sizeof.FLOAT, ptr_A);
@@ -52,7 +63,15 @@ public class JCudaHistogram {
 
     }
 
-    public void calculate(){
+//    public static void main(String[] args) {
+//
+//        float[] A = ArrayUtils.generateFArray1D(100, 5);
+//        System.out.println(Arrays.toString(matrix_A));
+//        JCudaHistogram serial = new JCudaHistogram(A, 10);
+//
+//    }
+
+    public void calculate() {
         JCublas2.setExceptionsEnabled(true);
         cudaMalloc(ptr_A, N * Sizeof.FLOAT);
         cudaMalloc(ptr_B, N * Sizeof.FLOAT);
@@ -102,28 +121,7 @@ public class JCudaHistogram {
                 ptr_C,N);*/
     }
 
-    public JCudaHistogram(float[] matrix_AA, int range) {
-        N = matrix_AA.length;
-
-        matrix_A = matrix_AA;
-        matrix_B = new float[N];
-        matrix_C = new float[N];
-
-        Arrays.fill(matrix_B, 1);
-        System.out.println(Arrays.toString(matrix_A));
-        System.out.println(Arrays.toString(matrix_B));
-        addMatrix(10,10);
-        System.out.println(Arrays.toString(matrix_C));
-    }
-
-    float[] getResult(){
+    float[] getResult() {
         return matrix_C;
-    }
-
-    public static void main(String[] args) {
-
-        float[] A = randomFloatArray1D(100, 5);   System.out.println(Arrays.toString(matrix_A));
-        JCudaHistogram serial = new JCudaHistogram(A, 10);
-
     }
 }

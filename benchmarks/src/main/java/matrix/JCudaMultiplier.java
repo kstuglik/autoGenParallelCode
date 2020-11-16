@@ -6,7 +6,7 @@ import jcuda.jcublas.JCublas;
 
 import java.util.Arrays;
 
-import static utils.ArrayUtils.randomIntArray2D;
+import pl.edu.agh.bcel.utils.ArrayUtils;
 
 public class JCudaMultiplier {
 
@@ -86,7 +86,7 @@ public class JCudaMultiplier {
                 result[row*rows+col] = arr[col][row];
             }
         }
-        System.out.println(Arrays.toString(result));
+//        System.out.println(Arrays.toString(result));
         return result;
     }
 

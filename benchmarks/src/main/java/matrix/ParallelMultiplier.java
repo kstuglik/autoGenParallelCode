@@ -1,5 +1,6 @@
 package matrix;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -8,15 +9,16 @@ import java.util.concurrent.Executors;
 
 public class ParallelMultiplier {
 
-    private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
-
+    ExecutorService service;
+    List<Callable<Integer>> tasks;
+    int step;
     private final int[][] A;
     private final int[][] B;
     private final int[][] C;
     private final int resultRows;
     private final int resultColumns;
 
-    public ParallelMultiplier(int[][] pA, int[][] pB) {
+    public ParallelMultiplier(int[][] pA, int[][] pB,int NUM_THREADS) {
         this.A = pA;
         this.B = pB;
         if (A[0].length != B.length) {
@@ -25,12 +27,32 @@ public class ParallelMultiplier {
         resultRows = A.length;
         resultColumns = B[0].length;
         C = new int[resultRows][resultColumns];
+        initializeExecutors(NUM_THREADS);
+    }
+
+//    public static void main(String[] args) {
+//        int[][] A = new int[][]{{3, 2, 6}, {0, 4, 1}, {2, 0, 1}};
+//        int[][] B = new int[][]{{4}, {3}, {1}};
+//        ParallelMultiplier parallelMultiplier = new ParallelMultiplier(A, B);
+//
+//        int[][] C = parallelMultiplier.multiply();
+//
+//        System.out.println(Arrays.deepToString(C));
+//    }
+
+    public int[][] getC() {
+        return C;
+    }
+
+    public void initializeExecutors(int NUM_THREADS) {
+        step = A.length / NUM_THREADS;
+        if (step == 0)
+            step = 1;
+        service = Executors.newFixedThreadPool(NUM_THREADS);
+        tasks = new LinkedList<>();
     }
 
     public int[][] multiply() {
-        ExecutorService service = Executors.newFixedThreadPool(NUM_THREADS);
-        List<Callable<Integer>> tasks = new LinkedList<>();
-        int step = A.length / NUM_THREADS;
         for (int rowNum = 0; rowNum < resultRows; rowNum += step) {
             for (int colNum = 0; colNum < resultColumns; colNum++) {
                 int finalRowNum = rowNum;
@@ -40,10 +62,11 @@ public class ParallelMultiplier {
         }
         try {
             service.invokeAll(tasks);
+            service.shutdown();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        service.shutdown();
+
         return C;
     }
 

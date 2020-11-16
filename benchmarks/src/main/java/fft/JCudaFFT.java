@@ -21,7 +21,7 @@ import java.util.Random;
  * forward FFT with JCufft, and compares the result to the
  * reference computed with JTransforms.
  */
-class jCudaFFT
+class JCudaFFT
 {
     public static void main(String[] args)
     {

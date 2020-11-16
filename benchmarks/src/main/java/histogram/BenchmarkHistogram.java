@@ -8,7 +8,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import utils.ArrayUtils;
+import pl.edu.agh.bcel.utils.*;
 
 import java.util.Random;
 
@@ -45,7 +45,7 @@ public class BenchmarkHistogram {
     public static class TestState {
         int N = 100;
         int range = 5;
-        float[] data = ArrayUtils.randomFloatArray1D(N,range);
+        float[] data = ArrayUtils.generateFArray1D(N,range);
         SerialHistogram serialHistogram = new SerialHistogram(data, range);
         ParallelHistogram parallelHistogram = new ParallelHistogram(data, range);
         JCudaHistogram jcudaHistogram = new JCudaHistogram(data, range);

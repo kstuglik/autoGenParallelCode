@@ -1,6 +1,7 @@
 package fft;
 
 public class SerialFFT {
+    public SerialFFT() {    }
 
     public void transform(double[] real, double[] imag) {
         int n = real.length;
