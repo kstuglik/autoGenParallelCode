@@ -100,6 +100,7 @@ public class Label {
                 String[] string = instr.toString().split("\\W+|_");
                 int ile = string.length;
 
+//                System.out.println(instr.toString() +"\t"+Arrays.toString(string));
                 if (ihy[i].toString().contains("_")) {
                     idLVar = Integer.parseInt(string[1]);
                 } else {

@@ -1,7 +1,6 @@
 package pl.edu.agh.bcel.utils;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.LocalVariable;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.*;
@@ -27,10 +26,12 @@ public class ReadyFields {
         il.append(factory.createPutStatic(className, LaunchProperties.NUMBER_OF_THREADS_NAME, Type.INT));
 
 
-        FieldGen thershold = new FieldGen(FLAGS, Type.INT,LaunchProperties.THRESHOLD_NAME, cp);
+        FieldGen thershold = new FieldGen(FLAGS, Type.INT, LaunchProperties.THRESHOLD_NAME, cp);
         cg.addField(thershold.getField());
-        il.append(new PUSH(cp,1024));il.append(new PUSH(cp,32));il.append(new IMUL());
-        il.append(factory.createPutStatic(cg.getClassName(),LaunchProperties.THRESHOLD_NAME,Type.INT));
+        il.append(new PUSH(cp, 1024));
+        il.append(new PUSH(cp, 32));
+        il.append(new IMUL());
+        il.append(factory.createPutStatic(cg.getClassName(), LaunchProperties.THRESHOLD_NAME, Type.INT));
 
 
         FieldGen service = new FieldGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.getType(ExecutorService.class), LaunchProperties.EXECUTOR_SERVICE_NAME, cp);
@@ -65,6 +66,13 @@ public class ReadyFields {
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
 
+    public static void addFieldStepToIL(InstructionList il, MethodGen mgNew, InstructionFactory factory) {
+        int id = mgNew.addLocalVariable("step", Type.INT, null, null).getIndex();
+        il.append(factory.createInvoke(mgNew.getClassName(), "setStep", Type.INT, Type.NO_ARGS, Const.INVOKESTATIC));
+        il.append(InstructionFactory.createStore(Type.INT, id));
+    }
+
+
     public static void addFieldTaskPool(ClassGen cg, MethodGen mg) {
         ConstantPoolGen cp = cg.getConstantPool();
         InstructionFactory factory = new InstructionFactory(cg, cp);
@@ -86,6 +94,16 @@ public class ReadyFields {
         mg.setMaxStack();
         mg.setMaxLocals();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
+    }
+
+    public static void addFieldTaskPoolToIL(ClassGen cg, InstructionList il, InstructionFactory factory) {
+        il.append(factory.createInvoke(
+                cg.getClassName(), "init", new ObjectType("ArrayList<Callable<Integer>>"),
+                Type.NO_ARGS, Const.INVOKESTATIC));
+
+        il.append(InstructionFactory.createStore(Type.OBJECT, LaunchProperties.TASK_POOL_ID));
+        il.append(InstructionFactory.createLoad(Type.OBJECT, LaunchProperties.TASK_POOL_ID));
+        il.append(InstructionFactory.createStore(Type.OBJECT, LaunchProperties.TASK_POOL_ID + 1));
     }
 
     public static void addFieldsForJcuda(ClassGen cg) {
@@ -243,6 +261,24 @@ public class ReadyFields {
         mg.setMaxLocals();
         cg.replaceMethod(mg.getMethod(), mg.getMethod());
     }
+
+    public static void initFieldExecutorServiceToIL(ClassGen cg, InstructionList il, InstructionFactory factory) {
+        il.append(factory.createGetStatic(
+                cg.getClassName(),
+                LaunchProperties.NUMBER_OF_THREADS_NAME,
+                Type.INT));
+        il.append(factory.createInvoke(
+                "java.util.concurrent.Executors",
+                "newFixedThreadPool",
+                Type.getType(ExecutorService.class),
+                new Type[]{Type.INT},
+                Const.INVOKESTATIC));
+        il.append(factory.createPutStatic(
+                cg.getClassName(),
+                LaunchProperties.EXECUTOR_SERVICE_NAME,
+                Type.getType(ExecutorService.class)));
+    }
+
 
     protected static void initFieldsForJCuda(ClassGen cg, InstructionList il, InstructionFactory factory, ConstantPoolGen cp) {
         InstructionHandle ih_0 = il.append(factory.createNew("jcuda.Pointer"));

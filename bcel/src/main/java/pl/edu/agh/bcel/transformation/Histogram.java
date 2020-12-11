@@ -227,30 +227,19 @@ public class Histogram {
     public static void histogramSubtask(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR) {
 
         InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
-        //      *****************************************************************************************
-        HashMap<Integer, ArrayList<BranchHandle>> hashmapIFs = new HashMap<>();
-        HashMap<Integer, ArrayList<BranchInstruction>> hashmapGOTO = new HashMap<>();
-        HashMap<Integer, ArrayList<InstructionHandle>> hashmapNEXT = new HashMap<>();
-        HashMap<Integer, ArrayList<InstructionHandle>> hashmapSTART = new HashMap<>();
-        //      *****************************************************************************************
+
         InstructionList il = new InstructionList();
         InstructionFactory factory = new InstructionFactory(cg, cg.getConstantPool());
         ConstantPoolGen cp = cg.getConstantPool();
         MethodGen mgNew = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
                 new ArrayType(Type.FLOAT, 1), Type.NO_ARGS, new String[]{}, LaunchProperties.SUBTASK_METHOD_NAME,
                 cg.getClassName(), il, cp);
-        //      *****************************************************************************************
-        LocalVariableGen startVariable = mgNew.addLocalVariable(LaunchProperties.START_CONDITION_NAME, Type.INT, null, null);
-        LocalVariableGen endVariable = mgNew.addLocalVariable(LaunchProperties.STOP_CONDITION_NAME, Type.INT, null, null);
-        //      *****************************************************************************************
+
         HashMap<Integer, Integer> hashmapIdOldAndNewLVar = VariableUtils.getHashmapLVarIndexesOldAndNew(mgOld, mgNew);
         //      *****************************************************************************************
 
-        ArrayList<BranchHandle> listaIFinFOR = new ArrayList<>();
         ArrayList<BranchInstruction> listaGOTO = new ArrayList<>();
-        ArrayList<InstructionHandle> listaSTART = new ArrayList<>();
-        ArrayList<InstructionHandle> listaNEXT = new ArrayList<>();
-        ArrayList<InstructionHandle> listaINSIDE = new ArrayList<>();
+
         //      *****************************************************************************************
         ElementFOR item = listElementsFOR.get(0);
 

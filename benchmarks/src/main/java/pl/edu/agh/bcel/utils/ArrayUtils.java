@@ -3,10 +3,42 @@ package pl.edu.agh.bcel.utils;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.stream.IntStream;
 
 public class ArrayUtils {
 
+    public static void writeMatrix2D(String filePath, int[][] matrix) {
+        try {
+            File file = new File(filePath);
+            file.createNewFile();
+
+            FileOutputStream fos = new FileOutputStream(file, false);
+            DataOutputStream dos = new DataOutputStream(fos);
+
+            for (int i = 0; i < matrix.length; i++) {
+                for (int j = 0; j < matrix[i].length; j++) {
+                    dos.writeInt(matrix[i][j]);
+                }
+            }
+            dos.close();
+        } catch (IOException e) { //why does the catch need its own curly? }}}
+        }
+    }
+
+    public static int[][] readMatrix2D(String fileName) throws IOException {
+        DataInputStream dataInputStream = new DataInputStream(new FileInputStream(fileName));
+        int size = dataInputStream.available() / (Float.SIZE / 8);
+        int N = (int) Math.sqrt(size);
+        int[][] matrix = new int[N][N];
+//        System.out.println("N = " + N);
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                matrix[i][j] = dataInputStream.readInt();
+            }
+        }
+        return matrix;
+    }
 
     public static int[] convertF2IArray1D(float[] data) {
         return IntStream.range(0, data.length).map(i -> (int) data[i]).toArray();
@@ -31,7 +63,7 @@ public class ArrayUtils {
         double min = 0.0;
         Random random = new Random();
         for (int i = 0; i < N; i++) {
-            arr[i] =  min + random.nextDouble() * (range - min);
+            arr[i] = min + random.nextDouble() * (range - min);
         }
         return arr;
     }
@@ -41,45 +73,23 @@ public class ArrayUtils {
         float min = 0.0f;
         Random random = new Random();
         for (int i = 0; i < N; i++) {
-            arr[i] =  min + random.nextFloat() * (range - min);
+            arr[i] = min + random.nextFloat() * (range - min);
         }
         return arr;
     }
 
+    public static int getRandomNumber(int min, int max) {
+        return (int) ((Math.random() * (max - min)) + min);
+    }
+
     public static int[][] generateIArray2D(int rows, int columns, int range) {
         int[][] A = new int[rows][columns];
-        Random gen = new Random();
         for (int rowNum = 0; rowNum < rows; rowNum++) {
             for (int colNum = 0; colNum < columns; colNum++) {
-                A[rowNum][colNum] = gen.nextInt(range);
+                A[rowNum][colNum] = getRandomNumber(0,range);
             }
         }
         return A;
-    }
-
-    public static float[] readFromFileFArray1D(String fileName) throws IOException {
-        DataInputStream dataInputStream = new DataInputStream(new FileInputStream(fileName));
-        int size = dataInputStream.available() / (Float.SIZE / 8);
-        float[] A = new float[size];
-        for (int i = 0; i < size; i++) A[i] = dataInputStream.readFloat();
-        return A;
-    }
-
-    public static void writeToFileFArray1D(float[] A, String filePath) throws IOException {
-        File file = new File(filePath);
-        if (file.exists()) {
-            System.out.println("File already exists");
-        } else {
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-        }
-
-        FileOutputStream fos = new FileOutputStream(file, false);
-        DataOutputStream dos = new DataOutputStream(fos);
-
-        for (float v : A) dos.writeFloat(v);
-
-        dos.close();
     }
 
     public static int[] rewrite(float[] data) {

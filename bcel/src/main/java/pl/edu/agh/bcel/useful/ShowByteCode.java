@@ -17,13 +17,13 @@ public class ShowByteCode {
 //        LaunchProperties.CLASS_NAME = "SerialHistogramScala";
 //        LaunchProperties.CLASS_METHOD = "calculate";
 //
-//        LaunchProperties.CLASS_DIR = "bcel/target/classes/histogram/";
-//        LaunchProperties.CLASS_NAME = "ParallelHistogram";
-//        LaunchProperties.CLASS_METHOD = "calculate";
+        LaunchProperties.CLASS_DIR = "bcel/target/classes/histogram/";
+        LaunchProperties.CLASS_NAME = "ParallelHistogram";
+        LaunchProperties.CLASS_METHOD = "calculate";
 //
-        LaunchProperties.CLASS_DIR = "bcel/target/classes/fft/";
-        LaunchProperties.CLASS_NAME = "SerialFFT";
-        LaunchProperties.CLASS_METHOD = "fft";
+//        LaunchProperties.CLASS_DIR = "bcel/target/classes/fft/";
+//        LaunchProperties.CLASS_NAME = "SerialFFT";
+//        LaunchProperties.CLASS_METHOD = "fft";
 
 
         JavaClass _analyzedClass = new ClassParser(LaunchProperties.getPathToIntputFile()).parse();

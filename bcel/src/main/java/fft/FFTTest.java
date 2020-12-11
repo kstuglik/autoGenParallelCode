@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 public class FFTTest {
 
-    private static final int ARR_LENGTH = 64*64*64;
+    private static final int ARR_LENGTH = 1024*1024*64;
     private static final double BOUND = 1.0;
 
     public static void main(String[] args) {
@@ -21,7 +21,7 @@ public class FFTTest {
 
         new SerialFFT().transform(real, imag);
 
-        System.out.println("Took " + (double) (System.currentTimeMillis() - now) / 1e3);
+        System.out.println("Took " + (double) (System.currentTimeMillis() - now) / 1e3+"\n");
         System.out.println("------------");
         System.out.println("Starting...");
 
@@ -29,7 +29,7 @@ public class FFTTest {
 
         new ParallelFFT().transform(real2, imag2);
 
-        System.out.println("Took " + (double) (System.currentTimeMillis() - now) / 1e3);
+        System.out.println("Took " + (double) (System.currentTimeMillis() - now) / 1e3+"\n");
         System.out.println(real[0] + " " + real[1] + " " + real[2]);
         System.out.println(real2[0] + " " + real2[1] + " " + real2[2]);
         System.out.println(imag[0] + " " + imag[1] + " " + imag[2]);

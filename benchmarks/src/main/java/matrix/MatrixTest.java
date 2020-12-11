@@ -7,7 +7,7 @@ public class MatrixTest {
     public static void main(String[] args) {
 
         int size = 1024;
-        int bound = 5;
+        int bound = 100;
         int[][] A = ArrayUtils.generateIArray2D(size, size, bound);
         int[][] B = ArrayUtils.generateIArray2D(size, size, bound);
         int NUM_THREADS = Runtime.getRuntime().availableProcessors();
@@ -18,7 +18,7 @@ public class MatrixTest {
         serialMultiplier.multiply();
         System.out.println("Took " + (double) (System.currentTimeMillis() - now) / 1e3+"\n");
 
-        ParallelMultiplier parallelMultiplier = new ParallelMultiplier(A, B,NUM_THREADS);
+        ParallelMultiplier parallelMultiplier = new ParallelMultiplier(A, B);
         System.out.println("ParallelMultiplier: Starting...");
         Long now2 = System.currentTimeMillis();
         parallelMultiplier.multiply();

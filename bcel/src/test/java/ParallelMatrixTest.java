@@ -46,9 +46,9 @@ public class ParallelMatrixTest {
         ReadyMethods.addMethodSetStop(cgTarget);
         ReadyMethods.addMethodToInitTaskPool(cgTarget);
 
-        ReadyFields.addFieldStep(cgTarget, mg);
-        ReadyFields.addFieldTaskPool(cgTarget, mg);
-        ReadyFields.initFieldExecutorService(cgTarget, mg);
+//        ReadyFields.addFieldStep(cgTarget, mg);
+//        ReadyFields.addFieldTaskPool(cgTarget, mg);
+//        ReadyFields.initFieldExecutorService(cgTarget, mg);
 
         Structure.selectBaseCase(cgTarget, mg, "matrix");
 

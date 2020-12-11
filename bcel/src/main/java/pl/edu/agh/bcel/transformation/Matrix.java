@@ -6,40 +6,80 @@ import pl.edu.agh.bcel.Label;
 import pl.edu.agh.bcel.LaunchProperties;
 import pl.edu.agh.bcel.nested.ElementFOR;
 import pl.edu.agh.bcel.utils.ForLoopUtils;
+import pl.edu.agh.bcel.utils.ReadyFields;
 import pl.edu.agh.bcel.utils.VariableUtils;
 
 import java.util.ArrayList;
-
-import static pl.edu.agh.bcel.Label.getListVariablesForSubTask;
-import static pl.edu.agh.bcel.Label.getListVariablesToFinal;
 
 public class Matrix {
 
     static ArrayList<Label> labelsParamsSubTask;
     static ArrayList<Label> labelsVarInsideSubTask;
 
-    static int iteratorToPass;
 
     public static void matrixMultiply(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR) {
 
+        InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
         InstructionList il = new InstructionList();
         ConstantPoolGen cp = cg.getConstantPool();
-        MethodGen mgNew = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC,
-                Type.VOID, Type.NO_ARGS, new String[]{}, LaunchProperties.CLASS_METHOD, cg.getClassName(), il, cp);
 
-        InstructionFactory factory = new InstructionFactory(cg, cg.getConstantPool());
-        InstructionHandle[] ihy = mgOld.getInstructionList().getInstructionHandles();
+        MethodGen mgNew = new MethodGen(mgOld.getAccessFlags(), mgOld.getType(),
+                mgOld.getArgumentTypes(), mgOld.getArgumentNames(),
+                mgOld.getName(), cg.getClassName(), il, cp);
+
+        InstructionFactory factory = new InstructionFactory(cg, mgNew.getConstantPool());
+
+        ReadyFields.addFieldStepToIL(il, mgNew, factory);
+        ReadyFields.addFieldTaskPoolToIL(cg, il, factory);
+        ReadyFields.initFieldExecutorServiceToIL(cg, il, factory);
 
 
-        il.append(InstructionFactory.createReturn(Type.VOID));
+        System.out.println("count of for:" + listElementsFOR.size());
+
+        ElementFOR elFor0 = listElementsFOR.get(0);
+        ElementFOR elFor1 = listElementsFOR.get(1);
+        ElementFOR elFor2 = listElementsFOR.get(2);
+
+        int position = ihy[elFor2.getIdPrevStore()].getPosition();
+
+        System.out.println("\n---- GET LIST VARIABLES TO SET IN SUBTASK-METHOD ----\n");
+        labelsParamsSubTask = Label.getListVariablesForSubTask(mgOld, position);
+        Label.createVariablesFromLabels(labelsParamsSubTask, mgNew, cg.getConstantPool());
+
+        System.out.println("\n---- SET PARAMS IN SUBTASK-METHOD ----\n");
+        Label.setParamsInSubtskFromLabels(mgNew, labelsParamsSubTask);
+
+        System.out.println("\n---- GET LIST VARIABLES TO SET WITH FINAL ----\n");
+        labelsVarInsideSubTask = Label.getListVariablesToFinal(mgOld, elFor0.getIdPrevStore(), elFor0.getIdInc());
+        Label.createVariablesFromLabels(labelsVarInsideSubTask, mgNew, cg.getConstantPool());
+
+//        IN THE FUTURE USE
+//        ElementFOR.setNestedInArrayListElementFor(listElementsFOR);
+//        displayTypeNestedFromArrayListElementFors(listElementsFOR);
+        int length = elFor0.getListWithIdInstructionIfInsideFor().size();
+        int last = elFor0.getListWithIdInstructionIfInsideFor().get(length - 1);
+
+        il.append(new ICONST(0));
+        il.append(new ISTORE(2));
+        InstructionHandle prevLoad = il.append(new PUSH(cp, 10));
+        il.append(new ILOAD(2));
+        BranchHandle bh0 = il.append(new IF_ICMPEQ(null));
+        il.append(factory.createPrintln("Hello world"));
+        il.append(new IINC(2, 1));
+        il.append(new GOTO(prevLoad));
+
+        InstructionHandle rh = il.append(new PUSH(cp, 10));
+        il.append(factory.createNewArray(Type.INT, (short) 1));
+        il.append(InstructionFactory.createReturn(Type.OBJECT));
+
+        bh0.setTarget(rh);
 
         mgNew.setInstructionList(il);
-
         mgNew.setMaxLocals();
         mgNew.setMaxStack();
         cg.replaceMethod(mgOld.getMethod(), mgNew.getMethod());
-        cg.getConstantPool().addMethodref(mgNew);
     }
+
 
     public static void matrixSubtask(ClassGen cg, MethodGen mgOld, ArrayList<ElementFOR> listElementsFOR) {
 
@@ -57,17 +97,17 @@ public class Matrix {
         int position = ihy[elFor_1.getIdPrevStore()].getPosition();
 
         ArrayList<Integer> listWithIdRange = new ArrayList<>();
-        setArrayListWithRange(listWithIdRange, listElementsFOR, 0, 2);
+        Structure.setArrayListWithRange(listWithIdRange, listElementsFOR, 0, 2);
 
         System.out.println("\n---- GET LIST VARIABLES TO SET IN SUBTASK-METHOD ----\n");
-        labelsParamsSubTask = getListVariablesForSubTask(mgOld, position);
+        labelsParamsSubTask = Label.getListVariablesForSubTask(mgOld, position);
         Label.createVariablesFromLabels(labelsParamsSubTask, mgNew, cg.getConstantPool());
 
         System.out.println("\n---- SET PARAMS IN SUBTASK-METHOD ----\n");
         Label.setParamsInSubtskFromLabels(mgNew, labelsParamsSubTask);
 
         System.out.println("\n---- GET LIST VARIABLES TO SET WITH FINAL ----\n");
-        labelsVarInsideSubTask = getListVariablesToFinal(mgOld, elFor_0.getIdPrevStore(), elFor_1.getIdPrevStore());
+        labelsVarInsideSubTask = Label.getListVariablesToFinal(mgOld, elFor_0.getIdPrevStore(), elFor_1.getIdPrevStore());
         Label.createVariablesFromLabels(labelsVarInsideSubTask, mgNew, cg.getConstantPool());
 
 //        IN THE FUTURE USE
@@ -76,11 +116,11 @@ public class Matrix {
 
 
         for (int i = 0; i < listWithIdRange.size(); i += 2) {
-            System.out.println("petla zewnetrzna i = " + i);
+//            System.out.println("petla zewnetrzna i = " + i);
             for (int ii = listWithIdRange.get(i); ii < listWithIdRange.get(i + 1); ii++) {
 
                 Instruction in = VariableUtils.replaceOldIdInInstruction(ihy[ii], mgOld, mgNew);
-                System.out.println("\tpetla wewnetrzna ii = " + ii + ", " + in);
+//                System.out.println("\tpetla wewnetrzna ii = " + ii + ", " + in);
 
                 if (ii == elFor_0.getIdGoTo()) {
                     BranchInstruction bh = InstructionFactory.createBranchInstruction(
@@ -124,6 +164,7 @@ public class Matrix {
         InstructionHandle rh = il.append(new PUSH(cp, 0));
         il.append(InstructionFactory.createReturn(Type.INT));
 
+
         elFor_1.getListWithBranchHandleIfInFor().get(0).setTarget(elFor_0.getInstructionHandleINC());
         elFor_0.getListWithBranchHandleIfInFor().get(0).setTarget(rh);
 
@@ -131,31 +172,6 @@ public class Matrix {
         mgNew.setMaxStack();
         cg.addMethod(mgNew.getMethod());
         cg.getConstantPool().addMethodref(mgNew);
-
-    }
-
-    private static void setArrayListWithRange(
-            ArrayList<Integer> listWithIdRange,
-            ArrayList<ElementFOR> listElementsFOR,
-            int for1, int for2) {
-        listWithIdRange.add(listElementsFOR.get(for1).getIdPrevStore());
-        if (for2 - for1 > 1) {
-            System.out.println("mix-case for-loop in use");
-//            int checkLastIdIfInFor = listElementsFOR.get(for1).getListWithIdInstructionIfInsideFor().size();
-            int between = for1 + 1;
-
-            listWithIdRange.add(listElementsFOR.get(between).getIdPrevStore());
-            listWithIdRange.add(listElementsFOR.get(for2).getIdPrevStore());
-            listWithIdRange.add(listElementsFOR.get(for2).getIdGoTo() + 1);
-            listWithIdRange.add(listElementsFOR.get(for1).getIdInc());
-
-        }
-        listWithIdRange.add(listElementsFOR.get(for1).getIdGoTo() + 1);
-
-        for (int i = 0; i < listWithIdRange.size(); i += 2) {
-            System.out.println("\t[" + listWithIdRange.get(i) + ", " +
-                    listWithIdRange.get(i + 1) + ")");
-        }
 
     }
 

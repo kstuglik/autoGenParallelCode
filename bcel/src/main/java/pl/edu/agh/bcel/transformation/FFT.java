@@ -30,13 +30,13 @@ public class FFT {
         MethodGen mgNew = new MethodGen(Const.ACC_PUBLIC | Const.ACC_STATIC, Type.INT,
                 new Type[]{}, new String[]{}, LaunchProperties.SUBTASK_METHOD_NAME, cg.getClassName(), il, cp);
 
-        ElementFOR elFor3 = listElementsFOR.get(3);
-        ElementFOR elFor4 = listElementsFOR.get(4);
+        ElementFOR elFor1 = listElementsFOR.get(3);
+        ElementFOR elFor2 = listElementsFOR.get(4);
 //        kolejnosc for to jest taka ze zewnetrzna petla jest wczesniej, tak to zostalo posortowane!
-        int start = elFor3.getIdPrevStore();
-        int end = elFor3.getIdGoTo();
-        int position = ihy[elFor4.getIdPrevStore()].getPosition();
-        iteratorToPass = elFor3.getidIterator();
+        int start = elFor1.getIdPrevStore();
+        int end = elFor1.getIdGoTo();
+        int position = ihy[elFor2.getIdPrevStore()].getPosition();
+        iteratorToPass = elFor1.getidIterator();
 
         System.out.println("\n---- GET LIST VARIABLES TO SET IN SUBTASK-METHOD ----\n");
         labelsParamsSubTask = getListVariablesForSubTask(mgOld, position);
@@ -61,40 +61,40 @@ public class FFT {
 
             Instruction in = VariableUtils.replaceOldIdInInstruction(ihy[id], mgOld, mgNew);
 
-            if (id == elFor3.getIdGoTo()) {
+            if (id == elFor1.getIdGoTo()) {
                 BranchInstruction bh = InstructionFactory.createBranchInstruction(
-                        Const.GOTO, elFor3.getInstructionHandlePrevLOAD());
-                elFor3.setBranchInstructionGOTO(bh);
+                        Const.GOTO, elFor1.getInstructionHandlePrevLOAD());
+                elFor1.setBranchInstructionGOTO(bh);
                 il.append(bh);
-            } else if (id == elFor4.getIdGoTo()) {
+            } else if (id == elFor2.getIdGoTo()) {
                 BranchInstruction bh = InstructionFactory.createBranchInstruction(
-                        Const.GOTO, elFor4.getInstructionHandlePrevLOAD());
-                elFor4.setBranchInstructionGOTO(bh);
+                        Const.GOTO, elFor2.getInstructionHandlePrevLOAD());
+                elFor2.setBranchInstructionGOTO(bh);
                 il.append(bh);
-            } else if (id == elFor3.getIdPrevLoad()) {
+            } else if (id == elFor1.getIdPrevLoad()) {
                 InstructionHandle ihPrevLoad = il.append(in);
-                elFor3.setInstructionHandlePrevLOAD(ihPrevLoad);
-            } else if (id == elFor4.getIdPrevLoad()) {
+                elFor1.setInstructionHandlePrevLOAD(ihPrevLoad);
+            } else if (id == elFor2.getIdPrevLoad()) {
                 InstructionHandle ihPrevLoad = il.append(in);
-                elFor4.setInstructionHandlePrevLOAD(ihPrevLoad);
-            } else if (id == elFor3.getIdInc()) {
+                elFor2.setInstructionHandlePrevLOAD(ihPrevLoad);
+            } else if (id == elFor1.getIdInc()) {
                 InstructionHandle ihINC = il.append(in);
-                elFor3.setInstructionHandleINC(ihINC);
-            } else if (id == elFor4.getIdInc()) {
+                elFor1.setInstructionHandleINC(ihINC);
+            } else if (id == elFor2.getIdInc()) {
                 InstructionHandle ihINC = il.append(in);
-                elFor4.setInstructionHandleINC(ihINC);
-            } else if (id == elFor3.getIdInsideLoop()) {
+                elFor2.setInstructionHandleINC(ihINC);
+            } else if (id == elFor1.getIdInsideLoop()) {
                 InstructionHandle ihFirstInside = il.append(in);
-                elFor3.setInstructionHandleFirstInside(ihFirstInside);
-            } else if (id == elFor4.getIdInsideLoop()) {
+                elFor1.setInstructionHandleFirstInside(ihFirstInside);
+            } else if (id == elFor2.getIdInsideLoop()) {
                 InstructionHandle ihFirstInside = il.append(in);
-                elFor4.setInstructionHandleFirstInside(ihFirstInside);
-            } else if (elFor3.getListWithIdInstructionIfInsideFor().contains(id)) {
+                elFor2.setInstructionHandleFirstInside(ihFirstInside);
+            } else if (elFor1.getListWithIdInstructionIfInsideFor().contains(id)) {
                 BranchHandle bh = ForLoopUtils.getBranchHandleIF(il, ihy[id].getInstruction());
-                elFor3.addBranchHandleIfInForToArrayList(bh);
-            } else if (elFor4.getListWithIdInstructionIfInsideFor().contains(id)) {
+                elFor1.addBranchHandleIfInForToArrayList(bh);
+            } else if (elFor2.getListWithIdInstructionIfInsideFor().contains(id)) {
                 BranchHandle bh = ForLoopUtils.getBranchHandleIF(il, ihy[id].getInstruction());
-                elFor4.addBranchHandleIfInForToArrayList(bh);
+                elFor2.addBranchHandleIfInForToArrayList(bh);
             } else il.append(in);
 
         }
@@ -102,8 +102,8 @@ public class FFT {
         InstructionHandle rh = il.append(new PUSH(cp, 0));
         il.append(InstructionFactory.createReturn(Type.INT));
 
-        elFor4.getListWithBranchHandleIfInFor().get(0).setTarget(elFor3.getInstructionHandleINC());
-        elFor3.getListWithBranchHandleIfInFor().get(0).setTarget(rh);
+        elFor2.getListWithBranchHandleIfInFor().get(0).setTarget(elFor1.getInstructionHandleINC());
+        elFor1.getListWithBranchHandleIfInFor().get(0).setTarget(rh);
 
         mgNew.setMaxLocals();
         mgNew.setMaxStack();

@@ -16,7 +16,7 @@ public class ShowBCEL {
     public static void main(String[] args) throws IOException {
 
         LaunchProperties.CLASS_DIR = "target/classes/org/example/";
-        LaunchProperties.CLASS_NAME = "App";
+        LaunchProperties.CLASS_NAME = "App$";
         LaunchProperties.CLASS_METHOD = "main";
 
         JavaClass analyzedClass = new ClassParser(LaunchProperties.getPathToIntputFile()).parse();

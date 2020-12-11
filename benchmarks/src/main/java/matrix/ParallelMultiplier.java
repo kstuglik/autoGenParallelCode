@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 
 public class ParallelMultiplier {
 
+    private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
     ExecutorService service;
     List<Callable<Integer>> tasks;
     int step;
@@ -18,7 +19,7 @@ public class ParallelMultiplier {
     private final int resultRows;
     private final int resultColumns;
 
-    public ParallelMultiplier(int[][] pA, int[][] pB,int NUM_THREADS) {
+    public ParallelMultiplier(int[][] pA, int[][] pB) {
         this.A = pA;
         this.B = pB;
         if (A[0].length != B.length) {
@@ -27,24 +28,24 @@ public class ParallelMultiplier {
         resultRows = A.length;
         resultColumns = B[0].length;
         C = new int[resultRows][resultColumns];
-        initializeExecutors(NUM_THREADS);
+        initializeExecutors();
     }
 
-//    public static void main(String[] args) {
-//        int[][] A = new int[][]{{3, 2, 6}, {0, 4, 1}, {2, 0, 1}};
-//        int[][] B = new int[][]{{4}, {3}, {1}};
-//        ParallelMultiplier parallelMultiplier = new ParallelMultiplier(A, B);
-//
-//        int[][] C = parallelMultiplier.multiply();
-//
-//        System.out.println(Arrays.deepToString(C));
-//    }
+    public static void main(String[] args) {
+        int[][] A = new int[][]{{3, 2, 6}, {0, 4, 1}, {2, 0, 1}};
+        int[][] B = new int[][]{{4}, {3}, {1}};
+        ParallelMultiplier parallelMultiplier = new ParallelMultiplier(A, B);
+
+        int[][] C = parallelMultiplier.multiply();
+
+        System.out.println(Arrays.deepToString(C));
+    }
 
     public int[][] getC() {
         return C;
     }
 
-    public void initializeExecutors(int NUM_THREADS) {
+    public void initializeExecutors() {
         step = A.length / NUM_THREADS;
         if (step == 0)
             step = 1;
@@ -62,7 +63,7 @@ public class ParallelMultiplier {
         }
         try {
             service.invokeAll(tasks);
-            service.shutdown();
+//            service.shutdown();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
